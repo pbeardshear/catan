@@ -4,12 +4,12 @@
     <meta charset="utf-8" />
     <title>Catan</title>
     <link rel="stylesheet" href="main.css" type="text/css" media="screen" />
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
-	<script src="js/controller.js"></script>
-	<script src="js/engine.js"></script>
-	<script src="js/game.js"></script>
-	<script src="js/app.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
+    <script src="js/controller.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
   </head>
   <body>
     <div id="gamePage" class="page">
@@ -17,8 +17,10 @@
         <div id="trade">
           <p><a href="#" class="button">Trade Resources</a></p>
         </div>
-		<img href="images/blank.png" id="blank" />
-        <canvas id="map" height="620px" width="620px"></canvas>        
+        <div id="mapContainer">
+          <img src="images/blank.png" id="blank" />
+          <canvas id="map" height="620" width="620"></canvas>
+        </div>
       </div>
       <div id="sidePane" class="pane">
         <table id="playerInfo">
@@ -62,7 +64,7 @@
           </div>
           <form>
             <p class="text"><input type="text" name="message" id="chatMessage" autocomplete="off" tabindex="1" /></p>
-    				<p class="send"><button type="submit">Send</button></p>
+            <p class="send"><button type="submit">Send</button></p>
           </form>
         </div>
       </div>
@@ -91,7 +93,7 @@
             <li><a href="" class="button">Knight x 2</a></li>
             <li><a href="" class="button">Year of Plenty</a></li>
           </ul>
-        </div>        
+        </div>
       </div>
     </div>
     
