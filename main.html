@@ -72,6 +72,10 @@
 				input.val('');
 			});
 			
+			$('#place-object').bind('click', function () {
+				Game.place({ type: $('input[name="build"]:checked').val() });
+			});
+			
 			socket.on('chat', function (data) {
 				$('#history').append(data.message);
 			});
@@ -91,13 +95,13 @@
 	<style type="text/css">
 		#map {
 			position: absolute;
-			left: 0px;
+			left: 100px;
 			top: 100px;
 			z-index: 1;
 		}
 		#blank {
 			position: absolute;
-			left: 0px;
+			left: 100px;
 			top: 100px;
 			z-index: 2;
 		}
@@ -147,6 +151,13 @@
 				<input type="text" name="message" id="message" />
 				<input type="button" value="Send" />
 			</form>
+		</div>
+		
+		<div id="place">
+			<input type="radio" name="build" value="road" />Road<br />
+			<input type="radio" name="build" value="settlement" />Settlement<br />
+			<input type="radio" name="build" value="city" />City<br />
+			<input id="place-object" type="button" value="Place!" />
 		</div>
 	</div>
 </body>

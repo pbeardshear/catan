@@ -54,7 +54,7 @@ var Game = (function () {
 				// Kind of a misnomer, the user placed an object, so lets rollback
 				// the state to not placing anything
 				this.cancel();
-			});
+			}, this);
 		},
 		// Replace a settlement with a city
 		upgrade: function (o) { },

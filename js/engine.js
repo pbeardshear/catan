@@ -29,11 +29,11 @@ var Engine = (function () {
 			{ type: 'wool', count: 4 },
 			{ type: 'desert', count: 1 }
 		],
-		sizes = [
+		sizes = {
 			road: 4,
 			settlement: 8,
 			city: 15
-		],
+		},
 		numTiles = 19;
 		
 	// -- State variables
@@ -144,14 +144,14 @@ var Engine = (function () {
 				break;
 			case 1:
 				return {
-					start: { x: pos.x + cos(pi/6)*len, y: pos.y + sin(pi/6)*len },
-					end: { x: pos.x - cos(pi/6)*len, y: pos.y - sin(pi/6)*len }
+					start: { x: pos.x + cos(pi/6)*len, y: pos.y - sin(pi/6)*len },
+					end: { x: pos.x - cos(pi/6)*len, y: pos.y + sin(pi/6)*len }
 				};
 				break;
 			case 2: 
 				return {
-					start: { x: pos.x + cos(pi/6)*len, y: pos.y - sin(pi/6)*len },
-					end: { x: pos.x - cos(pi/6)*len, y: pos.y + sin(pi/6)*len }
+					start: { x: pos.x + cos(pi/6)*len, y: pos.y + sin(pi/6)*len },
+					end: { x: pos.x - cos(pi/6)*len, y: pos.y - sin(pi/6)*len }
 				};
 				break;
 		}
@@ -210,13 +210,26 @@ var Engine = (function () {
 	
 	function drawObject (pos, type, map, edgeType) {
 		if (map[type] == 'vertex') {
-			ctx.arc(pos.x, pos.y, sizes[type], 0, Math.PI*2, false);
-		}
-		else if (map[type] == 'edge') {
-			var edge = getEdge(pos, edgeType);
 			ctx.save();
 			
-			ctx.lineWidth = sizes[type] + 'px';
+			ctx.scale(1, -1);
+			ctx.translate(-(length/2), -(height/2));
+			ctx.beginPath();
+			ctx.moveTo(pos.x, pos.y);
+			ctx.arc(pos.x, pos.y, sizes[type], 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+			
+			ctx.restore();
+		}
+		else if (map[type] == 'edge') {
+			var edge = getEdge({ x: parseFloat(pos.x), y: parseFloat(pos.y) }, parseInt(edgeType)) ;
+			ctx.save();
+			
+			ctx.scale(1, -1);
+			ctx.translate(-(length/2), -(height/2));
+			
+			ctx.lineWidth = sizes[type];
 			
 			ctx.beginPath();
 			ctx.moveTo(edge.start.x, edge.start.y);
@@ -292,9 +305,9 @@ var Engine = (function () {
 			});
 		},
 		placeObject: function (o, callback, scope) {
-			var map = { edge: 'vertex', city: 'vertex', road: 'edge' };
+			var map = { settlement: 'vertex', city: 'vertex', road: 'edge' };
 			changeSelectionState(map[o.type]);
-			$('#board-' + o.type + ' area').bind('click', function () {
+			$('#board-' + map[o.type] + ' area').bind('click', function () {
 				var coords = this.coords.split(','),
 					edgeType = $(this).attr('type');
 				drawObject({ x: coords[0], y: coords[1] }, o.type, map, edgeType);
