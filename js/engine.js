@@ -34,6 +34,11 @@ var Engine = (function () {
 			settlement: 8,
 			city: 15
 		},
+		map = { 
+			settlement: 'vertex', 
+			city: 'vertex', 
+			road: 'edge' 
+		},
 		numTiles = 19;
 		
 	// -- State variables
@@ -208,48 +213,16 @@ var Engine = (function () {
 		container.appendChild(mapVertex);
 	}
 	
-	function drawObject (pos, type, map, edgeType) {
-		if (map[type] == 'vertex') {
-			ctx.save();
-			
-			ctx.scale(1, -1);
-			ctx.translate(-(length/2), -(height/2));
-			ctx.beginPath();
-			ctx.moveTo(pos.x, pos.y);
-			ctx.arc(pos.x, pos.y, sizes[type], 0, Math.PI*2, false);
-			ctx.closePath();
-			ctx.fill();
-			
-			ctx.restore();
-		}
-		else if (map[type] == 'edge') {
-			var edge = getEdge({ x: parseFloat(pos.x), y: parseFloat(pos.y) }, parseInt(edgeType)) ;
-			ctx.save();
-			
-			ctx.scale(1, -1);
-			ctx.translate(-(length/2), -(height/2));
-			
-			ctx.lineWidth = sizes[type];
-			
-			ctx.beginPath();
-			ctx.moveTo(edge.start.x, edge.start.y);
-			ctx.lineTo(edge.end.x, edge.end.y);
-			ctx.closePath();
-			ctx.stroke();
-			
-			ctx.restore();
-		}
-		else {
-			// Something weird was passed
-		}
-	}
-	
 	function changeSelectionState (state) {
 		var imageMap = '#board-' + state;
 		// Check if a valid state was passed
 		if ($(imageMap).length) {
 			$(blankID).attr('usemap', imageMap);
 		}
+	}
+	
+	function pointDist (a, b) {
+		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 	}
 	
 	return {
@@ -266,6 +239,13 @@ var Engine = (function () {
 			generateImageMaps();
 			this.drawMap(3);
 			this.swapTiles();
+		},
+		// Returns true if the number of steps between vertex a and b is 
+		// less than or equal to the number of provided steps, otherwise false
+		separation: function (a, b, amt) {
+			var floor = Math.floor,
+				dist = pointDist(a, b);
+			return dist <= (floor(amt/2) + 1)*landSize;
 		},
 		// Draw the main map
 		drawMap: function (r) {
@@ -305,14 +285,41 @@ var Engine = (function () {
 			});
 		},
 		placeObject: function (o, callback, scope) {
-			var map = { settlement: 'vertex', city: 'vertex', road: 'edge' };
 			changeSelectionState(map[o.type]);
 			$('#board-' + map[o.type] + ' area').bind('click', function () {
 				var coords = this.coords.split(','),
-					edgeType = $(this).attr('type');
-				drawObject({ x: coords[0], y: coords[1] }, o.type, map, edgeType);
-				callback.call(scope);
+					pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) };
+				if (map[o.type] == 'edge') {
+					pos = getEdge(pos, parseInt($(this).attr('type')));
+				}
+				callback.call(scope, pos);
 			});
+		},
+		drawObject: function (pos, type) {
+			ctx.save();
+			ctx.scale(1, -1);
+			ctx.translate(-(length/2), -(height/2));
+			if (map[type] == 'vertex') {
+				ctx.beginPath();
+				ctx.moveTo(pos.x, pos.y);
+				ctx.arc(pos.x, pos.y, sizes[type], 0, Math.PI*2, false);
+				ctx.closePath();
+				ctx.fill();
+			}
+			else if (map[type] == 'edge') {
+				ctx.lineWidth = sizes[type];
+				
+				ctx.beginPath();
+				ctx.moveTo(pos.start.x, pos.start.y);
+				ctx.lineTo(pos.end.x, pos.end.y);
+				ctx.closePath();
+				ctx.stroke();
+			}
+			else {
+				// Something weird was passed
+			}
+			
+			ctx.restore();
 		},
 		// Remove event listeners from the canvas element
 		// Should be called between view steps, so that the canvas doesn't have any

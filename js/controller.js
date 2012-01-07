@@ -13,6 +13,10 @@ var Controller = (function () {
 		list: function () { },
 		// Send a chat message
 		chat: function () { },
+		// Start a new game
+		start: function (s) {
+			Game.init(s);
+		},
 		// Disconnect from the server
 		disconnect: function () { }
 	};
