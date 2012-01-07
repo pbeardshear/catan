@@ -21,6 +21,34 @@ var Controller = (function () {
 		disconnect: function () { }
 	};
 	
+	// Allowable actions
+	var Actions = {
+		// Build a settlement, road, city, or development card
+		build: {
+			el: '#build .items .button',
+			event: 'click',
+			fn: function (e) {
+				Game.place({ type: $(e).attr('value') });
+			}
+		},
+		// Activate a development card
+		useCard: {
+			el: '#development .items .button',
+			event: 'click',
+			fn: function (e) {
+				// Activate development card
+			}
+		},
+		// Trade resources
+		trade: {
+			el: '#trade .button',
+			event: 'click',
+			fn: function (e) {
+				// Popup trade menu
+			}
+		}
+	};
+	
 	return {
 		init: function (io) {
 			socket = io.connect('192.168.1.112:1337');
@@ -34,6 +62,20 @@ var Controller = (function () {
 		// Send the passed command up to the server, along with any optional passed data
 		go: function (comm, o) {
 			socket.emit(comm, o);
+		},
+		// Set allowable actions for this player
+		activate: function (name) {
+			var action = Actions[name];
+			if (action) {
+				$(action.el).bind(action.event, action.fn);
+			}
+		},
+		// Remove actions allowed by the player
+		deactivate: function (name) {
+			var action = Action[name];
+			if (action) {
+				$(action.el).unbind(action.event);
+			}
 		}
 	};
 })();

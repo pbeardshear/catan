@@ -1,6 +1,5 @@
 var connect = require('connect'),
 	io = require('socket.io'),
-	po = require('./player_objects.js'),
 	go = require('./game.js'),
 	model = require('./model.js');
 

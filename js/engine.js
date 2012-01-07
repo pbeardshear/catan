@@ -207,7 +207,7 @@ var Engine = (function () {
 			mapCenter.appendChild(areaCenter);
 		}
 		
-		var container = document.getElementById('container');
+		var container = document.getElementById('gamePage');
 		container.appendChild(mapCenter);
 		container.appendChild(mapEdge);
 		container.appendChild(mapVertex);
@@ -237,7 +237,7 @@ var Engine = (function () {
 			
 			// DEBUG
 			generateImageMaps();
-			this.drawMap(3);
+			this.drawMap();
 			this.swapTiles();
 		},
 		// Returns true if the number of steps between vertex a and b is 
@@ -248,7 +248,7 @@ var Engine = (function () {
 			return dist <= (floor(amt/2) + 1)*landSize;
 		},
 		// Draw the main map
-		drawMap: function (r) {
+		drawMap: function () {
 			var tile,
 				arr = [];
 			for (var i = 0; i < resources.length; i++) {
