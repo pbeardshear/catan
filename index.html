@@ -1,101 +1,106 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Catan</title>
-    <link rel="stylesheet" href="main.css" type="text/css" media="screen" />
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
-    <script src="js/controller.js"></script>
-    <script src="js/engine.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/app.js"></script>
-  </head>
-  <body>
-    <div id="gamePage" class="page">
-      <div id="mapPane" class="pane">
-        <div id="trade">
-          <p><a href="#" class="button">Trade Resources</a></p>
-        </div>
-        <div id="mapContainer">
-          <img src="images/blank.png" id="blank" />
-          <canvas id="map" height="620" width="620"></canvas>
-        </div>
-      </div>
-      <div id="sidePane" class="pane">
-        <table id="playerInfo">
-          <tr class="red">
-            <td class="name">Tim</td>
-            <td class="achievement">R</td>
-            <td class="resource"><em>R:</em> 8</td>
-            <td class="development"><em>D:</em> 2</td>
-            <td class="victory"><em>V:</em> 4</td>
-          </tr>
-          <tr class="orange">
-            <td class="name">Colin</td>
-            <td class="achievement">&nbsp;</td>
-            <td class="resource"><em>R:</em> 8</td>
-            <td class="development"><em>D:</em> 2</td>
-            <td class="victory"><em>V:</em> 4</td>
-          </tr>
-          <tr class="blue active">
-            <td class="name">Becky</td>
-            <td class="achievement">A</td>
-            <td class="resource"><em>R:</em> 8</td>
-            <td class="development"><em>D:</em> 20</td>
-            <td class="victory"><em>V:</em> 4</td>
-          </tr>
-          <tr class="white">
-            <td class="name">Peter</td>
-            <td class="achievement">&nbsp;</td>
-            <td class="resource"><em>R:</em> 10</td>
-            <td class="development"><em>D:</em> 2</td>
-            <td class="victory"><em>V:</em> 4</td>
-          </tr>                                           
-        </table>
-        <div id="chat">
-          <div id="chatLog">
-            <div class="wrap">
-              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            </div>
-          </div>
-          <form>
-            <p class="text"><input type="text" name="message" id="chatMessage" autocomplete="off" tabindex="1" /></p>
-            <p class="send"><button type="submit">Send</button></p>
-          </form>
-        </div>
-      </div>
-      <div id="bottomPane" class="pane">
-        <div id="build" class="actionPane">
-          <h2><span>Build</span></h2>
-          <ul class="items">
-            <li><a class="button" value="road">Road</a></li>
-            <li><a class="button" value="settlement">Settlement</a></li>
-            <li><a class="button" value="city">City</a></li>     
-            <li><a class="button">Development</a></li>
-          </ul>
-        </div>
-        <div id="resources" class="actionPane">
-          <ul class="items">
-            <li class="wool">5</li>
-            <li class="grain">2</li>
-            <li class="ore">1</li>
-            <li class="brick">3</li>
-            <li class="wood">0</li>
-          </ul>          
-        </div>
-        <div id="development" class="actionPane">
-          <h2><span>Development Items</span></h2>
-          <ul class="items">
-            <li><a href="" class="button">Knight x 2</a></li>
-            <li><a href="" class="button">Year of Plenty</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    
-  </body>
+	<head>
+		<meta charset="utf-8" />
+		<title>Catan</title>
+		<link rel="stylesheet" href="main.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
+		<script src="js/controller.js"></script>
+		<script src="js/engine.js"></script>
+		<script src="js/game.js"></script>
+		<script src="js/app.js"></script>
+	</head>
+	<body>
+		<div id="gamePage" class="page">
+			<div id="mapPane" class="pane">
+				<div id="trade">
+					<p><a href="#" class="button">Trade Resources</a></p>
+				</div>
+				<div id="mapContainer">
+					<img src="images/blank.png" id="blank" />
+					<canvas id="map" height="620" width="620"></canvas>
+				</div>
+			</div>
+			<div id="sidePane" class="pane">
+				<table id="playerInfo">
+					<tr class="red">
+						<td class="name">Tim</td>
+						<td class="achievement">R</td>
+						<td class="resource"><em>R:</em> 8</td>
+						<td class="development"><em>D:</em> 2</td>
+						<td class="victory"><em>V:</em> 4</td>
+					</tr>
+					<tr class="orange">
+						<td class="name">Colin</td>
+						<td class="achievement">&nbsp;</td>
+						<td class="resource"><em>R:</em> 8</td>
+						<td class="development"><em>D:</em> 2</td>
+						<td class="victory"><em>V:</em> 4</td>
+					</tr>
+					<tr class="blue active">
+						<td class="name">Becky</td>
+						<td class="achievement">A</td>
+						<td class="resource"><em>R:</em> 8</td>
+						<td class="development"><em>D:</em> 20</td>
+						<td class="victory"><em>V:</em> 4</td>
+					</tr>
+					<tr class="white">
+						<td class="name">Peter</td>
+						<td class="achievement">&nbsp;</td>
+						<td class="resource"><em>R:</em> 10</td>
+						<td class="development"><em>D:</em> 2</td>
+						<td class="victory"><em>V:</em> 4</td>
+					</tr>
+				</table>
+				<div id="chat">
+					<div id="chatLog">
+						<div class="wrap">
+							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+						</div>
+					</div>
+					<form>
+						<p class="text"><input type="text" name="message" id="chatMessage" autocomplete="off" tabindex="1" /></p>
+						<p class="send"><button type="submit">Send</button></p>
+					</form>
+				</div>
+			</div>
+			<div id="bottomPane" class="pane">
+				<div id="build" class="actionPane">
+					<h2><span>Build</span></h2>
+					<ul class="items">
+						<li><a class="button" value="road">
+							Road
+							<span class="">
+							<img src="images/icon_dot_wood.png" />
+							<img src="images/icon_dot_brick.png" />
+						</a></li>
+						<li><a class="button" value="settlement">Settlement</a></li>
+						<li><a class="button" value="city">City</a></li>
+						<li><a class="button">Development</a></li>
+					</ul>
+				</div>
+				<div id="resources" class="actionPane">
+					<ul class="items">
+						<li class="wool">5</li>
+						<li class="grain">2</li>
+						<li class="ore">1</li>
+						<li class="brick">3</li>
+						<li class="wood">0</li>
+					</ul>
+				</div>
+				<div id="development" class="actionPane">
+					<h2><span>Development Items</span></h2>
+					<ul class="items">
+						<li><a href="" class="button">Knight x 2</a></li>
+						<li><a href="" class="button">Year of Plenty</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		
+	</body>
 </html>

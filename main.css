@@ -12,7 +12,7 @@ button { cursor:pointer; }
 .pane { position:absolute; }
 
 #mapPane { width:75%; height:70%; left:0; top:0; padding:0 1px 1px 0; background:#4CC4FC; }
-#sidePane { width:25%; height:70%; min-width:300px; right:0; top:0; padding:0 0 1px; background:#555; }
+#sidePane { width:25%; height:70%; min-width:100px; right:0; top:0; padding:0 0 1px; background:#555; }
 #bottomPane { width:100%; height:30%; left:0; bottom:0; background:#000; }
 
 #mapContainer { margin:0 auto; width:620px; }
@@ -47,7 +47,7 @@ button { cursor:pointer; }
 #chat #chatMessage { display:block; width:90%; height:34px; margin:0; padding:0 5%; background:#333; border:none; border-radius:4px; font-size:13px; color:#FFF; box-shadow:inset 0 0 5px rgba(0,0,0,0.5); -webkit-transition:all 300ms; }
 #chat #chatMessage:focus { background:#222; }
 #chat .send { float:right; width:20%; }
-#chat .send button  { background:#111; border:none; width:100%; height:24px; color:#999; display:block; height:34px; line-height:34px; padding:0 8px; text-transform:uppercase; font-size:12px; border-radius:4px; }
+#chat .send button  { background:#111; border:none; width:100%; height:24px; color:#999; display:block; height:34px; line-height:34px; padding:0; text-transform:uppercase; font-size:12px; border-radius:4px; }
 #chat .send button:hover { color:#FFF; }
 
 #trade { position:absolute; width:180px; left:0; bottom:0; margin:10px 20px; }
@@ -63,7 +63,8 @@ button { cursor:pointer; }
 .actionPane .items .button:hover { background-color:#555; }
 
 #build { width:25%; left:0; border-right:1px solid #999; }
-	
+#build .items img { display:block; }
+
 #resources { width:50%; left:25%; }
 #resources .items li { width:20%; float:left; text-align:center; font-size:36px; padding:90px 0 0; background-position:center top; background-repeat:no-repeat; }
 #resources .items .wool  { color:#7DC142; background-image:url(images/icon_wool.png); }
