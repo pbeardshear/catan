@@ -1,53 +1,92 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<script type="text/javascript">
-		// Some util functions
-		// For convenience, attach to the global prototype
-		Object.prototype.implement = function (cfg) {
-			if (typeof cfg === 'object') {
-				for (var prop in cfg) {
-					if (cfg.hasOwnProperty(prop)) {
-						this[prop] = cfg[prop];
-					}
-				}
-				return this;
-			}
-			else {
-				throw new TypeError("Argument to implement must be an object.");
-			}
-		};
-	</script>
-	<script type="text/javascript" src="main.js"></script>
-	<script type="text/javascript" src="js/engine.js"></script>
-	<script type="text/javascript">
-		window.addEventListener('load', function () {
-			app.init();
-		});
-	</script>
-	<script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
-	<script type="text/javascript">
-		var socket = io.connect('http://192.168.1.112:1337');
-		socket.on('hello', function (data) {
-			console.log(data);
-			socket.emit('world', { data: 'mydata' });
-		});
-		socket.emit('world', { data: 'mydata' });
-	</script>
-	<link rel="stylesheet" type="text/css" href="main.css" />
-</head>
-<body>
-	<div id="container">
-		<canvas id="map" height="620px" width="620px"></canvas>
-		<form id="settings">
-			<label>Num. Players</label><input type="text" />
-			<label>Map Size</label>
-			<select>
-				<option value="small">Small (7 tiles)</option>
-				<option value="medium">Medium (19 tiles)</option>
-				<option value="large">Large (37 tiles)</option>
-			</select>
-		</form>
-	</div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Catan</title>
+    <link rel="stylesheet" href="main.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <div id="gamePage" class="page">
+      <div id="mapPane" class="pane">
+        <div id="trade">
+          <p><a href="#" class="button">Trade Resources</a></p>
+        </div>
+        <p>map</p>        
+      </div>
+      <div id="sidePane" class="pane">
+        <table id="playerInfo">
+          <tr class="red">
+            <td class="name">Tim</td>
+            <td class="achievement">R</td>
+            <td class="resource"><em>R:</em> 8</td>
+            <td class="development"><em>D:</em> 2</td>
+            <td class="victory"><em>V:</em> 4</td>
+          </tr>
+          <tr class="orange">
+            <td class="name">Colin</td>
+            <td class="achievement">&nbsp;</td>
+            <td class="resource"><em>R:</em> 8</td>
+            <td class="development"><em>D:</em> 2</td>
+            <td class="victory"><em>V:</em> 4</td>
+          </tr>
+          <tr class="blue active">
+            <td class="name">Becky</td>
+            <td class="achievement">A</td>
+            <td class="resource"><em>R:</em> 8</td>
+            <td class="development"><em>D:</em> 20</td>
+            <td class="victory"><em>V:</em> 4</td>
+          </tr>
+          <tr class="white">
+            <td class="name">Peter</td>
+            <td class="achievement">&nbsp;</td>
+            <td class="resource"><em>R:</em> 10</td>
+            <td class="development"><em>D:</em> 2</td>
+            <td class="victory"><em>V:</em> 4</td>
+          </tr>                                           
+        </table>
+        <div id="chat">
+          <div id="chatLog">
+            <div class="wrap">
+              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            </div>
+          </div>
+          <form>
+            <p class="text"><input type="text" name="message" id="chatMessage" autocomplete="off" tabindex="1" /></p>
+    				<p class="send"><button type="submit">Send</button></p>
+          </form>
+        </div>
+      </div>
+      <div id="bottomPane" class="pane">
+        <div id="build" class="actionPane">
+          <h2><span>Build</span></h2>
+          <ul class="items">
+            <li><a href="" class="button">Road</a></li>
+            <li><a href="" class="button">Settlement</a></li>
+            <li><a href="" class="button">City</a></li>     
+            <li><a href="" class="button">Development</a></li>
+          </ul>
+        </div>
+        <div id="resources" class="actionPane">
+          <ul class="items">
+            <li class="wool">5</li>
+            <li class="grain">2</li>
+            <li class="ore">1</li>
+            <li class="brick">3</li>
+            <li class="wood">0</li>
+          </ul>          
+        </div>
+        <div id="development" class="actionPane">
+          <h2><span>Development Items</span></h2>
+          <ul class="items">
+            <li><a href="" class="button">Knight x 2</a></li>
+            <li><a href="" class="button">Year of Plenty</a></li>
+          </ul>
+        </div>        
+      </div>
+    </div>
+    
+  </body>
 </html>
