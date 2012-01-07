@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="js/engine.js"></script>
+	<script type="text/javascript" src="js/game.js"></script>
+	<script type="text/javascript" src="js/controller.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://192.168.1.112:1337/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+		var socket = io.connect('http://192.168.1.112:1337');
+		socket.on('host', function (data) {
+			console.log(data);
+			if (data.success) {
+				// TODO:
+				// Change the view to the setup screen
+				// Draw the map to the screen, and all the user to rearrange things
+			}
+			else {
+				// TODO:
+				// Alert the user of the error, and return to the initial screen
+			}
+		});
+		socket.on('list', function (data) {
+			var games = data.games;
+			if (games && games.length) {
+				var ul = document.getElementById('game-list');
+				for (var i = 0; i < games.length; i++) {
+					// TODO: Do only one append at the end
+					var li = document.createElement('li');
+					li.setAttribute('class', 'game');
+					li.innerHTML = games[i].name;
+					ul.appendChild(li);
+				}
+				$('.game').bind('click', function () {
+					socket.emit('join', { game: this.innerHTML });
+				});
+			}
+		});
+		socket.on('join', function (data) {
+			console.log(data);
+			if (data.success) {
+				// TODO:
+				// Change the view to a readonly version of the selections
+				// that the host is making
+			}
+			else {
+				// TODO:
+				// Alert the user that they were unable to join the selected game
+				// Return to the list games screen, and refresh the list
+			}
+		});
+		
+		socket.emit('list');
+		
+		$(document).ready(function () {
+			$('#submit').bind('click', function () {
+				var fields = document.getElementById('host').getElementsByTagName('input');
+				for (var i = 0; i < fields.length; i++) {
+					if (fields[i].value == "") {
+						return false;
+					}
+				}
+				socket.emit('host', { game: $('#gamename').val(), user: $('#username').val() });
+			});
+			
+			$('#chat').bind('submit', function (e) {
+				// Necessary to prevent a page reload on submit
+				e.preventDefault();
+				var input = $('#message'),
+					text = '<span class="stamp">' + input.val() + '</span>';
+				socket.emit('chat', { message: text });
+				input.val('');
+			});
+			
+			socket.on('chat', function (data) {
+				$('#history').append(data.message);
+			});
+			
+			Engine.init();
+		});
+		
+		window.onbeforeunload = function () {
+			socket.emit('disconnect');
+		};
+		
+		function test (o) {
+			console.log(o);
+			console.log(o.coords);
+		}
+	</script>
+	<style type="text/css">
+		#map {
+			position: absolute;
+			left: 0px;
+			top: 100px;
+			z-index: 1;
+		}
+		#blank {
+			position: absolute;
+			left: 0px;
+			top: 100px;
+			z-index: 2;
+		}
+		#chat-pane {
+			position: absolute;
+			right: 0px;
+			top: 0px;
+			width: 200px;
+			height: 100%;
+		}
+		#chat-pane #history {
+			height: 90%;
+			margin: 5px 5px 0px 5px;
+			padding: 5px;
+			border: 1px solid #000;
+			font-family: Verdana, Helvetica, sans-serif;
+			font-size: 12px;
+		}
+		#chat-pane #history span { display: block; }
+		#chat-pane input {
+			margin: 5px 5px 0px 5px;
+		}
+		
+		area { cursor: pointer; }
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div class="header">Host</div>
+		<form id="host">
+			<label>Game Name</label><input type="text" name="game" id="gamename" /><br />
+			<label>Username</label><input type="text" name="user" id="username" /><br />
+			<input id="submit" type="button" value="Host!" />
+		</form>
+		<div class="header">Join</div>
+		<div id="game-container">
+			<div class="subheader">Games</div>
+			<ul id="game-list">
+			</ul>
+		</div>
+		<canvas id="map" height="620px" width="620px"></canvas>
+		<img id="blank" src="/images/blank.png" height="620px" width="620px" usemap="#board-center" />
+		
+		<div id="chat-pane">
+			<div id="history"></div>
+			<form id="chat">
+				<input type="text" name="message" id="message" />
+				<input type="button" value="Send" />
+			</form>
+		</div>
+	</div>
+</body>
+</html>

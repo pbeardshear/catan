@@ -1,0 +1,9 @@
+body { margin: 0px; }
+label { display: block; font-family: Verdana, Helvetica, sans-serif; font-size: 12px; }
+#container {
+	width: 1080px;
+	margin: 100px auto 0px auto;
+}
+#map {
+	
+}
