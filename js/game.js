@@ -5,6 +5,8 @@
 var Game = (function () {
 	// Global state variables
 	var self = new Player({ id: 0 }),
+		tiles = [],
+		robberTile = null,
 		players = [],
 		pieces = {
 			road: [[]],	// Array of arrays, one for each player
@@ -23,21 +25,25 @@ var Game = (function () {
 	// Private classes
 	function Player (o) {
 		this.id = o.id;
+		this.resources = [];
 	}
 	
 	function Road (o) {
 		this.start = o.pos.start;
 		this.end = o.pos.end;
+		this.owner = o.owner;
 		this.type = 'edge';
 	}
 	
 	function Settlement (o) {
 		this.pos = o.pos;
+		this.owner = o.owner;
 		this.type = 'vertex';
 	}
 	
 	function City (o) {
 		this.pos = o.pos;
+		this.owner = o.owner;
 		this.type = 'vertex';
 	}
 	
@@ -89,27 +95,82 @@ var Game = (function () {
 			return false;
 		}
 	}
+	
+	// Move the robber
+	function moveRobber (tile) {
+		robberTile.robber = false;
+		tile.robber = true;
+		robberTile = tile;
+	}
+	
+	// Add appropriate resources to this players count
+	function harvestResources (roll) {
+		var out = [];
+		// Compile a list of all tiles outputting resources for this roll
+		for (var i = 0; i < tiles.length; i++) {
+			if (tiles[i].quality == roll) {
+				var tile = Engine.getTilePosition(i);
+				tile.resource = tiles[i].type;
+				out.push(tile);
+			}
+		}
+		
+		// Iterate over this player's settlements, and check if any of them are adjacent
+		for (var j = 0; j < pieces.settlement.length; j++) {
+			if (pieces.settlement[j].owner.id == self.id) {
+				for (var k = 0; k < out.length; k++) {
+					if (Engine.separation(out[i], pieces.settlement[j].pos, 1)) {
+						self.resources.push(out.resource);
+					}
+				}
+			}
+		}
+		// Do the same over the cities
+		for (var m = 0; m < pieces.city.length; m++) {
+			if (pieces.city[m].owner.id == self.id) {
+				for (var n = 0; n < out.length; n++) {
+					if (Engine.separation(out[n], pieces.city[m].pos, 1)) {
+						self.resources = self.resources.concat([out[n].resource, out[n].resource]);
+					}
+				}
+			}
+		}
+	}
 		
 	return {
 		// Setup the game
-		init: function (data) { },
+		init: function (data) {
+			tiles = Engine.generateMap();
+			for (var i = 0; i < tiles.length; i++) {
+				if (tiles[i].robber) {
+					robberTile = tiles[i];
+					break;
+				}
+			}
+		},
 		// Add a new game piece (road, settlement) to the board
 		place: function (o) {
+			var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' };
 			placing = true;
 			// Show the available locations
 			Engine.highlightAvailable(o.type);
-			Engine.placeObject(o, function (pos) {
-				// Validate the placement
-				if (validate(pos, o.type)) {
-					this.addPiece(pos, o.type, self.id);
-					// Kind of a misnomer, the user placed an object, so lets rollback
-					// the state to not placing anything
-					this.cancel();
-				}
-				else {
-					// Alert the user that they chose incorrectly
-				}
-			}, this);
+			Controller.activate('place', {
+				el: '#board-' + placementMap[o.type] + ' area',
+				type: o.type,
+				state: placementMap[o.type],
+				callback: (function (pos) {
+					// Validate the placement
+					if (validate(pos, o.type)) {
+						this.addPiece(pos, o.type, self.id);
+						// Kind of a misnomer, the user placed an object, so lets rollback
+						// the state to not placing anything
+						this.cancel();
+					}
+					else {
+						// Alert the user that they chose incorrectly
+					}
+				}).createDelegate(this)
+			});
 		},
 		// Add a game piece under the control of the player with the given id
 		addPiece: function (pos, type, id) {
@@ -129,8 +190,18 @@ var Game = (function () {
 			Engine.cleanup();
 		},
 		// Initialize the game state and view for the beginning of this player's turn
-		startTurn: function () { },
+		startTurn: function () {
+			// Turn on allowable functions on your turn
+			Controller.activate('build');
+			Controller.activate('useCard');
+			Controller.activate('trade');
+		},
 		// Do cleanup
-		endTurn: function () { }
+		endTurn: function () {
+			// Disallow actions when your turn is over
+			Controller.deactivate('build');
+			Controller.deactivate('useCard');
+			Controller.deactivate('trade');
+		}
 	};
 })();
