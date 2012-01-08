@@ -54,9 +54,9 @@ var Engine = (function () {
 	// -- Private classes
 	function Tile (o) {
 		this.id = o.id;
-		this.position = o.position;
 		this.type = o.type;
 		this.quality = o.quality;
+		this.robber = o.type == 'desert';
 	}
 	
 	Tile.prototype.draw = function () {
@@ -213,14 +213,6 @@ var Engine = (function () {
 		container.appendChild(mapVertex);
 	}
 	
-	function changeSelectionState (state) {
-		var imageMap = '#board-' + state;
-		// Check if a valid state was passed
-		if ($(imageMap).length) {
-			$(blankID).attr('usemap', imageMap);
-		}
-	}
-	
 	function pointDist (a, b) {
 		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 	}
@@ -237,8 +229,7 @@ var Engine = (function () {
 			
 			// DEBUG
 			generateImageMaps();
-			this.drawMap();
-			this.swapTiles();
+			Controller.activate('swap', { state: 'center' });
 		},
 		// Returns true if the number of steps between vertex a and b is 
 		// less than or equal to the number of provided steps, otherwise false
@@ -248,7 +239,7 @@ var Engine = (function () {
 			return dist <= (floor(amt/2) + 1)*landSize;
 		},
 		// Draw the main map
-		drawMap: function () {
+		generateMap: function () {
 			var tile,
 				arr = [];
 			for (var i = 0; i < resources.length; i++) {
@@ -268,32 +259,25 @@ var Engine = (function () {
 		},
 		// Set up the event to handle swapping of resource tiles on the map
 		swapTiles: function () {
-			// Change the selection state
-			changeSelectionState('center');
-			$('#board-center area').bind('click', function () {
-				var coords = this.coords.split(','),
-					x = coords[0],
-					y = coords[1];
-				
-				if (selectedTile) {
-					selectedTile.swap(findTile(x, y));
-					selectedTile = null;
-				}
-				else {
-					selectedTile = findTile(x, y);
-				}
-			});
+			var coords = this.coords.split(','),
+				x = coords[0],
+				y = coords[1];
+			
+			if (selectedTile) {
+				selectedTile.swap(findTile(x, y));
+				selectedTile = null;
+			}
+			else {
+				selectedTile = findTile(x, y);
+			}
 		},
 		placeObject: function (o, callback, scope) {
-			changeSelectionState(map[o.type]);
-			$('#board-' + map[o.type] + ' area').bind('click', function () {
-				var coords = this.coords.split(','),
-					pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) };
-				if (map[o.type] == 'edge') {
-					pos = getEdge(pos, parseInt($(this).attr('type')));
-				}
-				callback.call(scope, pos);
-			});
+			var coords = this.coords.split(','),
+				pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) };
+			if (map[o.type] == 'edge') {
+				pos = getEdge(pos, parseInt($(this).attr('type')));
+			}
+			callback.call(scope, pos);
 		},
 		drawObject: function (pos, type) {
 			ctx.save();
@@ -320,6 +304,9 @@ var Engine = (function () {
 			}
 			
 			ctx.restore();
+		},
+		getTilePosition: function (i) {
+			return getCenter(i);
 		},
 		// Remove event listeners from the canvas element
 		// Should be called between view steps, so that the canvas doesn't have any
