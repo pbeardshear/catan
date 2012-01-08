@@ -14,6 +14,7 @@
 	<body>
 		<!-- Start Game Page -->
 		<div id="gamePage" class="page">
+			<!-- Map Pane -->
 			<div id="mapPane" class="pane">
 				<div id="eventNotice" style="display:block;">
 					<p>Becky built a settlement</p>
@@ -23,6 +24,7 @@
 					<img src="images/blank.png" id="blank" />
 				</div>
 			</div>
+			<!-- Side Pane -->			
 			<div id="sidePane" class="pane">
 				<table id="playerInfo">
 					<tr class="red">
@@ -54,6 +56,10 @@
 						<td class="victory"><em>V:</em> 4</td>
 					</tr>
 				</table>
+				<div class="actions">
+					<a class="button" id="tradeButton">Trade Resources</a>
+					<a class="button" id="endButton">End Turn</a>	
+				</div>
 				<div id="chat">
 					<div id="chatLog">
 						<div class="wrap">
@@ -69,7 +75,9 @@
 					</form>
 				</div>
 			</div>
+			<!-- Bottom Pane -->			
 			<div id="bottomPane" class="pane">
+				<!-- Build -->
 				<div id="build" class="actionPane">
 					<h2><span>Build</span></h2>
 					<ul class="items">
@@ -117,6 +125,7 @@
 						</li>
 					</ul>
 				</div>
+				<!-- Resources -->
 				<div id="resources" class="actionPane">
 					<ul class="items">
 						<li class="wool">5</li>
@@ -126,6 +135,7 @@
 						<li class="wood">0</li>
 					</ul>
 				</div>
+				<!-- Development -->				
 				<div id="development" class="actionPane">
 					<h2><span>Development Items</span></h2>
 					<ul class="items">
