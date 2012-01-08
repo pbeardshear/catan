@@ -12,10 +12,11 @@
 		<script src="js/app.js"></script>
 	</head>
 	<body>
+		<!-- Start Game Page -->
 		<div id="gamePage" class="page">
 			<div id="mapPane" class="pane">
-				<div id="trade">
-					<p><a href="#" class="button">Trade Resources</a></p>
+				<div id="eventNotice" style="display:block;">
+					<p>Becky built a settlement</p>
 				</div>
 				<div id="mapContainer">
 					<img src="images/blank.png" id="blank" />
@@ -72,15 +73,48 @@
 				<div id="build" class="actionPane">
 					<h2><span>Build</span></h2>
 					<ul class="items">
-						<li><a class="button" value="road">
-							Road
-							<span class="">
-							<img src="images/icon_dot_wood.png" />
-							<img src="images/icon_dot_brick.png" />
-						</a></li>
-						<li><a class="button" value="settlement">Settlement</a></li>
-						<li><a class="button" value="city">City</a></li>
-						<li><a class="button">Development</a></li>
+						<li>
+							<a class="button" value="road">
+								Road 
+								<span class="cost">
+									<img src="images/icon_dot_wood.png" />
+									<img src="images/icon_dot_brick.png" />
+								</span>
+							</a>
+						</li>
+						<li>
+							<a class="button" value="settlement">
+								Settlement
+								<span class="cost">
+									<img src="images/icon_dot_wood.png" />
+									<img src="images/icon_dot_brick.png" />
+									<img src="images/icon_dot_wool.png" />
+									<img src="images/icon_dot_grain.png" />									
+								</span>
+							</a>
+						</li>
+						<li>
+							<a class="button" value="city">
+								City
+								<span class="cost">
+									<img src="images/icon_dot_ore.png" />
+									<img src="images/icon_dot_ore.png" />
+									<img src="images/icon_dot_ore.png" />																		
+									<img src="images/icon_dot_grain.png" />
+									<img src="images/icon_dot_grain.png" />									
+								</span>
+							</a>
+						</li>
+						<li>
+							<a class="button">
+								Development
+								<span class="cost">
+									<img src="images/icon_dot_ore.png" />									
+									<img src="images/icon_dot_wool.png" />
+									<img src="images/icon_dot_grain.png" />
+								</span>
+							</a>
+						</li>
 					</ul>
 				</div>
 				<div id="resources" class="actionPane">
@@ -100,7 +134,85 @@
 					</ul>
 				</div>
 			</div>
+			<!-- Trade Popup -->
+			<div id="tradePopup" class="popup" style="display:none;">
+				<h2 class="title">Trade Resources</h2>
+				<form>
+					<div class="third first">
+						<h3 class="subtitle">Trade with:</h3>
+						<ul>
+							<li>
+								<input type="radio" name="player" />	
+								<label>Tim</label>
+							</li>
+							<li>
+								<input type="radio" name="player" />	
+								<label>Colin</label>
+							</li>
+							<li>
+								<input type="radio" name="player" />	
+								<label>Becky</label>
+							</li>													
+							<li class="maritime">
+								<input type="radio" name="player" />
+								<label>Maritime Trade</label>
+								<ul class="availability">
+									<li>4:1 Any Resource</li>
+									<li>2:1 Wood</li>
+								</ul>
+							</li>							
+						</ul>
+					</div>
+					<div class="third">
+						<h3 class="subtitle">I Want:</h3>
+						<ul class="resources">
+							<li class="wool"><input type="text" /><label>Wool</label></li>
+							<li class="grain"><input type="text" /><label>Grain</label></li>
+							<li class="ore"><input type="text" /><label>Ore</label></li>
+							<li class="brick"><input type="text" /><label>Brick</label></li>
+							<li class="wood"><input type="text" /><label>Wood</label></li>
+						</ul>
+					</div>
+					<div class="third last">
+						<h3 class="subtitle">I'll Give:</h3>
+						<ul class="resources">
+							<li class="wool"><input type="text" /><label>Wool</label></li>
+							<li class="grain"><input type="text" /><label>Grain</label></li>
+							<li class="ore"><input type="text" /><label>Ore</label></li>
+							<li class="brick"><input type="text" /><label>Brick</label></li>
+							<li class="wood"><input type="text" /><label>Wood</label></li>
+						</ul>
+					</div>
+					<p class="actions">
+						<a class="button">Trade</a>
+						<a class="button">Cancel</a>					
+					</p>
+				</form>
+			</div>
+			<!-- Trade Confirm Popup -->
+			<div id="tradeConfirmPopup" class="popup" style="display:none;">
+				<h2 class="title">Confirm Resources Trade</h2>
+				<div class="half first">
+					<h3 class="subtitle">Peter Wants:</h3>
+					<ul class="resources">
+						<li class="wool"><em>5</em> Wool</li>
+						<li class="grain"><em>1</em> Grain</li>
+						<li class="ore"><em>2</em> Ore</li>
+					</ul>
+				</div>
+				<div class="half last">
+					<h3 class="subtitle">Peter Gives:</h3>
+					<ul class="resources">
+						<li class="brick"><em>3</em> Brick</li>
+						<li class="wood"><em>5</em> Wood</li>
+					</ul>
+				</div>
+				<p class="actions">
+					<a class="button">Yes, I'll Trade</a>
+					<a class="button">No, Don't Trade</a>
+				</p>
+			</div>
 		</div>
-		
+		<!-- End Game Page -->
 	</body>
 </html>
