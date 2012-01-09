@@ -68,11 +68,11 @@ Game.prototype.host = function (_host, options) {
 		this.name = options.game;
 		this.private = options.private || false;
 		this.minPlayers = 2;
-		this.maxPlayers = options.maxPlayers || 6;
+		this.maxPlayers = options.players || 6;
 		this.currentPlayer = 0;
 		// Add the host to the list of users
 		this._host = _host;
-		this.join(_host, options.user);
+		this.join(_host, options.username);
 	}
 	catch (e) {
 		_host.emit('host', { success: false, reason: 'invalid entry' });

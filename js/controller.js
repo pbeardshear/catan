@@ -6,11 +6,21 @@ var Controller = (function () {
 	var socket;
 	var Commands = {
 		// Host a new game
-		host: function () { },
+		host: function (o) {
+			console.log(o);
+		},
 		// Join an existing game
 		join: function () { },
 		// List available games
-		list: function () { },
+		list: function (o) {
+			var template = '<tr><td>{0}</td><td>{1}/6</td><td><a class="join button">Join</a></td></tr',
+				gameList = $('#gameList table'),
+				games = "";
+			$.each(o.games, function (i, game) {
+				games += template.replace('{0}', game.name).replace('{1}', game.count);
+			});
+			gameList.append(games);
+		},
 		// Send a chat message
 		chat: function (data) {
 			var template = '<p><em class="name">{0}:</em>{1}</p>',
@@ -19,6 +29,9 @@ var Controller = (function () {
 			chat.append(template);
 			// Scroll the chat window to the bottom
 			chat.scrollTop(chat[0].scrollHeight);
+		},
+		trade: function (data) {
+			Game.startTrade(data);
 		},
 		// Start a new game
 		start: function (s) {
@@ -30,6 +43,31 @@ var Controller = (function () {
 	
 	// Allowable actions
 	var Actions = {
+		host: {
+			el: '#hostGame form',
+			event: 'submit',
+			fn: function (e) {
+				e.preventDefault();
+				// Get the form information
+				console.log(e);
+				var values = {};
+				$.each($(this).serializeArray(), function (i, field) {
+					values[field.name] = field.value;
+				});
+				console.log(values);
+				if (values.username && values.game && values.players) {
+					// Send the data up to the server
+					values.private = values.private == 'on';
+					socket.emit('host', values);
+				}
+				else {
+					// One of the fields was blank
+				}
+			}
+		},
+		join: {
+			
+		},
 		// Swap the position of tiles on the map during initialization
 		swap: {
 			el: '#board-center area',
@@ -64,10 +102,53 @@ var Controller = (function () {
 		},
 		// Trade resources
 		trade: {
-			el: '#trade .button',
+			el: '#tradeButton',
 			event: 'click',
 			fn: function (e) {
 				// Popup trade menu
+				$('#tradePopup').show();
+			}
+		},
+		// Request a trade to another player
+		tradeRequest: {
+			el: '#tradePopup .actions .button',
+			event: 'click',
+			fn: function (e) {
+				// Possible actions: trade, cancel
+				if ($(this).hasClass('trade')) {
+					var give = [],
+						take = [];
+					$('#tradePopup .resources.offer').children().each(function (el) {
+						give.push({
+							type: $(this).text(),
+							amount: $(this).children('input').val()
+						});
+					});
+					$('#tradePopup .resources.obtain').children().each(function (el) {
+						take.push({
+							type: $(this).text(),
+							amount: $(this).children('input').val()
+						});
+					});
+					// Alert the server of the trade
+					socket.emit('trade', { give: give, take: take });
+				}
+				$('#tradePopup').hide();
+			}
+		},
+		// Confirm a trade from another player
+		tradeConfirm: {
+			el: '#tradeConfirmPopup .actions .button',
+			event: 'click',
+			fn: function (e) {
+				if ($(this).hasClass('trade')) {
+					Game.acceptTrade();
+				}
+				else {
+					Game.denyTrade();
+				}
+				Game.finishTrade();
+				$('#tradeConfirmPopup').hide();
 			}
 		},
 		// Use the chat window

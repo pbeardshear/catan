@@ -21,6 +21,7 @@ var Game = (function () {
 		
 	// Turn variables
 	var placing = false;
+	var trade = null;
 	
 	// Private classes
 	function Player (o) {
@@ -136,6 +137,10 @@ var Game = (function () {
 			}
 		}
 	}
+	
+	function useDevelopmentCard (card) {
+		
+	}
 		
 	return {
 		// Setup the game
@@ -195,6 +200,7 @@ var Game = (function () {
 			Controller.activate('build');
 			Controller.activate('useCard');
 			Controller.activate('trade');
+			Controller.activate('tradeRequest');
 		},
 		// Do cleanup
 		endTurn: function () {
@@ -202,6 +208,54 @@ var Game = (function () {
 			Controller.deactivate('build');
 			Controller.deactivate('useCard');
 			Controller.deactivate('trade');
+			Controller.deactivate('tradeRequest');
+		},
+		startTrade: function (data) {
+			var popup = $('#tradeConfirmPopup'),
+				template = '<li class="{0}"><input type="text" value="{1}" /><label>{2}</label></li>',
+				give = "",
+				take = "";
+			$.each(data.give, function (o) {
+				give += template.replace('{0}', o.type).replace('{1}', o.amount).replace('{2}', o.type);
+			});
+			$.each(data.take, function (o) {
+				take += template.replace('{0}', o.type).replace('{1}', o.amount).replace('{2}', o.type);
+			});
+			trade = data;
+			$('#tradeConfirmPopup .first .resources').append(take);
+			$('#tradeConfirmPopup .last .resources').append(give);
+			$('#tradeConfirmPopup').show();
+			Controller.activate('tradeConfirm');
+		},
+		acceptTrade: function () {
+			// TODO:
+			// Validate that the user has enough resources to make the trade
+			// Give the resources to this player and alert the server
+			// that the trade was accepted
+			for (var i = 0; i < trade.give.length; i++) {
+				var resources = [];
+				for (var j = 0; j < trade.give[i].amount; j++) {
+					resources.push(trade.give[i].type);
+				}
+				self.resources.concat(resources);
+			}
+			
+			// Remove the resources this player traded away
+			for (var k = 0; k < trade.take.length; k++) {
+				for (var m = 0; m < trade.take[k].amount; m++) {
+					self.resources.splice(self.resources.indexOf(trade.take[k].type), 1);
+				}
+			}
+			Controller.go('tradeRequest', { accepted: true });
+		},
+		denyTrade: function () {
+			// Tell the server that the trade was canceled
+			Controller.go('tradeRequest', { accepted: false });
+		},
+		finishTrade: function () {
+			trade = null;
+			Controller.deactivate('tradeRequest');
+			Controller.deactivate('tradeConfirm');
 		}
 	};
 })();

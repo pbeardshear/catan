@@ -10,8 +10,24 @@ server.listen(1337, '192.168.1.112');
 
 socket.sockets.on('connection', function (client) {
 	server.addClient(client);
+	
+	var Commands = {
+		host: function () { },
+		join: function () { },
+		list: function () { },
+		
+		chat: function () { },
+		trade: function () { },
+		tradeComplete: function () { },
+		// Broadcast a state update to all players in this game
+		update: function () { },
+		startTurn: function () { },
+		endTurn: function () { },
+		
+		disconnect: function () { }
+	};
 	client.on('host', function (options) {
-		console.log('user hosting');
+		console.log('\n\nuser hosting\n\n');
 		var game = server.newGame();
 		if (game) {
 			game.host(client, options);

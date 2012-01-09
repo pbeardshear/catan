@@ -7,7 +7,13 @@ Function.prototype.createDelegate = function (scope, o) {
 };
 
 var app = (function () {
+	var views = [];
+	
 	return {
+		// Change the view
+		swap: function (view) {
+			
+		},
 		// CONSTANTS
 		CONST: {
 			blankID: '#blank',
@@ -19,6 +25,8 @@ var app = (function () {
 
 $(document).ready(function () {
 	Controller.init(io);
+	Controller.activate('host');
+	Controller.go('list');
 	Engine.init();
 	Game.init();
 	Game.startTurn();

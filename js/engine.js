@@ -256,6 +256,7 @@ var Engine = (function () {
 				}));
 				tile.draw();
 			}
+			return tiles;
 		},
 		// Set up the event to handle swapping of resource tiles on the map
 		swapTiles: function () {
