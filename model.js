@@ -60,7 +60,7 @@ function Game () {
 }
 
 // Host a new game
-Game.prototype.host = function (_host, options) {
+Game.prototype.host = function (server, _host, options) {
 	// Initialize state for this game
 	// Generate a new id
 	try {
@@ -68,14 +68,14 @@ Game.prototype.host = function (_host, options) {
 		this.name = options.game;
 		this.private = options.private || false;
 		this.minPlayers = 2;
-		this.maxPlayers = options.players || 6;
+		this.maxPlayers = parseInt(options.players) || 6;
 		this.currentPlayer = 0;
 		// Add the host to the list of users
 		this._host = _host;
-		this.join(_host, options.username);
+		return this.join(server, _host, options.username);
 	}
 	catch (e) {
-		_host.emit('host', { success: false, reason: 'invalid entry' });
+		return { success: false, reason: 'invalid entry' };
 	}
 };
 // Connect a client to this game
@@ -84,10 +84,12 @@ Game.prototype.join = function (server, client, user) {
 		this.players.push(new go.Player(client.id, user));
 		this.numPlayers++;
 		server.clients[client.id].game = this;
-		client.emit('join', { success: true });
+		return { success: true, id: (this.numPlayers - 1), name: user };
+		// client.emit('join', { success: true });
 	}
 	else {
-		client.emit('join', { success: false, reason: 'full' });
+		return { success: false, reason: 'full' };
+		// client.emit('join', { success: false, reason: 'full' });
 	}
 };
 Game.prototype.start = function (o) {
@@ -97,6 +99,16 @@ Game.prototype.start = function (o) {
 	// Then alert the first player that it is their turn
 	// // Create the game board from the given information
 	// this.board = new go.Board(o.board);
+};
+Game.prototype.dropPlayer = function (player) {
+	this.numPlayers--;
+	// Remove the player from the list
+	for (var i = 0; i < this.players.length; i++) {
+		if (this.players[i].id == player.id) {
+			this.players.splice(i, 1);
+			break;
+		}
+	}
 };
 // Convenience function for checking if a game is available (not full, and hasn't started)
 Game.prototype.available = function () {
@@ -155,7 +167,7 @@ exports.Game = function () {
 // Server ---------------------------------------------------
 // ----------------------------------------------------------
 function Server (module) {
-	this.maxGames = 4;
+	this.maxGames = 10;
 	this.games = [];
 	// TODO: consider storing clients as a dictionary keyed on id for faster lookups
 	// Also, store the game that they are in, so that chats and things like that can
@@ -203,12 +215,13 @@ Server.prototype.findGame = function (name) {
 Server.prototype.listGames = function () {
 	var games = this.games,
 		results = [];
-	// Convert into a more readable form
+	// Massage data into a more readable form
 	for (var i = 0; i < games.length; i++) {
 		if (games[i].available()) {
 			results.push({
 				name: games[i].name,
-				count: games[i].numPlayers 
+				count: games[i].numPlayers,
+				max: games[i].maxPlayers
 			});
 		}
 	}
@@ -226,6 +239,7 @@ Server.prototype.removeClient = function (id) {
 	console.log('client', client);
 	if (client) {
 		if (client.game) {
+			client.game.dropPlayer(client);
 			this.closeGame(client.game);
 		}
 		delete this.clients[id];

@@ -12,11 +12,24 @@ socket.sockets.on('connection', function (client) {
 	server.addClient(client);
 	
 	var Commands = {
-		host: function () { },
-		join: function () { },
-		list: function () { },
+		host: function (o) {
+			var game = server.newGame();
+			client.emit('host', game ? game.host(server, client, o) : { success: false, reason: 'server full' });
+		},
+		join: function (o) {
+			var game = server.findGame(o.game);
+			client.emit('join', game ? game.join(server, client, o.user) : { success: false, reason: 'not exist' });
+			// game ? game.join(server, client, o.user) : client.emit('join', { success: false, reason: 'not exist' });
+		},
+		list: function () {
+			client.emit('list', { games: server.listGames() });
+		},
 		
-		chat: function () { },
+		chat: function (o) {
+			// TODO: Find the game that this client belongs to and broadcast there
+			client.broadcast.emit('chat', o);
+			client.emit('chat', o);
+		},
 		trade: function () { },
 		tradeComplete: function () { },
 		// Broadcast a state update to all players in this game
@@ -24,49 +37,17 @@ socket.sockets.on('connection', function (client) {
 		startTurn: function () { },
 		endTurn: function () { },
 		
-		disconnect: function () { }
+		disconnect: function () {
+			server.removeClient(client.id);
+		}
 	};
-	client.on('host', function (options) {
-		console.log('\n\nuser hosting\n\n');
-		var game = server.newGame();
-		if (game) {
-			game.host(client, options);
-			client.emit('host', { success: true, id: game.id });
-		}
-		else {
-			client.emit('host', { success: false, reason: 'full' });
-		}
-	});
 	
-	client.on('list', function () {
-		client.emit('list', { games: server.listGames() });
-	});
-	
-	client.on('join', function (data) {
-		console.log('user joining');
-		console.log('\n\n Join Data', data, '\n\n');
-		var game = server.findGame(data.game);
-		if (game) {
-			game.join(server, client, data.user);
+	// Set up control
+	for (var comm in Commands) {
+		if (Commands.hasOwnProperty(comm)) {
+			client.on(comm, Commands[comm]);
 		}
-		else {
-			client.emit('join', { success: false, reason: 'not exist' });
-		}
-	});
-	
-	client.on('disconnect', function (data) {
-		console.log('\n\nDisconnecting...\n\n');
-		// Remove the client from the list
-		server.removeClient(client.id);
-	});
-	
-	client.on('chat', function (data) {
-		// TODO: find the gmae that this client belongs to
-		// game.broadcast(client, data.message);
-		console.log('\n\nChat message', data.message, '\n\n');
-		client.broadcast.emit('chat', data);
-		client.emit('chat', data);
-	});
+	}
 });
 
 // DEBUG

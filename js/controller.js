@@ -8,25 +8,25 @@ var Controller = (function () {
 		// Host a new game
 		host: function (o) {
 			console.log(o);
+			if (o.success) {
+				Game.init(o);
+			}
 		},
 		// Join an existing game
-		join: function () { },
+		join: function (o) {
+			if (o.success) {
+				Game.addPlayer(o);
+			}
+		},
 		// List available games
 		list: function (o) {
-			var template = '<tr><td>{0}</td><td>{1}/6</td><td><a class="join button">Join</a></td></tr',
-				gameList = $('#gameList table'),
-				games = "";
 			$.each(o.games, function (i, game) {
-				games += template.replace('{0}', game.name).replace('{1}', game.count);
+				app.apply('host', 'list', [game.name, game.count, game.max]);
 			});
-			gameList.append(games);
 		},
 		// Send a chat message
 		chat: function (data) {
-			var template = '<p><em class="name">{0}:</em>{1}</p>',
-				chat = $('#chatLog .wrap');
-			template = template.replace('{0}', data.user).replace('{1}', data.message);
-			chat.append(template);
+			app.apply('game', 'chat', [data.user, data.message]);
 			// Scroll the chat window to the bottom
 			chat.scrollTop(chat[0].scrollHeight);
 		},
@@ -47,9 +47,9 @@ var Controller = (function () {
 			el: '#hostGame form',
 			event: 'submit',
 			fn: function (e) {
+				// Necessary to prevent a page refresh on form submit
 				e.preventDefault();
 				// Get the form information
-				console.log(e);
 				var values = {};
 				$.each($(this).serializeArray(), function (i, field) {
 					values[field.name] = field.value;
@@ -67,6 +67,14 @@ var Controller = (function () {
 		},
 		join: {
 			
+		},
+		start: {
+			el: '#startGame',
+			event: 'click',
+			fn: function () {
+				// Send up map information to the server
+				socket.emit('start');
+			}
 		},
 		// Swap the position of tiles on the map during initialization
 		swap: {
@@ -88,8 +96,9 @@ var Controller = (function () {
 		place: {
 			el: null,
 			event: 'click',
-			fn: function (o) {
-				Engine.placeObject.apply(this, [o, o.callback, o.scope]);
+			fn: function (e) {
+				console.log(e.data);
+				Engine.placeObject.apply(this, [e.data, e.data.callback, e.data.scope]);
 			}
 		},
 		// Activate a development card
@@ -98,6 +107,7 @@ var Controller = (function () {
 			event: 'click',
 			fn: function (e) {
 				// Activate development card
+				Game.useCard($(this).val());
 			}
 		},
 		// Trade resources
@@ -162,18 +172,15 @@ var Controller = (function () {
 				// Clear the field
 				$('#chatMessage').val('');
 			}
+		},
+		moveRobber: {
+			el: '#board-center area',
+			event: 'click',
+			fn: function (e) {
+				e.data.callback(Engine.getTilePosition(this.coords));
+			}
 		}
 	};
-	
-	// Private methods
-	function changeSelectionState (state) {
-		console.log(state);
-		var imageMap = '#board-' + state;
-		// Check if a valid state was passed
-		if ($(imageMap).length) {
-			$(app.CONST.blankID).attr('usemap', imageMap);
-		}
-	}
 	
 	return {
 		init: function (io) {
@@ -191,20 +198,23 @@ var Controller = (function () {
 		},
 		// Set allowable actions for this player
 		activate: function (name, o) {
-			var action = Actions[name],
-				fn = (o ? action.fn.createDelegate(o.scope, o) : action.fn);
+			var action = Actions[name];
 			if (action) {
-				$(((o && o.el) || action.el)).bind(((o && o.event) || action.event), fn);
-			}
-			if (o && o.state) {
-				changeSelectionState(o.state);
+				$((o && o.el) || action.el).bind((o && o.event) || action.event, o || action.fn, action.fn);
 			}
 		},
 		// Remove actions allowed by the player
-		deactivate: function (name) {
-			var action = Action[name];
+		deactivate: function (name, o) {
+			var action = Actions[name];
 			if (action) {
-				$(action.el).unbind(action.event);
+				$((o && o.el) || action.el).unbind((o && o.event) || action.event);
+			}
+		},
+		changeState: function (state) {
+			var imageMap = '#board-' + state;
+			// Check if a valid state was passed
+			if ($(imageMap).length) {
+				$(app.CONST.blankID).attr('usemap', imageMap);
 			}
 		}
 	};

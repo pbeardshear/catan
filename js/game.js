@@ -4,7 +4,7 @@
 
 var Game = (function () {
 	// Global state variables
-	var self = new Player({ id: 0 }),
+	var self = null,
 		tiles = [],
 		robberTile = null,
 		players = [],
@@ -19,6 +19,32 @@ var Game = (function () {
 			city: City
 		};
 		
+	var developmentCards = {
+		knight: function () {
+			Controller.changeState('center');
+			Controller.activate('moveRobber', {
+				callback: function (i) {
+					moveRobber(tiles[i]);
+					// TODO:
+					// Steal from someone next to the tile
+				}
+			});
+		},
+		plenty: function () {
+			// Prompt the user to choose two resources
+		},
+		monopoly: function () {
+			// Prompt the user to select a resource type
+		},
+		roadBuild: function () {
+			// Prompt the user to choose two locations
+			Game.place({ type: 'road'}, 1);
+		},
+		victory: function () {
+			// Prompt the user that victory cards are not playable
+		}
+	};
+		
 	// Turn variables
 	var placing = false;
 	var trade = null;
@@ -26,7 +52,9 @@ var Game = (function () {
 	// Private classes
 	function Player (o) {
 		this.id = o.id;
+		this.name = o.name;
 		this.resources = [];
+		this.developmentCards = [];
 	}
 	
 	function Road (o) {
@@ -137,14 +165,10 @@ var Game = (function () {
 			}
 		}
 	}
-	
-	function useDevelopmentCard (card) {
-		
-	}
 		
 	return {
 		// Setup the game
-		init: function (data) {
+		init: function (o) {
 			tiles = Engine.generateMap();
 			for (var i = 0; i < tiles.length; i++) {
 				if (tiles[i].robber) {
@@ -152,29 +176,45 @@ var Game = (function () {
 					break;
 				}
 			}
+			
+			self = new Player(o);
+			players.push(self);
+			
+			Controller.changeState('center');
+			Controller.activate('swap');
+			
+			app.swap('host', 'setup');
+			app.apply('setup', 'player', [o.name]);
+		},
+		// Add a player to the game
+		addPlayer: function (o) {
+			
 		},
 		// Add a new game piece (road, settlement) to the board
-		place: function (o) {
-			var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' };
+		place: function (o, rep) {
+			var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
+				clickable = '#board-' + placementMap[o.type] + ' area';
 			placing = true;
 			// Show the available locations
 			Engine.highlightAvailable(o.type);
+			Controller.changeState(placementMap[o.type]);
 			Controller.activate('place', {
-				el: '#board-' + placementMap[o.type] + ' area',
+				el: clickable,
 				type: o.type,
-				state: placementMap[o.type],
-				callback: (function (pos) {
+				scope: this,
+				callback: function (pos) {
 					// Validate the placement
 					if (validate(pos, o.type)) {
 						this.addPiece(pos, o.type, self.id);
 						// Kind of a misnomer, the user placed an object, so lets rollback
 						// the state to not placing anything
-						this.cancel();
+						rep ? this.place(o) : this.cancel({ el: clickable });
+						// Controller.deactivate('place');
 					}
 					else {
 						// Alert the user that they chose incorrectly
 					}
-				}).createDelegate(this)
+				}
 			});
 		},
 		// Add a game piece under the control of the player with the given id
@@ -187,12 +227,15 @@ var Game = (function () {
 			}
 			Engine.drawObject(pos, type);
 		},
+		useCard: function (type) {
+			developmentCards[type]();
+		},
 		// Replace a settlement with a city
 		upgrade: function (o) { },
 		// Rollback a previous game operation (place or upgrade)
-		cancel: function () {
+		cancel: function (o) {
 			placing = false;
-			Engine.cleanup();
+			Controller.deactivate('place', o);
 		},
 		// Initialize the game state and view for the beginning of this player's turn
 		startTurn: function () {

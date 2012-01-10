@@ -226,10 +226,6 @@ var Engine = (function () {
 			ctx.scale(1, -1);
 			loaded = true;
 			rings = 3;
-			
-			// DEBUG
-			generateImageMaps();
-			Controller.activate('swap', { state: 'center' });
 		},
 		// Returns true if the number of steps between vertex a and b is 
 		// less than or equal to the number of provided steps, otherwise false
@@ -256,6 +252,8 @@ var Engine = (function () {
 				}));
 				tile.draw();
 			}
+			// Create the clickable image maps over the canvas
+			generateImageMaps();
 			return tiles;
 		},
 		// Set up the event to handle swapping of resource tiles on the map
@@ -307,7 +305,13 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		getTilePosition: function (i) {
-			return getCenter(i);
+			if (typeof i == 'number') {
+				return getCenter(i);
+			}
+			else {
+				var coords = i.split(',');
+				return findTile(coords[0], coords[1]).id;
+			}
 		},
 		// Remove event listeners from the canvas element
 		// Should be called between view steps, so that the canvas doesn't have any

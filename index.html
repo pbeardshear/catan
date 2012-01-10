@@ -12,11 +12,15 @@
 		<script src="js/app.js"></script>
 		<style type="text/css">
 			#gamePage { display: none; }
+			#setupPage { display: none; }
 			.header { font-family: Verdana, Helvetica, sans-serif; font-size: 16px; margin: 10px; }
 			.body { margin: 10px; }
 			.body label { margin-right: 10px; }
 			#gameList table { text-align: left; font-family: Verdana, Helvetica, sans-serif; }
 			#gameList table td { width: 200px; }
+			#playerList ul { list-style: none; }
+			#playerList ul li { margin: 5px 0px; }
+			.colorSquare { height: 20px; width: 20px; background-color: red; }
 		</style>
 	</head>
 	<body>
@@ -55,6 +59,22 @@
 				</div>
 			</div>
 		</div>
+		<!-- Start Game Setup Page -->
+		<div id="setupPage" class="page">
+			<div id="mapContainer">
+				<canvas id="map" height="620" width="620"></canvas>
+				<img src="images/blank.png" id="blank" />
+			</div>
+			<div id="configuration">
+				<button>Randomize Map</button>
+				<button id="startGame">Start</button>
+			</div>
+			<div id="playerList">
+				<ul>
+					<li><div class="colorSquare"></div><div class="player">Test User</div></li>
+				</ul>
+			</div>
+		</div>
 		<!-- Start Game Page -->
 		<div id="gamePage" class="page">
 			<!-- Map Pane -->
@@ -62,10 +82,7 @@
 				<div id="eventNotice" style="display:block;">
 					<p>Becky built a settlement</p>
 				</div>
-				<div id="mapContainer">
-					<canvas id="map" height="620" width="620"></canvas>
-					<img src="images/blank.png" id="blank" />
-				</div>
+				<!-- Map Container goes here -->
 			</div>
 			<!-- Side Pane -->			
 			<div id="sidePane" class="pane">
@@ -182,8 +199,8 @@
 				<div id="development" class="actionPane">
 					<h2><span>Development Items</span></h2>
 					<ul class="items">
-						<li><a href="" class="button">Knight x 2</a></li>
-						<li><a href="" class="button">Year of Plenty</a></li>
+						<li><a href="" class="button" value="knight">Knight x 2</a></li>
+						<li><a href="" class="button" value="plenty">Year of Plenty</a></li>
 					</ul>
 				</div>
 			</div>
