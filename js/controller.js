@@ -73,7 +73,7 @@ var Controller = (function () {
 			event: 'click',
 			fn: function () {
 				// Send up map information to the server
-				socket.emit('start');
+				socket.emit('start');				
 			}
 		},
 		// Swap the position of tiles on the map during initialization

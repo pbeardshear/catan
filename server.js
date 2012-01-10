@@ -30,10 +30,15 @@ socket.sockets.on('connection', function (client) {
 			client.broadcast.emit('chat', o);
 			client.emit('chat', o);
 		},
+		start: function () {
+			server.clients[client.id].game.start(server);
+		},
 		trade: function () { },
 		tradeComplete: function () { },
 		// Broadcast a state update to all players in this game
-		update: function () { },
+		update: function (o) {
+			server.clients[client.id].game.broadcast(server, o.message, o.data);
+		},
 		startTurn: function () { },
 		endTurn: function () { },
 		

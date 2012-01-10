@@ -50,7 +50,8 @@ function Game () {
 	this.minPlayers = 0;
 	this.maxPlayers = 0;
 	this.numPlayers = 0;
-	this.currentPlayer = 0;
+	this.currentTurn = 0;
+	this.turnOrder = [];
 	this.started = false;
 	
 	this._host = null;
@@ -69,7 +70,7 @@ Game.prototype.host = function (server, _host, options) {
 		this.private = options.private || false;
 		this.minPlayers = 2;
 		this.maxPlayers = parseInt(options.players) || 6;
-		this.currentPlayer = 0;
+		this.currentTurn = 0;
 		// Add the host to the list of users
 		this._host = _host;
 		return this.join(server, _host, options.username);
@@ -92,13 +93,28 @@ Game.prototype.join = function (server, client, user) {
 		// client.emit('join', { success: false, reason: 'full' });
 	}
 };
-Game.prototype.start = function (o) {
+Game.prototype.start = function (server) {
 	this.started = true;
+	for (var i = 0; i < this.players.length; i++) {
+		this.turnOrder.push(i);
+	}
+	// Generate the turn order
+	this.util.shuffle(this.turnOrder);
+	this.broadcast(server, 'start', { 
+		success: true, 
+		turnOrder: this.turnOrder,
+		roll: this.util.rollDice(),
+		turn: this.turnOrder[this.currentTurn]
+	});
+	// Start the next turn
 	// TODO:
 	// Set up the state necessary for the game to start
 	// Then alert the first player that it is their turn
 	// // Create the game board from the given information
 	// this.board = new go.Board(o.board);
+};
+Game.prototype.endTurn = function () {
+	
 };
 Game.prototype.dropPlayer = function (player) {
 	this.numPlayers--;
@@ -115,10 +131,11 @@ Game.prototype.available = function () {
 	return !this.started && (this.numPlayers < this.maxPlayers);
 };
 // Send a chat message to each client in the game
-Game.prototype.broadcast = function (client, message) {
+Game.prototype.broadcast = function (server, message, data) {
 	// Send the message to each client
-	for (var i = 0; i < this._clients.length; i++) {
-		this._clients[i].client.emit('chat', { sender: client.user, msg: message });
+	var clients = server.clients;
+	for (var i = 0; i < this.players.length; i++) {
+		clients[this.players[i].id].emit(message, data);
 	}
 };
 // Initialize the development cards for this game
