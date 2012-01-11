@@ -34,8 +34,17 @@ var Controller = (function () {
 			Game.startTrade(data);
 		},
 		// Start a new game
-		start: function (s) {
-			Game.init(s);
+		start: function (o) {
+			if (o.success) {
+				Game.turnOrder = o.turnOrder;
+				Game.startTurn(o);
+			}
+		},
+		startTurn: function (o) {
+			Game.startTurn(o);
+		},
+		endTurn: function (o) {
+			Game.endTurn(o);
 		},
 		// Disconnect from the server
 		disconnect: function () { }
@@ -178,6 +187,14 @@ var Controller = (function () {
 			event: 'click',
 			fn: function (e) {
 				e.data.callback(Engine.getTilePosition(this.coords));
+			}
+		},
+		endTurn: {
+			el: '#endButton',
+			event: 'click',
+			fn: function () {
+				Game.endTurn();
+				socket.emit('endTurn');
 			}
 		}
 	};

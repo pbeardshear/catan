@@ -51,6 +51,7 @@ function Game () {
 	this.maxPlayers = 0;
 	this.numPlayers = 0;
 	this.currentTurn = 0;
+	this.currentRotation = 0;	// Used at the end of the turn, when each player is given a chance to build
 	this.turnOrder = [];
 	this.started = false;
 	
@@ -71,6 +72,7 @@ Game.prototype.host = function (server, _host, options) {
 		this.minPlayers = 2;
 		this.maxPlayers = parseInt(options.players) || 6;
 		this.currentTurn = 0;
+		this.currentRotation = 0;
 		// Add the host to the list of users
 		this._host = _host;
 		return this.join(server, _host, options.username);
@@ -114,7 +116,17 @@ Game.prototype.start = function (server) {
 	// this.board = new go.Board(o.board);
 };
 Game.prototype.endTurn = function () {
-	
+	this.currentRotation = (this.currentRotation + 1) % this.numPlayers;
+	if (this.currentRotation == this.currentTurn) {
+		// End and start the next turn
+		++this.currentTurn;
+		this.currentRotation = this.currentTurn;
+		return { message: 'startTurn', roll: this.util.rollDice(), turn: this.turnOrder[this.currentTurn] };
+	}
+	else {
+		// Ask the next player if they want to build something
+		return { message: 'endTurn', turn: this.turnOrder[this.currentRotation] };
+	}
 };
 Game.prototype.dropPlayer = function (player) {
 	this.numPlayers--;

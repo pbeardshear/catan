@@ -40,7 +40,14 @@ socket.sockets.on('connection', function (client) {
 			server.clients[client.id].game.broadcast(server, o.message, o.data);
 		},
 		startTurn: function () { },
-		endTurn: function () { },
+		endTurn: function () {
+			// Iterate over each player in the game, and ask if they want to build anything
+			var game = server.clients[client.id].game,
+				current = game.currentTurn,
+				players = game.numPlayers,
+				result = game.endTurn();
+			game.broadcast(server, result.message, result);
+		},
 		
 		disconnect: function () {
 			server.removeClient(client.id);

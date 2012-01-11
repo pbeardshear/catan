@@ -169,6 +169,7 @@ var Game = (function () {
 	return {
 		// Setup the game
 		init: function (o) {
+			this.turnOrder = null;
 			tiles = Engine.generateMap();
 			for (var i = 0; i < tiles.length; i++) {
 				if (tiles[i].robber) {
@@ -238,20 +239,31 @@ var Game = (function () {
 			Controller.deactivate('place', o);
 		},
 		// Initialize the game state and view for the beginning of this player's turn
-		startTurn: function () {
-			// Turn on allowable functions on your turn
-			Controller.activate('build');
-			Controller.activate('useCard');
-			Controller.activate('trade');
-			Controller.activate('tradeRequest');
+		startTurn: function (o) {
+			// Check if this user gets any resources from the dice roll
+			harvestResources(o.roll);
+			// Check if it is the current player's turn
+			if (this.turnOrder[o.turn] == self.id) {
+				// Turn on allowable functions on your turn
+				Controller.activate('build');
+				Controller.activate('useCard');
+				Controller.activate('trade');
+				Controller.activate('tradeRequest');
+				Controller.activate('endTurn');
+			}
 		},
 		// Do cleanup
-		endTurn: function () {
+		endTurn: function (o) {
 			// Disallow actions when your turn is over
-			Controller.deactivate('build');
-			Controller.deactivate('useCard');
-			Controller.deactivate('trade');
-			Controller.deactivate('tradeRequest');
+			if (o && this.turnOrder[o.turn] == self.id) {
+				Controller.activate('build');
+			}
+			else {
+				Controller.deactivate('build');
+				Controller.deactivate('useCard');
+				Controller.deactivate('trade');
+				Controller.deactivate('tradeRequest');
+			}			
 		},
 		startTrade: function (data) {
 			var popup = $('#tradeConfirmPopup'),

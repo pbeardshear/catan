@@ -99,7 +99,7 @@ var Engine = (function () {
 	
 	// -- Private methods
 	function popRandom (arr) {
-		return arr.splice(Math.floor(Math.random()*arr.length), 1);
+		return arr.splice(Math.floor(Math.random()*arr.length), 1)[0];
 	}
 	
 	function findTile (x, y) {
@@ -261,7 +261,6 @@ var Engine = (function () {
 			var coords = this.coords.split(','),
 				x = coords[0],
 				y = coords[1];
-			
 			if (selectedTile) {
 				selectedTile.swap(findTile(x, y));
 				selectedTile = null;

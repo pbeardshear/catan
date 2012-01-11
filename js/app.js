@@ -66,9 +66,9 @@ $(document).ready(function () {
 	Controller.activate('host');
 	Controller.go('list');
 	Engine.init();
-	Engine.generateMap();
+	// Engine.generateMap();
 	
-	Game.startTurn();
+	// Game.startTurn();
 	
 	// DEBUG
 	Controller.activate('chat');
