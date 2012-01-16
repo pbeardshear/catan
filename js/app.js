@@ -9,7 +9,8 @@ Function.prototype.createDelegate = function (scope, o) {
 var app = (function () {
 	var CONST = {
 		board: { height: 620, width: 620, landSize: 50 },
-		ID: { canvas: '#map', blank: '#blank' }
+		ID: { canvas: '#map', blank: '#blank' },
+		IP: 'localhost:1337'
 	};
 	var templates = {
 		host: {
