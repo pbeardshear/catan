@@ -6,7 +6,7 @@ var connect = require('connect'),
 
 var server = new model.Server(connect);
 var socket = io.listen(server.master);
-server.listen(1337, '192.168.1.112');
+server.listen(1337, 'localhost');
 
 socket.sockets.on('connection', function (client) {
 	server.addClient(client);

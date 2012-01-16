@@ -201,7 +201,7 @@ var Controller = (function () {
 	
 	return {
 		init: function (io) {
-			socket = io.connect('192.168.1.112:1337');
+			socket = io.connect(app.CONST.IP);
 			
 			for (var comm in Commands) {
 				if (Commands.hasOwnProperty(comm)) {
