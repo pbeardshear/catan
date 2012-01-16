@@ -4,12 +4,12 @@
 
 var Engine = (function () {
 	// -- Constants
-	var height = 620,
-		length = 620,
-		landSize = 50,
+	var height = app.CONST.board.height,
+		length = app.CONST.board.width,
+		landSize = app.CONST.board.landSize,
 		alt = Math.sin(Math.PI/3)*landSize,
-		canvasID = '#map',
-		blankID = '#blank',
+		canvasID = app.CONST.ID.canvas,
+		blankID = app.CONST.ID.blank,
 		imageSize = { x: 100, y: 114 },
 		// DEBUG
 		colors = {
@@ -202,7 +202,6 @@ var Engine = (function () {
 				mapEdge.appendChild(areaEdge);
 				mapVertex.appendChild(areaVertex);
 			}
-			
 			
 			mapCenter.appendChild(areaCenter);
 		}

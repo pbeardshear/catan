@@ -231,7 +231,7 @@ var Controller = (function () {
 			var imageMap = '#board-' + state;
 			// Check if a valid state was passed
 			if ($(imageMap).length) {
-				$(app.CONST.blankID).attr('usemap', imageMap);
+				$(app.CONST.ID.blank).attr('usemap', imageMap);
 			}
 		}
 	};

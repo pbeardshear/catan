@@ -7,6 +7,10 @@ Function.prototype.createDelegate = function (scope, o) {
 };
 
 var app = (function () {
+	var CONST = {
+		board: { height: 620, width: 620, landSize: 50 },
+		ID: { canvas: '#map', blank: '#blank' }
+	};
 	var templates = {
 		host: {
 			list: {
@@ -48,15 +52,7 @@ var app = (function () {
 			$(temp.container).append(build(temp.template, o));
 		},
 		// CONSTANTS
-		CONST: {
-			blankID: '#blank',
-			canvasID: '#map',
-			views: {
-				host: '#hostPage',
-				setup: '#setupPage',
-				game: '#gamePage'
-			}
-		}
+		CONST: CONST
 	};
 })();
 
