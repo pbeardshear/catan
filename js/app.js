@@ -7,11 +7,6 @@ Function.prototype.createDelegate = function (scope, o) {
 };
 
 var app = (function () {
-	var CONST = {
-		board: { height: 620, width: 620, landSize: 50 },
-		ID: { canvas: '#map', blank: '#blank' },
-		IP: 'localhost:1337'
-	};
 	var templates = {
 		host: {
 			list: {
@@ -31,6 +26,14 @@ var app = (function () {
 				container: '#chatLog .wrap'
 			}
 		}
+	};
+	
+	var CONST = {
+		board: { height: 620, width: 620, landSize: 50 },
+		ID: { canvas: '#map', blank: '#blank' },
+		tile: { img: { size: { x: 100, y: 114 }, path: '' } },
+		IP: 'localhost:1337',
+		views: templates
 	};
 	
 	function build (template, o) {
@@ -63,11 +66,16 @@ $(document).ready(function () {
 	Controller.activate('host');
 	Controller.go('list');
 	Engine.init();
-	// Engine.generateMap();
-	
-	// Game.startTurn();
 	
 	// DEBUG
+	Engine.generateMap();
+	
+	Controller.changeState('vertex');
+	Game.init({ id: 0, name: 'peter' });
+	Game.place({ type: 'settlement' });
+	Game.turnOrder = [0];
+	Game.startTurn({ turn: 0, roll: 6 });
+	
 	Controller.activate('chat');
 });
 

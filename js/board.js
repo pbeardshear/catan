@@ -7,7 +7,16 @@ var Board = (function () {
 		width = app.CONST.width;
 		
 	// -- Private classes
-	function Tile () {
+	// Ports are considered tiles internally,
+	// and a have one edge which is considered active (i.e. gives access to the port)
+	function Port (o) {
+		this.type = o.type;
+		this.count = o.count;
+		this.id = o.id;
+		this.pos = o.pos;
+	}
+	
+	function Tile (o) {
 		this.id = o.id;
 		this.type = o.type;
 		this.quality = o.quality;
@@ -31,6 +40,8 @@ var Board = (function () {
 	
 	// Public
 	return {
-		
+		init: function (size) {
+			
+		}
 	};
 })();

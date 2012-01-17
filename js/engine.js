@@ -4,13 +4,14 @@
 
 var Engine = (function () {
 	// -- Constants
-	var height = app.CONST.board.height,
-		length = app.CONST.board.width,
-		landSize = app.CONST.board.landSize,
+	var CONST = app.CONST,
+		height = CONST.board.height,
+		length = CONST.board.width,
+		landSize = CONST.board.landSize,
 		alt = Math.sin(Math.PI/3)*landSize,
-		canvasID = app.CONST.ID.canvas,
-		blankID = app.CONST.ID.blank,
-		imageSize = { x: 100, y: 114 },
+		canvasID = CONST.ID.canvas,
+		blankID = CONST.ID.blank,
+		imageSize = CONST.tile.img.size,
 		// DEBUG
 		colors = {
 			'wheat': '#FFC500', 
@@ -18,7 +19,8 @@ var Engine = (function () {
 			'wood': '#238C47', 
 			'brick': '#BF7130', 
 			'ore': '#AAA',
-			'desert': '#000'
+			'desert': '#000',
+			'port': '#3F92D2'
 		},
 		numbers = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
 		resources = [
@@ -52,6 +54,48 @@ var Engine = (function () {
 	var centers = [];
 	
 	// -- Private classes
+	function Port (o) {
+		this.type = o.type;
+		this.count = o.count;
+		this.pos = o.pos;
+		this.id = o.id;
+		this.validPoints = [0, 1];
+		this.hasPort = o.valid;
+	}
+	
+	Port.prototype.draw = function () {
+		var center = getCenter(this.id, 4),
+			len = landSize;
+		ctx.save();
+		
+		// Adjust the center position to the default coordinate axis
+		center.x -= (length/2);
+		center.y = -(center.y - (height/2));
+		
+		// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
+		ctx.fillStyle = colors[this.type] || colors[Math.floor(Math.random()*5)];
+		ctx.beginPath();
+		ctx.moveTo(center.x + alt, center.y + (len/2));
+		ctx.lineTo(center.x, center.y + len);
+		ctx.lineTo(center.x - alt, center.y + (len/2));
+		ctx.lineTo(center.x - alt, center.y - (len/2));
+		ctx.lineTo(center.x, center.y - len);
+		ctx.lineTo(center.x + alt, center.y - (len/2));
+		ctx.closePath();
+		ctx.stroke();
+		ctx.fill();
+		
+		if (this.hasPort) {
+			ctx.fillStyle = '#000';
+			ctx.beginPath();
+			ctx.arc(center.x, center.y, 10, 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+		}
+		
+		ctx.restore();
+	};
+	
 	function Tile (o) {
 		this.id = o.id;
 		this.type = o.type;
@@ -107,8 +151,8 @@ var Engine = (function () {
 		return (i != -1 ? tiles[i] : null);
 	}
 	
-	function getCenter (n) {
-		var min = rings,
+	function getCenter (n, r) {
+		var min = r || rings,
 			mid = min - 1,
 			max = min + mid;
 		
@@ -212,8 +256,12 @@ var Engine = (function () {
 		container.appendChild(mapVertex);
 	}
 	
+	function round (num, dec) {
+		return Math.round(num * Math.pow(10, dec))/Math.pow(10, dec);
+	}
+	
 	function pointDist (a, b) {
-		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+		return round(Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)), 2);
 	}
 	
 	return {
@@ -231,7 +279,8 @@ var Engine = (function () {
 		separation: function (a, b, amt) {
 			var floor = Math.floor,
 				dist = pointDist(a, b);
-			return dist <= (floor(amt/2) + 1)*landSize;
+			console.log(dist);
+			return amt ? dist <= (floor(amt/2) + 1)*landSize : dist == 0;
 		},
 		// Draw the main map
 		generateMap: function () {
@@ -251,9 +300,26 @@ var Engine = (function () {
 				}));
 				tile.draw();
 			}
+			
+			// DEBUG
+			// Port tiles
+			console.log('rings', rings);
+			// Generate the ids that the port tiles use (outer ring ids)
+			// var ids = [0, 1, 2, 3, 4, 8, 9, 14, 15, 21, 22, 27, 28, 32, 33, 34, 35, 36];
+			var ports = [];
+			var ids = [0, 1, 2, 3, 8, 14, 21, 27, 32, 36, 35, 34, 33, 28, 22, 15, 9, 4];
+			for (var m = 0; m < ids.length; m++) {
+				var temp = new Port({
+					id: ids[m],
+					type: 'port',
+					valid: m % 2 != 0
+				});
+				ports.push(temp);
+				temp.draw();
+			}
 			// Create the clickable image maps over the canvas
 			generateImageMaps();
-			return tiles;
+			return { tiles: tiles, ports: ports };
 		},
 		// Set up the event to handle swapping of resource tiles on the map
 		swapTiles: function () {
@@ -302,9 +368,9 @@ var Engine = (function () {
 			
 			ctx.restore();
 		},
-		getTilePosition: function (i) {
+		getTilePosition: function (i, r) {
 			if (typeof i == 'number') {
-				return getCenter(i);
+				return getCenter(i, r);
 			}
 			else {
 				var coords = i.split(',');

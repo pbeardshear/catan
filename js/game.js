@@ -6,6 +6,7 @@ var Game = (function () {
 	// Global state variables
 	var self = null,
 		tiles = [],
+		ports = [],
 		robberTile = null,
 		players = [],
 		pieces = {
@@ -55,6 +56,7 @@ var Game = (function () {
 		this.name = o.name;
 		this.resources = [];
 		this.developmentCards = [];
+		this.ports = [];
 	}
 	
 	function Road (o) {
@@ -78,6 +80,8 @@ var Game = (function () {
 	
 	// Private methods
 	function validate (pos, type) {
+		// DEBUG
+		return true;
 		var round = Math.round;
 		if (type == 'road') {
 			return true;
@@ -165,12 +169,40 @@ var Game = (function () {
 			}
 		}
 	}
+	
+	// Adds access to a port if the object is adjacent to a port
+	// TODO:
+	// Move and fix, this is pure nastiness
+	function tryPort (o) {
+		// DEBUG
+		console.log(ports);
+		console.log('object', o);
+		for (var i = 0; i < ports.length; i++) {
+			if (ports[i].hasPort) {
+				var pos = Engine.getTilePosition(ports[i].id, 4),
+					points = ports[i].validPoints;
+				var cos = Math.cos, sin = Math.sin, pi = Math.PI;
+				var a = [{ x: pos.x + cos(points[0]*pi/3 - pi/6)*app.CONST.board.landSize, y: pos.y + sin(points[0]*pi/3 - pi/6)*app.CONST.board.landSize },
+						 { x: pos.x + cos(points[1]*pi/3 - pi/6)*app.CONST.board.landSize, y: pos.y + sin(points[1]*pi/3 - pi/6)*app.CONST.board.landSize }];
+				console.log(ports[i], 'pos', pos, 'bottom', a[0], 'top', a[1]);
+				if (Engine.separation(a[0], o.pos, 0) || Engine.separation(a[1], o.pos, 0)) {
+					self.ports.push(ports[i]);
+					// No settlement can be adjacent to two ports, so we can end early
+					break;
+				}
+			}
+		}
+		// DEBUG
+		console.log(self.ports);
+	}
 		
 	return {
 		// Setup the game
 		init: function (o) {
 			this.turnOrder = null;
-			tiles = Engine.generateMap();
+			var board = Engine.generateMap();
+			tiles = board.tiles;
+			ports = board.ports;
 			for (var i = 0; i < tiles.length; i++) {
 				if (tiles[i].robber) {
 					robberTile = tiles[i];
@@ -184,8 +216,8 @@ var Game = (function () {
 			Controller.changeState('center');
 			Controller.activate('swap');
 			
-			app.swap('host', 'setup');
-			app.apply('setup', 'player', [o.name]);
+			// app.swap('host', 'setup');
+			// app.apply('setup', 'player', [o.name]);
 		},
 		// Add a player to the game
 		addPlayer: function (o) {
@@ -224,7 +256,10 @@ var Game = (function () {
 				pieces[type][id].push(new Road({ pos: pos, owner: players[id] }));
 			}
 			else {
-				pieces[type].push(new map[type]({ pos: pos, owner: players[id] }));
+				var piece = new map[type]({ pos: pos, owner: players[id] });
+				pieces[type].push(piece);
+				// Checks if the placed piece gives the current player access to a port
+				tryPort(piece);
 			}
 			Engine.drawObject(pos, type);
 		},
