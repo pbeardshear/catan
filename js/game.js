@@ -109,14 +109,14 @@ var Game = (function () {
 					(round(r[i].end.x) == round(pos.x) && round(r[i].end.y) == round(pos.y))) {
 					// Validate settlement proximity location
 					for (var j = 0; j < s.length; j++) {
-						if (Engine.separation(pos, s[j].pos, 1)) {
+						if (!Board.validate(pos, s[j].pos)) {
 							console.log('failed validation 2');
 							return false;
 						}
 					}
 					
 					for (var k = 0; k < c.length; k++) {
-						if (Engine.separation(pos, c[k].pos, 1)) {
+						if (!Board.validate(pos, c[k].pos)) {
 							console.log('failed validation 3');
 							return false;
 						}
@@ -142,7 +142,7 @@ var Game = (function () {
 		// Compile a list of all tiles outputting resources for this roll
 		for (var i = 0; i < tiles.length; i++) {
 			if (tiles[i].quality == roll) {
-				var tile = Engine.getTilePosition(i);
+				var tile = Board.getTile(i, 'tile');
 				tile.resource = tiles[i].type;
 				out.push(tile);
 			}
@@ -152,7 +152,7 @@ var Game = (function () {
 		for (var j = 0; j < pieces.settlement.length; j++) {
 			if (pieces.settlement[j].owner.id == self.id) {
 				for (var k = 0; k < out.length; k++) {
-					if (Engine.separation(out[i], pieces.settlement[j].pos, 1)) {
+					if (Board.validate(out[i], pieces.settlement[j].pos)) {
 						self.resources.push(out.resource);
 					}
 				}
@@ -162,7 +162,7 @@ var Game = (function () {
 		for (var m = 0; m < pieces.city.length; m++) {
 			if (pieces.city[m].owner.id == self.id) {
 				for (var n = 0; n < out.length; n++) {
-					if (Engine.separation(out[n], pieces.city[m].pos, 1)) {
+					if (Board.validate(out[n], pieces.city[m].pos)) {
 						self.resources = self.resources.concat([out[n].resource, out[n].resource]);
 					}
 				}
@@ -179,13 +179,13 @@ var Game = (function () {
 		console.log('object', o);
 		for (var i = 0; i < ports.length; i++) {
 			if (ports[i].hasPort) {
-				var pos = Engine.getTilePosition(ports[i].id, 4),
+				var pos = Board.getTile(ports[i].id, 'port'),
 					points = ports[i].validPoints;
 				var cos = Math.cos, sin = Math.sin, pi = Math.PI;
 				var a = [{ x: pos.x + cos(points[0]*pi/3 - pi/6)*app.CONST.board.landSize, y: pos.y + sin(points[0]*pi/3 - pi/6)*app.CONST.board.landSize },
 						 { x: pos.x + cos(points[1]*pi/3 - pi/6)*app.CONST.board.landSize, y: pos.y + sin(points[1]*pi/3 - pi/6)*app.CONST.board.landSize }];
 				console.log(ports[i], 'pos', pos, 'bottom', a[0], 'top', a[1]);
-				if (Engine.separation(a[0], o.pos, 0) || Engine.separation(a[1], o.pos, 0)) {
+				if (Board.validate(a[0], o.pos, 'port') || Board.validate(a[1], o.pos, 'port')) {
 					self.ports.push(ports[i]);
 					// No settlement can be adjacent to two ports, so we can end early
 					break;
@@ -200,15 +200,15 @@ var Game = (function () {
 		// Setup the game
 		init: function (o) {
 			this.turnOrder = null;
-			var board = Engine.generateMap();
-			tiles = board.tiles;
-			ports = board.ports;
-			for (var i = 0; i < tiles.length; i++) {
-				if (tiles[i].robber) {
-					robberTile = tiles[i];
-					break;
-				}
-			}
+			// var board = Engine.generateMap();
+			// tiles = board.tiles;
+			// ports = board.ports;
+			// for (var i = 0; i < tiles.length; i++) {
+				// if (tiles[i].robber) {
+					// robberTile = tiles[i];
+					// break;
+				// }
+			// }
 			
 			self = new Player(o);
 			players.push(self);
@@ -228,8 +228,6 @@ var Game = (function () {
 			var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
 				clickable = '#board-' + placementMap[o.type] + ' area';
 			placing = true;
-			// Show the available locations
-			Engine.highlightAvailable(o.type);
 			Controller.changeState(placementMap[o.type]);
 			Controller.activate('place', {
 				el: clickable,

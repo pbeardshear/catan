@@ -29,9 +29,14 @@ var app = (function () {
 	};
 	
 	var CONST = {
-		board: { height: 620, width: 620, landSize: 50 },
+		board: { height: 620, width: 620, landSize: 50, size: 3 },
+		game: {
+			resources: { desert: 'desert', ore: 'ore', brick: 'brick', wood: 'wood', wool: 'wool', wheat: 'wheat' },
+			numTypes: 5,
+			numTiles: 19
+		},
 		ID: { canvas: '#map', blank: '#blank' },
-		tile: { img: { size: { x: 100, y: 114 }, path: '' } },
+		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'wheat': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
 		IP: 'localhost:1337',
 		views: templates
 	};
@@ -46,6 +51,13 @@ var app = (function () {
 	}
 	
 	return {
+		init: function () {
+			// Add some additional functionality to the jQuery object
+			$.dom = function (el) {
+				var dom = $(el);
+				return dom && dom[0];
+			};
+		},
 		// Change the view
 		swap: function (prev, next) {
 			$(this.CONST.views[prev]).hide(200);
@@ -62,13 +74,16 @@ var app = (function () {
 
 
 $(document).ready(function () {
+	app.init();
+	
 	Controller.init(io);
 	Controller.activate('host');
 	Controller.go('list');
 	Engine.init();
 	
 	// DEBUG
-	Engine.generateMap();
+	// Engine.generateMap();
+	Board.init(app.CONST.board.size);
 	
 	Controller.changeState('vertex');
 	Game.init({ id: 0, name: 'peter' });

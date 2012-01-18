@@ -90,7 +90,7 @@ var Controller = (function () {
 			el: '#board-center area',
 			event: 'click',
 			fn: function () {
-				Engine.swapTiles.call(this);
+				Board.swapTiles(this);
 			}
 		},
 		// Build a settlement, road, city, or development card
@@ -107,7 +107,7 @@ var Controller = (function () {
 			event: 'click',
 			fn: function (e) {
 				console.log(e.data);
-				Engine.placeObject.apply(this, [e.data, e.data.callback, e.data.scope]);
+				Board.place(this, e.data.callback, e.data.scope);
 			}
 		},
 		// Activate a development card

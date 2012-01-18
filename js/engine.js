@@ -3,7 +3,8 @@
 //
 
 var Engine = (function () {
-	// -- Constants
+	// Constants
+	// ---------------------------------------------------------------------------------------------------------
 	var CONST = app.CONST,
 		height = CONST.board.height,
 		length = CONST.board.width,
@@ -12,16 +13,8 @@ var Engine = (function () {
 		canvasID = CONST.ID.canvas,
 		blankID = CONST.ID.blank,
 		imageSize = CONST.tile.img.size,
+		colors = CONST.tile.colors,
 		// DEBUG
-		colors = {
-			'wheat': '#FFC500', 
-			'wool': '#B3F36D', 
-			'wood': '#238C47', 
-			'brick': '#BF7130', 
-			'ore': '#AAA',
-			'desert': '#000',
-			'port': '#3F92D2'
-		},
 		numbers = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
 		resources = [
 			{ type: 'wheat', count: 4 },
@@ -36,23 +29,24 @@ var Engine = (function () {
 			settlement: 8,
 			city: 15
 		},
-		map = { 
+		map = {
 			settlement: 'vertex', 
 			city: 'vertex', 
 			road: 'edge' 
 		},
 		numTiles = 19;
 		
-	// -- State variables
-	var canvas,
-		ctx,
-		rings,
+	// State variables
+	// ---------------------------------------------------------------------------------------------------------
+	var ctx,
+		size,
 		selectedTile = null,
 		tiles = [];
 		
 	// Convience storage
 	var centers = [];
 	
+	/*
 	// -- Private classes
 	function Port (o) {
 		this.type = o.type;
@@ -140,11 +134,41 @@ var Engine = (function () {
 		this.draw();
 		tile.draw();
 	};
+	*/
 	
-	// -- Private methods
-	function popRandom (arr) {
-		return arr.splice(Math.floor(Math.random()*arr.length), 1)[0];
-	}
+	// Private methods
+	// ---------------------------------------------------------------------------------------------------------
+	// Drawing functions
+	var draw = {
+		tile: function () {
+			var center = getCenter(this.id),
+			len = landSize;
+			ctx.save();
+			
+			// Adjust the center position to the default coordinate axis
+			center.x -= (length/2);
+			center.y = -(center.y - (height/2));
+			
+			// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
+			ctx.fillStyle = colors[this.type] || colors[Math.floor(Math.random()*5)];
+			ctx.beginPath();
+			ctx.moveTo(center.x + alt, center.y + (len/2));
+			ctx.lineTo(center.x, center.y + len);
+			ctx.lineTo(center.x - alt, center.y + (len/2));
+			ctx.lineTo(center.x - alt, center.y - (len/2));
+			ctx.lineTo(center.x, center.y - len);
+			ctx.lineTo(center.x + alt, center.y - (len/2));
+			ctx.closePath();
+			ctx.stroke();
+			ctx.fill();
+			
+			ctx.restore();
+		},
+		port: function () { },
+		road: function () { },
+		settlement: function () { },
+		city: function () { }
+	};
 	
 	function findTile (x, y) {
 		var i = centers.indexOf(x+y);
@@ -152,7 +176,7 @@ var Engine = (function () {
 	}
 	
 	function getCenter (n, r) {
-		var min = r || rings,
+		var min = r || size,
 			mid = min - 1,
 			max = min + mid;
 		
@@ -186,7 +210,7 @@ var Engine = (function () {
 			pi = Math.PI;
 		switch (type) {
 			case 0:
-				return { 
+				return {
 					start: { x: pos.x, y: pos.y - len },
 					end: { x: pos.x, y: pos.y + len }
 				};
@@ -246,10 +270,8 @@ var Engine = (function () {
 				mapEdge.appendChild(areaEdge);
 				mapVertex.appendChild(areaVertex);
 			}
-			
 			mapCenter.appendChild(areaCenter);
 		}
-		
 		var container = document.getElementById('gamePage');
 		container.appendChild(mapCenter);
 		container.appendChild(mapEdge);
@@ -264,15 +286,17 @@ var Engine = (function () {
 		return round(Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)), 2);
 	}
 	
+	/*
 	return {
 		init: function () {
-			canvas = $(canvasID)[0],
-			ctx = canvas.getContext('2d');
+			// canvas = $(canvasID)[0],
+			// ctx = canvas.getContext('2d');
+			ctx = $.dom(canvasID).getContext('2d');
 			// Initialize the drawing context
 			ctx.translate(length/2, height/2);
 			ctx.scale(1, -1);
 			loaded = true;
-			rings = 3;
+			size = 3;
 		},
 		// Returns true if the number of steps between vertex a and b is 
 		// less than or equal to the number of provided steps, otherwise false
@@ -303,7 +327,7 @@ var Engine = (function () {
 			
 			// DEBUG
 			// Port tiles
-			console.log('rings', rings);
+			console.log('size', size);
 			// Generate the ids that the port tiles use (outer ring ids)
 			// var ids = [0, 1, 2, 3, 4, 8, 9, 14, 15, 21, 22, 27, 28, 32, 33, 34, 35, 36];
 			var ports = [];
@@ -384,9 +408,44 @@ var Engine = (function () {
 			$('area').unbind('click');
 		},
 		// Add visual representation to all valid positions a particular object can take
-		highlightAvailable: function (obj) { },
-		
-		// Getters
-		canvas: canvas
+		highlightAvailable: function (obj) { }
+	};
+	*/
+	// Add functions as necessary
+	return {
+		loaded: false,
+		init: function () {
+			// Set up state variables
+			ctx = $.dom(canvasID).getContext('2d');
+			size = app.CONST.board.size;
+			// Initialize the drawing context
+			ctx.translate(length/2, height/2);
+			ctx.scale(1, -1);
+			// Set loaded flags
+			this.loaded = true;
+		},
+		generateMap: function (tiles) {
+			console.log(tiles);
+			console.log(tiles.length);
+			// Draw the tiles to the screen
+			for (var i = 0; i < tiles.length; i++) {
+				tiles[i].draw();
+			}
+		},
+		draw: function (o, type) {
+			return draw[type].call(o);
+		},
+		getCoords: function (index, size) {
+			return getCenter(index, size);
+		},
+		getTile: function (x, y) {
+			return findTile(x, y);
+		},
+		getPosition: function (position, type) {
+			return getEdge(position, type);
+		},
+		pointDistance: function (a, b) {
+			return pointDist(a, b);
+		}
 	};
 })();
