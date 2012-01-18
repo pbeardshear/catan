@@ -4,6 +4,7 @@
 
 var Game = (function () {
 	// Global state variables
+	// ---------------------------------------------------------------------------------------------------------
 	var self = null,
 		tiles = [],
 		ports = [],
@@ -28,29 +29,36 @@ var Game = (function () {
 					moveRobber(tiles[i]);
 					// TODO:
 					// Steal from someone next to the tile
+					Game.popup({ template: app.CONST.ID.steal });
 				}
 			});
 		},
 		plenty: function () {
 			// Prompt the user to choose two resources
+			Game.popup({ template: app.CONST.ID.plenty });
 		},
 		monopoly: function () {
 			// Prompt the user to select a resource type
+			Game.popup({ template: app.CONST.ID.monopoly });
 		},
 		roadBuild: function () {
+			Game.popup({ text: 'Place two roads' });
 			// Prompt the user to choose two locations
 			Game.place({ type: 'road'}, 1);
 		},
 		victory: function () {
 			// Prompt the user that victory cards are not playable
+			Game.popup({ text: 'Victory point cards are not playable' });
 		}
 	};
 		
 	// Turn variables
+	// ---------------------------------------------------------------------------------------------------------
 	var placing = false;
 	var trade = null;
 	
 	// Private classes
+	// ---------------------------------------------------------------------------------------------------------
 	function Player (o) {
 		this.id = o.id;
 		this.name = o.name;
@@ -79,6 +87,7 @@ var Game = (function () {
 	}
 	
 	// Private methods
+	// ---------------------------------------------------------------------------------------------------------
 	function validate (pos, type) {
 		// DEBUG
 		return true;
@@ -195,21 +204,22 @@ var Game = (function () {
 		// DEBUG
 		console.log(self.ports);
 	}
-		
+	
+	// Public
+	// ---------------------------------------------------------------------------------------------------------
 	return {
 		// Setup the game
 		init: function (o) {
 			this.turnOrder = null;
-			// var board = Engine.generateMap();
-			// tiles = board.tiles;
-			// ports = board.ports;
-			// for (var i = 0; i < tiles.length; i++) {
-				// if (tiles[i].robber) {
-					// robberTile = tiles[i];
-					// break;
-				// }
-			// }
-			
+			var board = Board.init(app.CONST.board.size);
+			tiles = board.tiles;
+			ports = board.ports;
+			for (var i = 0; i < tiles.length; i++) {
+				if (tiles[i].robber) {
+					robberTile = tiles[i];
+					break;
+				}
+			}
 			self = new Player(o);
 			players.push(self);
 			
@@ -221,7 +231,7 @@ var Game = (function () {
 		},
 		// Add a player to the game
 		addPlayer: function (o) {
-			
+			players.push(new Player(o));
 		},
 		// Add a new game piece (road, settlement) to the board
 		place: function (o, rep) {
@@ -263,6 +273,15 @@ var Game = (function () {
 		},
 		useCard: function (type) {
 			developmentCards[type]();
+		},
+		popup: function (data) {
+			if (data.template) {
+				$(data.template).show();
+				// Activate the controller necessary
+			}
+			else if (data.text) {
+				$(app.CONST.ID.notice).text(data.text);
+			}
 		},
 		// Replace a settlement with a city
 		upgrade: function (o) { },

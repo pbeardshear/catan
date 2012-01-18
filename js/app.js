@@ -35,7 +35,7 @@ var app = (function () {
 			numTypes: 5,
 			numTiles: 19
 		},
-		ID: { canvas: '#map', blank: '#blank' },
+		ID: { canvas: '#map', blank: '#blank', plenty: '#plentyPopup', monopoly: '#monopolyPopup', notice: '#eventNotice p', steal: '#stealPopup' },
 		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'wheat': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
 		IP: 'localhost:1337',
 		views: templates
@@ -83,7 +83,7 @@ $(document).ready(function () {
 	
 	// DEBUG
 	// Engine.generateMap();
-	Board.init(app.CONST.board.size);
+	// Board.init(app.CONST.board.size);
 	
 	Controller.changeState('vertex');
 	Game.init({ id: 0, name: 'peter' });

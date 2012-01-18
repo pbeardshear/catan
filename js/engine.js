@@ -411,7 +411,8 @@ var Engine = (function () {
 		highlightAvailable: function (obj) { }
 	};
 	*/
-	// Add functions as necessary
+	// Public
+	// ---------------------------------------------------------------------------------------------------------
 	return {
 		loaded: false,
 		init: function () {
@@ -425,8 +426,6 @@ var Engine = (function () {
 			this.loaded = true;
 		},
 		generateMap: function (tiles) {
-			console.log(tiles);
-			console.log(tiles.length);
 			// Draw the tiles to the screen
 			for (var i = 0; i < tiles.length; i++) {
 				tiles[i].draw();

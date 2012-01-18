@@ -186,7 +186,8 @@ var Controller = (function () {
 			el: '#board-center area',
 			event: 'click',
 			fn: function (e) {
-				e.data.callback(Engine.getTilePosition(this.coords));
+				e.data.callback(Board.getTile(this.coords));
+				// e.data.callback(Engine.getTilePosition(this.coords));
 			}
 		},
 		endTurn: {

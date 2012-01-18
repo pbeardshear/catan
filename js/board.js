@@ -6,8 +6,8 @@ var Board = (function () {
 	// Constants
 	// ---------------------------------------------------------------------------------------------------------
 	var CONST = app.CONST,
-		height = CONST.height,
-		width = CONST.width,
+		height = CONST.board.height,
+		width = CONST.board.width,
 		resources = CONST.game.resources,
 		numResources = CONST.game.numTypes,
 		numTiles = CONST.game.numTiles;
@@ -16,6 +16,7 @@ var Board = (function () {
 	// ---------------------------------------------------------------------------------------------------------
 	var swapTile = null,
 		tiles = [],
+		ports = [],
 		boardSize = 0;
 	
 	// Private classes
@@ -94,12 +95,99 @@ var Board = (function () {
 		return numbers;
 	}
 	
+	// Generate the tile ids that will be used by the ports
+	function generatePorts (size) {
+		var outer = size+1,
+			edges = size-1,
+			ports = [],
+			extras = [];	// Clever storage, used to store ids that we will need when wrapping back around
+		// Add tiles in a clockwise order
+		// Top-most tiles
+		for (var i = 0; i < outer; i++) {
+			ports.push(i);
+		}
+		// Right tiles
+		var offset = size;
+		extras.push(offset+1);
+		for (var i = 0; i < edges; i++) {
+			ports.push(offset + outer + 1 + i);
+			offset += outer + 1 + i;
+			extras.push(offset+1);
+		}
+		// Middle tile
+		offset += size*2 + 1;
+		ports.push(offset);
+		extras.push(offset+1);
+		// Lower right side
+		for (var i = edges - 1; i >= 0; i--) {
+			ports.push(offset + outer + 1 + i);
+			offset += outer + 1 + i;
+			if (i) {
+				extras.push(offset+1);
+			}
+		}
+		// Bottom tiles
+		// Easier to add them in order then reverse the array
+		var temp = [];
+		// offset += 1;
+		for (var i = 0; i < outer; i++) {
+			offset += 1;
+			temp.push(offset);
+		}
+		ports = ports.concat(temp.reverse());
+		// Left side
+		ports = ports.concat(extras.reverse());
+		return ports;
+	}
+	
+	// Generate the edge types that each port tile will have its ports on
+	function generatePortLocations (ports) {
+		var origin = { x: width/2, y: height/2 },
+			tileSize = app.CONST.board.landSize,
+			cos = Math.cos,
+			sin = Math.sin,
+			pi = Math.PI,
+			base = pi/6,
+			step = pi/3;
+		for (var i = 0; i < ports.length; i++) {
+			if (ports[i].valid) {
+				var pos = ports[i].pos,
+					spots = [];
+				for (var j = 0; j < 6; j++) {
+					var vertex = { x: pos.x + cos(step*j - base)*tileSize, y: pos.y + sin(step*j - base)*tileSize };
+					spots.push({ index: j, dist: Engine.pointDistance(vertex, origin), vertex: vertex });
+				}
+				// Sort the list least to greatest, and take the top two
+				spots.sort(function (a, b) {
+					return a.dist - b.dist;
+				});
+				
+				// DEBUG
+				var ctx = $.dom('#map').getContext('2d');
+				ctx.save();
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+				ctx.beginPath();
+				ctx.fillStyle = '#FFF';
+				ctx.arc(origin.x, origin.y, 20, 0, Math.PI*2, false);
+				ctx.fillStyle = '#000';
+				ctx.arc(pos.x, pos.y, 10, 0, Math.PI*2, false);
+				ctx.arc(spots[0].vertex.x, spots[0].vertex.y, 5, 0, Math.PI*2, false);
+				ctx.arc(spots[1].vertex.x, spots[1].vertex.y, 5, 0, Math.PI*2, false);
+				ctx.closePath();
+				ctx.fill();
+				ctx.restore();
+				
+				ports[i].docks = [spots[0].index, spots[1].index];
+			}
+		}
+	}
+	
 	// Return a random element from the passed array (in place)
 	function popRandom (arr) {
 		return arr.splice(Math.floor(Math.random()*arr.length), 1)[0];
 	}
 	
-	// Public object
+	// Public
 	// ---------------------------------------------------------------------------------------------------------
 	return {
 		// Initialize the board state, and draw it to the canvas
@@ -116,8 +204,26 @@ var Board = (function () {
 					quality: type != 'desert' ? popRandom(numbers) : 0
 				}));
 			}
+			// Create the ports
+			var portTiles = generatePorts(size);
+			console.log(portTiles);
+			for (var i = 0; i < portTiles.length; i++) {
+				ports.push(new Port({
+					id: portTiles[i],
+					type: 'random',
+					pos: this.getTile(portTiles[i], 'port'),
+					count: 3,
+					valid: (i % 2 != 0)
+				}));
+			}
+			// Add the docks to the ports
+			generatePortLocations(ports);
+			console.log(ports);
+			
 			// Draw the tiles
 			Engine.generateMap(tiles);
+			
+			return { tiles: tiles, ports: ports };
 		},
 		getTile: function (index, type) {
 			if (typeof index == 'number') {
