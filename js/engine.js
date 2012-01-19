@@ -142,7 +142,9 @@ var Engine = (function () {
 	var draw = {
 		tile: function () {
 			var center = getCenter(this.id),
-			len = landSize;
+				len = landSize;
+			// Add the center to the list
+			centers[this.id] = center.x.toString() + center.y.toString();
 			ctx.save();
 			
 			// Adjust the center position to the default coordinate axis
@@ -199,7 +201,7 @@ var Engine = (function () {
 			x : (-(mid * 2 * alt) + (diff * alt) + (x * 2 * alt)) + (length/2),
 			y : -(off * (3/2) * landSize) + (height/2)
 		};
-		centers[n] = (pos.x.toString() + pos.y.toString());
+		// centers[n] = (pos.x.toString() + pos.y.toString());
 		return pos;
 	}
 	
@@ -425,11 +427,14 @@ var Engine = (function () {
 			// Set loaded flags
 			this.loaded = true;
 		},
-		generateMap: function (tiles) {
+		generateMap: function (boardTiles) {
+			tiles = boardTiles;
 			// Draw the tiles to the screen
 			for (var i = 0; i < tiles.length; i++) {
 				tiles[i].draw();
 			}
+			// Create the image maps
+			generateImageMaps();
 		},
 		draw: function (o, type) {
 			return draw[type].call(o);

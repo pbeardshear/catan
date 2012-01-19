@@ -12,7 +12,7 @@
 		<script src="js/board.js"></script>
 		<script src="js/game.js"></script>
 		<style type="text/css">
-			
+			#gamePage { display: none; }
 			#setupPage { display: none; }
 			.header { font-family: Verdana, Helvetica, sans-serif; font-size: 16px; margin: 10px; }
 			.body { margin: 10px; }
@@ -62,12 +62,12 @@
 		</div>
 		<!-- Start Game Setup Page -->
 		<div id="setupPage" class="page">
-			<!--
+			<!-- -->
 			<div id="mapContainer">
 				<canvas id="map" height="620" width="620"></canvas>
 				<img src="images/blank.png" id="blank" />
 			</div>
-			-->
+			<!-- -->
 			<div id="configuration">
 				<button>Randomize Map</button>
 				<button id="startGame">Start</button>
@@ -86,10 +86,12 @@
 					<p>Becky built a settlement</p>
 				</div>
 				<!-- Map Container goes here -->
+				<!--
 				<div id="mapContainer">
 					<canvas id="map" height="620" width="620"></canvas>
 					<img src="images/blank.png" id="blank" />
 				</div>
+				-->
 			</div>
 			<!-- Side Pane -->			
 			<div id="sidePane" class="pane">

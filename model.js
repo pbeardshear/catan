@@ -2,8 +2,8 @@ var po = require('./player_objects.js'),
 	go = require('./game.js'),	
 	cryp = require('./js/md5.js');
 
-// Model ----------------------------------------------------
-// ----------------------------------------------------------
+// Model --------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
 
 // Class representing data relationships
 function Model () {
@@ -23,8 +23,8 @@ exports.Model = function () {
 	return new Model();
 };
 
-// Client ---------------------------------------------------
-// ----------------------------------------------------------
+// Client -------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
 function Client () {
 	this.id = null;
 	this.playerid = null;
@@ -37,11 +37,28 @@ exports.Client = function () {
 	return new Client();
 };
 
-// Game -----------------------------------------------------
-// ----------------------------------------------------------
-function Game () {
+// Player -------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+function Player (id, client, name, isHost) {
+	this.id = id;
+	this.self = client;
+	this.name = name;
+	this.isHost = isHost || false;
+	this.victoryPoints = 0;
+}
+
+Player.prototype.addBonus = function () {
+	this.victoryPoints += 2;
+};
+Player.prototype.removeBonus = function () {
+	this.victoryPoint -= 2;
+};
+
+// Game ---------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+function Game (server) {
 	// Game specific variables
-	this.server = null;
+	this.server = server;
 	this.name = null;
 	this.id = null;
 	this.private = false;
@@ -55,17 +72,17 @@ function Game () {
 	this.turnOrder = [];
 	this.started = false;
 	
-	this._host = null;
-	this.players = [];
-	this.bonuses = { 'largestArmy': null, 'longestRoad': null };
+	this.players = {};
+	this.bonuses = { largestArmy: null, longestRoad: null };
 	this.developmentCards = [];
 }
 
 // Host a new game
-Game.prototype.host = function (server, _host, options) {
+Game.prototype.host = function (client, options) {
+	console.log('\n\noptions', options, '\n\n');
 	// Initialize state for this game
-	// Generate a new id
 	try {
+		// Generate a unique game id
 		this.id = cryp.generateUniqueID(options.game);
 		this.name = options.game;
 		this.private = options.private || false;
@@ -74,46 +91,41 @@ Game.prototype.host = function (server, _host, options) {
 		this.currentTurn = 0;
 		this.currentRotation = 0;
 		// Add the host to the list of users
-		this._host = _host;
-		return this.join(server, _host, options.username);
+		return this.join(client, options.username, true);
 	}
 	catch (e) {
+		console.log('the error is', e);
 		return { success: false, reason: 'invalid entry' };
 	}
 };
 // Connect a client to this game
-Game.prototype.join = function (server, client, user) {
+Game.prototype.join = function (client, username, hosting) {
 	if (this.available()) {
-		this.players.push(new go.Player(client.id, user));
-		this.numPlayers++;
-		server.clients[client.id].game = this;
-		return { success: true, id: (this.numPlayers - 1), name: user };
-		// client.emit('join', { success: true });
+		console.log('joining');
+		this.players[client.id] = new Player(this.numPlayers, client, username, hosting);
+		++this.numPlayers;
+		console.log('server', this.server);
+		this.server.clients[client.id].game = this;
+		return { success: true, id: (this.numPlayers - 1), name: username };
 	}
 	else {
 		return { success: false, reason: 'full' };
-		// client.emit('join', { success: false, reason: 'full' });
 	}
 };
-Game.prototype.start = function (server) {
+Game.prototype.start = function () {
 	this.started = true;
-	for (var i = 0; i < this.players.length; i++) {
+	for (var i = 0; i < this.numPlayers; i++) {
 		this.turnOrder.push(i);
 	}
 	// Generate the turn order
 	this.util.shuffle(this.turnOrder);
-	this.broadcast(server, 'start', { 
+	// Alert all players of the turn order and the current turn
+	this.broadcast('start', { 
 		success: true, 
 		turnOrder: this.turnOrder,
 		roll: this.util.rollDice(),
 		turn: this.turnOrder[this.currentTurn]
 	});
-	// Start the next turn
-	// TODO:
-	// Set up the state necessary for the game to start
-	// Then alert the first player that it is their turn
-	// // Create the game board from the given information
-	// this.board = new go.Board(o.board);
 };
 Game.prototype.endTurn = function () {
 	this.currentRotation = (this.currentRotation + 1) % this.numPlayers;
@@ -121,21 +133,46 @@ Game.prototype.endTurn = function () {
 		// End and start the next turn
 		++this.currentTurn;
 		this.currentRotation = this.currentTurn;
-		return { message: 'startTurn', roll: this.util.rollDice(), turn: this.turnOrder[this.currentTurn] };
+		// Check if the current player has won
+		var turn = this.turnOrder[this.currentTurn],
+			result = { message: 'startTurn', roll: this.util.rollDice(), turn: this.turnOrder[this.currentTurn] };
+		if (Game.findPlayer(turn).victoryPoints >= 10) {
+			result.victory = true;
+		}
+		return result;
 	}
 	else {
 		// Ask the next player if they want to build something
 		return { message: 'endTurn', turn: this.turnOrder[this.currentRotation] };
 	}
 };
-Game.prototype.dropPlayer = function (player) {
-	this.numPlayers--;
-	// Remove the player from the list
-	for (var i = 0; i < this.players.length; i++) {
-		if (this.players[i].id == player.id) {
-			this.players.splice(i, 1);
-			break;
+// Find a player based on their id in game
+Game.prototype.findPlayer = function (id) {
+	for (var player in this.players) {
+		if (this.players.hasOwnProperty(player)) {
+			if (this.players[player].id == id) {
+				return this.players[player];
+			}
 		}
+	}
+};
+Game.prototype.dropPlayer = function (client) {
+	--this.numPlayers;
+	delete this.players[client.id];
+};
+// Update the state of a player
+Game.prototype.update = function (data, client) {
+	var player = this.players[client.id];
+	if (data.card && data.type == 'victory') {
+		player.victoryPoints += 1;
+	}
+	else if (data.bonus) {
+		if (this.bonuses[data.bonus]) {
+			// Remove the bonus from the current player
+			this.bonuses[data.bonus].removeBonus();
+		}
+		this.bonuses[data.bonus] = player;
+		player.addBonus();
 	}
 };
 // Convenience function for checking if a game is available (not full, and hasn't started)
@@ -143,12 +180,17 @@ Game.prototype.available = function () {
 	return !this.started && (this.numPlayers < this.maxPlayers);
 };
 // Send a chat message to each client in the game
-Game.prototype.broadcast = function (server, message, data) {
+Game.prototype.broadcast = function (message, data) {
 	// Send the message to each client
-	var clients = server.clients;
-	for (var i = 0; i < this.players.length; i++) {
-		clients[this.players[i].id].emit(message, data);
+	for (var player in this.players) {
+		if (this.players.hasOwnProperty(player)) {
+			this.players[player].self.emit(message, data);
+		}
 	}
+	// var clients = this.server.clients;
+	// for (var i = 0; i < this.players.length; i++) {
+		// clients[this.players[i].id].emit(message, data);
+	// }
 };
 // Initialize the development cards for this game
 Game.prototype.buildDeck = function () {
@@ -168,6 +210,10 @@ Game.prototype.buildDeck = function () {
 	// Shuffle the cards
 	this.util.shuffle(this.developmentCards);
 };
+Game.prototype.drawCard = function () {
+	// Deck works as a queue
+	return this.developmentCards.shift();
+}
 
 // Utility class to help with other methods
 Game.prototype.util = {
@@ -188,13 +234,8 @@ Game.prototype.util = {
 	}
 };
 
-exports.Game = function () {
-	return new Game();
-};
-
-
-// Server ---------------------------------------------------
-// ----------------------------------------------------------
+// Server -------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
 function Server (module) {
 	this.maxGames = 10;
 	this.games = [];
@@ -204,6 +245,7 @@ function Server (module) {
 	this.clients = { };
 	
 	// Initialize the server
+	console.log('\n\ndirectory: ', __dirname, '\n\n');
 	this.master = module.createServer(
 		module.logger(),
 		module.static(__dirname)
@@ -218,7 +260,7 @@ Server.prototype.listen = function (port, ip) {
 Server.prototype.newGame = function () {
 	var game = null;
 	if (this.games.length < this.maxGames) {
-		game = new Game();
+		game = new Game(this);
 		this.games.push(game);
 	}
 	return game;

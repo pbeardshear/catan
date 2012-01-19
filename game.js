@@ -19,6 +19,7 @@ function Player (id, name) {
 	this.name = name;
 	this.resources = [];
 	this.developmentCards = [];
+	this.victoryPoints = 0;
 }
 
 Player.prototype.addCard = function (card) {

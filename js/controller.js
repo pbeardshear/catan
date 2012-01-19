@@ -7,7 +7,7 @@ var Controller = (function () {
 	var Commands = {
 		// Host a new game
 		host: function (o) {
-			console.log(o);
+			console.log('hosting', o);
 			if (o.success) {
 				Game.init(o);
 			}
@@ -21,12 +21,12 @@ var Controller = (function () {
 		// List available games
 		list: function (o) {
 			$.each(o.games, function (i, game) {
-				app.apply('host', 'list', [game.name, game.count, game.max]);
+				app.update('host', 'list', [game.name, game.count, game.max]);
 			});
 		},
 		// Send a chat message
 		chat: function (data) {
-			app.apply('game', 'chat', [data.user, data.message]);
+			app.update('game', 'chat', [data.user, data.message]);
 			// Scroll the chat window to the bottom
 			chat.scrollTop(chat[0].scrollHeight);
 		},
@@ -35,8 +35,9 @@ var Controller = (function () {
 		},
 		// Start a new game
 		start: function (o) {
+			console.log('starting', o);
 			if (o.success) {
-				Game.turnOrder = o.turnOrder;
+				Game.setup(o);
 				Game.startTurn(o);
 			}
 		},
@@ -82,7 +83,7 @@ var Controller = (function () {
 			event: 'click',
 			fn: function () {
 				// Send up map information to the server
-				socket.emit('start');				
+				socket.emit('start');		
 			}
 		},
 		// Swap the position of tiles on the map during initialization

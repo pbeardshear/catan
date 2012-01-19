@@ -225,7 +225,9 @@ var Game = (function () {
 			
 			Controller.changeState('center');
 			Controller.activate('swap');
+			Controller.activate('start');
 			
+			app.transition({ from: 'host', to: 'setup' });
 			// app.swap('host', 'setup');
 			// app.apply('setup', 'player', [o.name]);
 		},
@@ -289,6 +291,10 @@ var Game = (function () {
 		cancel: function (o) {
 			placing = false;
 			Controller.deactivate('place', o);
+		},
+		setup: function (o) {
+			this.turnOrder = o.turnOrder;
+			app.transition({ from: 'setup', to: 'game' });
 		},
 		// Initialize the game state and view for the beginning of this player's turn
 		startTurn: function (o) {

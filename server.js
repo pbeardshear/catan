@@ -9,22 +9,22 @@ var socket = io.listen(server.master);
 server.listen(1337, 'localhost');
 
 socket.sockets.on('connection', function (client) {
+	// Add the client to the server list
 	server.addClient(client);
 	
+	// Define actions that the client is allowed to make
 	var Commands = {
 		host: function (o) {
 			var game = server.newGame();
-			client.emit('host', game ? game.host(server, client, o) : { success: false, reason: 'server full' });
+			client.emit('host', game ? game.host(client, o) : { success: false, reason: 'server full' });
 		},
 		join: function (o) {
 			var game = server.findGame(o.game);
 			client.emit('join', game ? game.join(server, client, o.user) : { success: false, reason: 'not exist' });
-			// game ? game.join(server, client, o.user) : client.emit('join', { success: false, reason: 'not exist' });
 		},
 		list: function () {
 			client.emit('list', { games: server.listGames() });
 		},
-		
 		chat: function (o) {
 			// TODO: Find the game that this client belongs to and broadcast there
 			client.broadcast.emit('chat', o);
@@ -37,7 +37,7 @@ socket.sockets.on('connection', function (client) {
 		tradeComplete: function () { },
 		// Broadcast a state update to all players in this game
 		update: function (o) {
-			server.clients[client.id].game.broadcast(server, o.message, o.data);
+			o.type == 'client' ? server.clients[client.id].game.broadcast(server, o.message, o.data) : client.game.update(o);
 		},
 		startTurn: function () { },
 		endTurn: function () {

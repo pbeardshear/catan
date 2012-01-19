@@ -7,6 +7,8 @@ Function.prototype.createDelegate = function (scope, o) {
 };
 
 var app = (function () {
+	// Constants
+	// -------------------------------------------------------------------------------------------------------------------
 	var templates = {
 		host: {
 			list: {
@@ -35,11 +37,25 @@ var app = (function () {
 			numTypes: 5,
 			numTiles: 19
 		},
-		ID: { canvas: '#map', blank: '#blank', plenty: '#plentyPopup', monopoly: '#monopolyPopup', notice: '#eventNotice p', steal: '#stealPopup' },
+		ID: { canvas: '#map', canvasContainer: '#mapContainer', mapPane: '#mapPane', blank: '#blank', plenty: '#plentyPopup', monopoly: '#monopolyPopup', notice: '#eventNotice p', steal: '#stealPopup' },
 		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'wheat': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
-		IP: 'localhost:1337',
-		views: templates
+		IP: 'http://localhost:1337',
+		views: { 
+			host: { id: '#hostPage', fn: initHost },
+			setup: { id: '#setupPage', fn: initSetup },
+			game: { id: '#gamePage', fn: initGame }
+		},
+		templates: templates
 	};
+	
+	// Private methods
+	// -------------------------------------------------------------------------------------------------------------------
+	// View initialization
+	function initHost () { }
+	function initSetup () { }
+	function initGame () {
+		$(CONST.ID.canvasContainer).appendTo(CONST.ID.mapPane);
+	}
 	
 	function build (template, o) {
 		for (var i = 0; i < template.length; i++) {
@@ -50,6 +66,8 @@ var app = (function () {
 		return template.join('');
 	}
 	
+	// Public
+	// -------------------------------------------------------------------------------------------------------------------
 	return {
 		init: function () {
 			// Add some additional functionality to the jQuery object
@@ -59,11 +77,15 @@ var app = (function () {
 			};
 		},
 		// Change the view
-		swap: function (prev, next) {
-			$(this.CONST.views[prev]).hide(200);
-			$(this.CONST.views[next]).show(200);
+		transition: function (order) {
+			var from = this.CONST.views[order.from],
+				to = this.CONST.views[order.to];
+			// Execute any additional view manipulation that needs to occur on transition
+			to.fn();
+			$(from.id).hide(200);
+			$(to.id).show(200);
 		},
-		apply: function (view, area, o) {
+		update: function (view, area, o) {
 			var temp = templates[view][area];
 			$(temp.container).append(build(temp.template, o));
 		},
@@ -71,7 +93,6 @@ var app = (function () {
 		CONST: CONST
 	};
 })();
-
 
 $(document).ready(function () {
 	app.init();
@@ -85,11 +106,11 @@ $(document).ready(function () {
 	// Engine.generateMap();
 	// Board.init(app.CONST.board.size);
 	
-	Controller.changeState('vertex');
-	Game.init({ id: 0, name: 'peter' });
-	Game.place({ type: 'settlement' });
-	Game.turnOrder = [0];
-	Game.startTurn({ turn: 0, roll: 6 });
+	// Controller.changeState('vertex');
+	// Game.init({ id: 0, name: 'peter' });
+	// Game.place({ type: 'settlement' });
+	// Game.turnOrder = [0];
+	// Game.startTurn({ turn: 0, roll: 6 });
 	
 	Controller.activate('chat');
 });
