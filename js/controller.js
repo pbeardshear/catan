@@ -20,15 +20,18 @@ var Controller = (function () {
 		},
 		// List available games
 		list: function (o) {
+			// Clear out the current list
+			$(app.CONST.ID.gameList).empty();
 			$.each(o.games, function (i, game) {
-				app.update('host', 'list', [game.name, game.count, game.max]);
+				app.update('list', { type: 'append', data: [game.name, game.count, game.max] });
 			});
 		},
 		// Send a chat message
 		chat: function (data) {
-			app.update('game', 'chat', [data.user, data.message]);
+			app.update('chat', { type: 'append', data: [data.user, data.message] });
 			// Scroll the chat window to the bottom
-			chat.scrollTop(chat[0].scrollHeight);
+			var chat = $(app.CONST.ID.chat)[0];
+			chat.scrollTop = chat.scrollHeight;
 		},
 		trade: function (data) {
 			Game.startTrade(data);

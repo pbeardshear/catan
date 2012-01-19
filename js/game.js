@@ -19,9 +19,16 @@ var Game = (function () {
 			road: Road,
 			settlement: Settlement,
 			city: City
-		};
+		},
+		costs: {
+			road: { brick: 1, wood: 1 },
+			settlement: { brick: 1, wood: 1, wheat: 1, wool: 1 },
+			city: { ore: 3, wheat: 2 },
+			developmentCard: { wheat: 1, ore: 1, wool: 1 }
+		}
 		
 	var developmentCards = {
+		displayName: { knight: 'Knight', plenty: 'Year of Plenty', monopoly: 'Monopoly', roadBuild: 'Road Building', victory: 'Victory Points' },
 		knight: function () {
 			Controller.changeState('center');
 			Controller.activate('moveRobber', {
@@ -62,10 +69,53 @@ var Game = (function () {
 	function Player (o) {
 		this.id = o.id;
 		this.name = o.name;
-		this.resources = [];
-		this.developmentCards = [];
+		this.resources = {};
+		this.bonuses = [];
+		this.developmentCards = {
+			knight: 0,
+			plenty: 0,
+			monopoly: 0,
+			roadBuild: 0,
+			victory: 0
+		};
 		this.ports = [];
 	}
+	
+	Player.prototype.canBuild = function (piece) {
+		var cost = costs[piece];
+		for (var resource in cost) {
+			if (cost.hasOwnProperty(resource)) {
+				if (this.resources[resource].count < cost[resource]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+	
+	Player.prototype.deduct = function (cost) {
+		var payment = {};
+		for (var resource in cost) {
+			if (cost.hasOwnProperty(resource)) {
+				this.resources[resource] -= cost[resource];
+				payment[resource] = -cost[resource];
+			}
+		}
+		app.updateResource(payment);
+	};
+	
+	Player.prototype.drawCard = function (type) {
+		this.developmentCards[type] += 1;
+		app.update('cards', { type: ['increment', 'append'], which: type, data: [type, developmentCards.displayName[type]] });
+	}
+	
+	Player.prototype.useCard = function (type) {
+		if (this.developmentCards[type] != 0) {
+			developmentCards[type]();
+			this.developmentCards[type] -= 1;
+			app.update({ type: ['decrement', 'remove'], which: type });
+		}
+	};
 	
 	function Road (o) {
 		this.start = o.pos.start;
@@ -236,29 +286,41 @@ var Game = (function () {
 			players.push(new Player(o));
 		},
 		// Add a new game piece (road, settlement) to the board
-		place: function (o, rep) {
-			var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
-				clickable = '#board-' + placementMap[o.type] + ' area';
-			placing = true;
-			Controller.changeState(placementMap[o.type]);
-			Controller.activate('place', {
-				el: clickable,
-				type: o.type,
-				scope: this,
-				callback: function (pos) {
-					// Validate the placement
-					if (validate(pos, o.type)) {
-						this.addPiece(pos, o.type, self.id);
-						// Kind of a misnomer, the user placed an object, so lets rollback
-						// the state to not placing anything
-						rep ? this.place(o) : this.cancel({ el: clickable });
-						// Controller.deactivate('place');
+		place: function (o, rep, force) {
+			// Check that the player has enough resources to build the piece
+			if (self.canBuild(o.type) || force) {
+				var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
+					clickable = '#board-' + placementMap[o.type] + ' area';
+				placing = true;
+				Controller.changeState(placementMap[o.type]);
+				Controller.activate('place', {
+					el: clickable,
+					type: o.type,
+					scope: this,
+					callback: function (pos) {
+						// Validate the placement
+						if (validate(pos, o.type)) {
+							this.addPiece(pos, o.type, self.id);
+							// Remove the resources from the player
+							if (!force) {
+								self.deduct(costs[o.type]);
+							}
+							// Kind of a misnomer, the user placed an object, so lets rollback
+							// the state to not placing anything
+							rep ? this.place(o) : this.cancel({ el: clickable });
+							// Controller.deactivate('place');
+						}
+						else {
+							// Alert the user that they chose incorrectly
+							app.popup({ text: 'Invalid location for placement' });
+						}
 					}
-					else {
-						// Alert the user that they chose incorrectly
-					}
-				}
-			});
+				});
+			}
+			else {
+				// Alert the user that they don't have enough resources
+				app.popup({ text: 'You don\'t have enough resources to build that' });
+			}
 		},
 		// Add a game piece under the control of the player with the given id
 		addPiece: function (pos, type, id) {
@@ -274,7 +336,7 @@ var Game = (function () {
 			Engine.drawObject(pos, type);
 		},
 		useCard: function (type) {
-			developmentCards[type]();
+			self.useCard(type);
 		},
 		popup: function (data) {
 			if (data.template) {
@@ -295,6 +357,9 @@ var Game = (function () {
 		setup: function (o) {
 			this.turnOrder = o.turnOrder;
 			app.transition({ from: 'setup', to: 'game' });
+			
+			Controller.deactivate('swap');
+			Controller.deactivate('start');
 		},
 		// Initialize the game state and view for the beginning of this player's turn
 		startTurn: function (o) {
