@@ -72,6 +72,7 @@ function Game (server) {
 	this.turnOrder = [];
 	this.started = false;
 	
+	this.HOST = null;
 	this.players = {};
 	this.bonuses = { largestArmy: null, longestRoad: null };
 	this.developmentCards = [];
@@ -107,7 +108,9 @@ Game.prototype.join = function (client, username, hosting) {
 	if (this.available()) {
 		console.log('joining');
 		this.players[client.id] = new Player(this.numPlayers, client, username, hosting);
-		this.HOST = this.players[client.id];
+		if (hosting) {
+			this.HOST = this.players[client.id];
+		}
 		++this.numPlayers;
 		console.log('server', this.server);
 		this.server.clients[client.id].game = this;
@@ -195,17 +198,15 @@ Game.prototype.available = function () {
 	return !this.started && (this.numPlayers < this.maxPlayers);
 };
 // Send a chat message to each client in the game
-Game.prototype.broadcast = function (message, data) {
+Game.prototype.broadcast = function (message, data, sender) {
 	// Send the message to each client
 	for (var player in this.players) {
 		if (this.players.hasOwnProperty(player)) {
-			this.players[player].self.emit(message, data);
+			if (!sender || data.self || (this.players[player].self.id != sender.id)) {
+				this.players[player].self.emit(message, data);
+			}
 		}
 	}
-	// var clients = this.server.clients;
-	// for (var i = 0; i < this.players.length; i++) {
-		// clients[this.players[i].id].emit(message, data);
-	// }
 };
 // Initialize the development cards for this game
 Game.prototype.buildDeck = function () {

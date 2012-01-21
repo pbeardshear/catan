@@ -19,12 +19,12 @@ socket.sockets.on('connection', function (client) {
 		},
 		join: function (o) {
 			var game = server.findGame(o.game),
-				join = game ? game.join(server, client, o.username) : { success: false, reason: 'not exist' };
+				join = game ? game.join(client, o.username, false) : { success: false, reason: 'not exist' };
 			client.emit('join', join);
 			if (join.success) {
 				client.broadcast.emit('newPlayer', { id: join.id, name: join.name });
 				// Request the board data from the host and send it up to the newly joined client
-				game.HOST.emit('request', { data: 'board' }, function (board) {
+				game.HOST.self.emit('request', { data: 'board' }, function (board) {
 					client.emit('update', { type: 'board', data: board });
 				});
 			}
@@ -44,7 +44,7 @@ socket.sockets.on('connection', function (client) {
 		tradeComplete: function () { },
 		// Broadcast a state update to all players in this game
 		update: function (o) {
-			o.dest == 'client' ? server.clients[client.id].game.broadcast('update', o) : client.game.update(o);
+			o.dest == 'client' ? server.clients[client.id].game.broadcast('update', o, client) : client.game.update(o);
 		},
 		startTurn: function () { },
 		endTurn: function () {
@@ -87,33 +87,5 @@ for (var i = 0; i < 3; i++) {
 	// var game = server.newGame();
 }
 
-// var socket = io.listen(server);
-// socket.on('connection', function (client) {
-	// console.log('connection established!');
-	// client.emit('hello', { data: 'test' });
-	// client.send({ data: 'test2' });
-	// socket.emit('hello', { data: 'socket connection' });
-	// var Commands = {
-		// // Commands that you will allow the client to send up to the server
-		// move: function (params) { 
-			// socket.broadcast({ move: params });
-		// },
-		// hello: function (data) {
-			// console.log('got here!');
-			// console.log(data);
-		// }
-	// };
-	
-	// client.on('message', function (message) {
-		// Object.keys(message).forEach(function (command) {
-			// if (Commands.hasOwnProperty(command)) {
-				// Commands[command](message[command]);b 
-			// }
-			// else {
-				// console.error('Invalid command', command);
-			// }
-		// });
-	// });
-// })
 
 

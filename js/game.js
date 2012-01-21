@@ -65,7 +65,7 @@ var Game = (function () {
 	var updateState = {
 		// Get the board state from the server (used when a new player joins a game)
 		board: function (data) {
-			var board = Board.init(data.board);
+			var board = Board.init(data);
 			tiles = board.tiles;
 			ports = board.ports;
 		},
@@ -277,7 +277,7 @@ var Game = (function () {
 				}
 			}
 		}
-		Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'resources', amount: count });
+		Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'resources', amount: count } });
 	}
 	
 	// Adds access to a port if the object is adjacent to a port
@@ -312,6 +312,7 @@ var Game = (function () {
 		// Initialize game state
 		init: function (o) {
 			this.turnOrder = null;
+			app.transition({ from: 'host', to: 'setup' });
 			var playerList = o.playerList;
 			for (var i = 0; i < playerList.length; i++) {
 				var player = new Player({ id: playerList[i].id, name: playerList[i].name });
@@ -321,7 +322,6 @@ var Game = (function () {
 					self = player;
 				}
 			}
-			app.transition({ from: 'host', to: 'setup' });
 		},
 		// Sets up functionality allowing the host to set up the game preferences
 		setup: function () {
@@ -367,7 +367,7 @@ var Game = (function () {
 								}
 								if (o.type == 'settlement' || o.type == 'city') {
 									this.count.victoryPoints += 1;
-									Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'victoryPoints', amount: 1 });
+									Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'victoryPoints', amount: 1 } });
 								}
 								// Kind of a misnomer, the user placed an object, so lets rollback
 								// the state to not placing anything

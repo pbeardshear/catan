@@ -45,7 +45,7 @@ var app = (function () {
 	CONST.templates = {
 		host: {
 			list: {
-				template: ['<tr class="game" value="', 0, '"><td>', 1, '</td><td>', 2, '/', 3, '</td><td><a class="join button">Join</a></td></tr'],
+				template: ['<tr class="game" value="', 0, '"><td class="gameName">', 1, '</td><td>', 2, '/', 3, '</td><td><a class="join button">Join</a></td></tr'],
 				container: CONST.ID.gameList
 			}
 		},
@@ -189,10 +189,10 @@ var app = (function () {
 			}
 			else {
 				// One update type, just try that
-				apply[o.type](o);
+				apply[o.type](template, o);
 			}
-			var temp = CONST.templates[view][area];
-			$(temp.container).append(build(temp.template, o));
+			// var temp = CONST.templates[view][area];
+			// $(temp.container).append(build(temp.template, o));
 		},
 		updateResources: function (resources) {
 			var current = $(CONST.ID.resources).children();

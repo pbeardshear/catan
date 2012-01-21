@@ -220,21 +220,22 @@ var Board = (function () {
 				// Add the docks to the ports
 				generatePortLocations(ports);
 				console.log(ports);
-				
-				// Draw the tiles
-				Engine.generateMap(tiles);
-				
-				return { tiles: tiles, ports: ports };
 			}
 			// Whole board was passed to us, we need to set up the state
 			else if (typeof size == 'object') {
 				var board = size;
 				boardSize = board.size;
-				tiles = board.tiles;
-				ports = board.ports;
-				Engine.generateMap(tiles);
-				return { tiles: tiles, ports: ports };
+				// Create the tile objects
+				for (var i = 0; i < board.tiles.length; i++) {
+					tiles[board.tiles[i].id] = new Tile(board.tiles[i]);
+				}
+				for (var i = 0; i < board.ports.length; i++) {
+					ports[board.ports[i].id] = new Port(board.ports[i]);
+				}
 			}
+			// Draw the tiles
+			Engine.generateMap(tiles);
+			return { tiles: tiles, ports: ports };
 		},
 		getTile: function (index, type) {
 			if (typeof index == 'number') {
@@ -262,16 +263,15 @@ var Board = (function () {
 		},
 		swapTiles: function (area, i) {
 			if (i && typeof area == 'number' && typeof i == 'number') {
-				var a = this.getTile(area),
-					b = this.getTile(i);
-				a.swap(b);
+				var j = area;
+				tiles[i].swap(tiles[j]);
 			}
 			else {
 				var coords = area.coords;
 				if (swapTile != null) {
 					var tile = this.getTile(coords);
 					swapTile.swap(tile);
-					Controller.update({ dest: 'client', type: 'swap', data: [swapTile.id, tile.id] });
+					Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
 					swapTile = null;
 				}
 				else {

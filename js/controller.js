@@ -70,7 +70,7 @@ var Controller = (function () {
 			Game.endTurn(o);
 		},
 		request: function (o, fn) {
-			fn(requests[o.data]());
+			fn(Requests[o.data]());
 		},
 		update: function (o) {
 			Game.update(o);
