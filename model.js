@@ -79,11 +79,15 @@ function Game (server) {
 
 // Host a new game
 Game.prototype.host = function (client, options) {
-	console.log('\n\noptions', options, '\n\n');
+	console.log('\n\n Hosting options', options, '\n\n');
 	// Initialize state for this game
 	try {
 		// Generate a unique game id
 		this.id = cryp.generateUniqueID(options.game);
+		// Check if any existing game has the same name
+		if (this.server.games[this.id]) {
+			return { success: false, reason: 'same name' };
+		}
 		this.name = options.game;
 		this.private = options.private || false;
 		this.minPlayers = 2;
@@ -103,10 +107,11 @@ Game.prototype.join = function (client, username, hosting) {
 	if (this.available()) {
 		console.log('joining');
 		this.players[client.id] = new Player(this.numPlayers, client, username, hosting);
+		this.HOST = this.players[client.id];
 		++this.numPlayers;
 		console.log('server', this.server);
 		this.server.clients[client.id].game = this;
-		return { success: true, id: (this.numPlayers - 1), name: username };
+		return { success: true, id: (this.numPlayers - 1), name: username, playerList: this.getPlayers() };
 	}
 	else {
 		return { success: false, reason: 'full' };
@@ -145,6 +150,16 @@ Game.prototype.endTurn = function () {
 		// Ask the next player if they want to build something
 		return { message: 'endTurn', turn: this.turnOrder[this.currentRotation] };
 	}
+};
+// Return a list of all the players in this game
+Game.prototype.getPlayers = function () {
+	var players = [];
+	for (var id in this.players) {
+		if (this.players.hasOwnProperty(id)) {
+			players.push({ id: this.players[id].id, name: this.players[id].name });
+		}
+	}
+	return players;
 };
 // Find a player based on their id in game
 Game.prototype.findPlayer = function (id) {
@@ -238,10 +253,8 @@ Game.prototype.util = {
 // --------------------------------------------------------------------------------------
 function Server (module) {
 	this.maxGames = 10;
-	this.games = [];
-	// TODO: consider storing clients as a dictionary keyed on id for faster lookups
-	// Also, store the game that they are in, so that chats and things like that can
-	// be correctly routed
+	this.numGames = 0;
+	this.games = { };
 	this.clients = { };
 	
 	// Initialize the server
@@ -257,42 +270,36 @@ Server.prototype.listen = function (port, ip) {
 };
 
 // Game functionality
-Server.prototype.newGame = function () {
-	var game = null;
-	if (this.games.length < this.maxGames) {
-		game = new Game(this);
-		this.games.push(game);
+Server.prototype.newGame = function (client, options) {
+	if (this.numGames < this.maxGames) {
+		var game = new Game(this),
+			host = game.host(client, options);
+		if (host.success) {
+			this.games[game.id] = game;
+			++this.numGames;
+		}
+		return host;
 	}
-	return game;
+	return { success: false, reason: 'server full' };
 };
 // Remove the specified game from the server
 Server.prototype.closeGame = function (game) {
-	for (var i = 0; i < this.games.length; i++) {
-		if (this.games[i].id == game.id) {
-			// Found the game, end it
-			this.games.splice(i, 1);
-		}
-	}
+	delete this.games[game.id];
 };
-// Return the game specified by the given id
+// Return the game specified by the given name
 Server.prototype.findGame = function (name) {
 	var id = cryp.generateUniqueID(name);
-	for (var i = 0; i < this.games.length; i++) {
-		if (this.games[i].id === id) {
-			return this.games[i];
-		}
-	}
+	return this.games[id] || null;
 };
 Server.prototype.listGames = function () {
 	var games = this.games,
 		results = [];
-	// Massage data into a more readable form
-	for (var i = 0; i < games.length; i++) {
-		if (games[i].available()) {
+	for (var id in games) {
+		if (games.hasOwnProperty(id) && games[id].available()) {
 			results.push({
-				name: games[i].name,
-				count: games[i].numPlayers,
-				max: games[i].maxPlayers
+				name: games[id].name,
+				count: games[id].numPlayers,
+				max: games[id].maxPlayers
 			});
 		}
 	}

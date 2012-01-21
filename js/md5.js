@@ -263,8 +263,6 @@ function binl2b64(binarray)
 const SEED = (Math.pow(2, 53) * Math.random() * Math.random()).toString(16);
 exports.hex_md5 = hex_md5;
 exports.generateUniqueID = function (a) {
-	console.log('message', a);
-	console.log('seed', SEED);
 	return hex_md5(hex_md5(a) + ':' + SEED);
 };	
 

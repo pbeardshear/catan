@@ -3,28 +3,47 @@
 //
 
 var Controller = (function () {
+	// State variables
+	// ---------------------------------------------------------------------------------------------------------
 	var socket;
+	
+	// Function collections
+	// ---------------------------------------------------------------------------------------------------------
+	// Accepted data requests that the server can make from the client
+	var Requests = {
+		// Send the board data up to the server
+		board: function () {
+			return Board.getState();
+		}
+	};
+	
+	// Accepted commands from the server
 	var Commands = {
 		// Host a new game
 		host: function (o) {
 			console.log('hosting', o);
 			if (o.success) {
 				Game.init(o);
+				Game.setup();
 			}
 		},
 		// Join an existing game
 		join: function (o) {
 			if (o.success) {
-				Game.addPlayer(o);
+				Game.init(o);
 			}
+		},
+		newPlayer: function (o) {
+			Game.addPlayer(o);
 		},
 		// List available games
 		list: function (o) {
 			// Clear out the current list
-			$(app.CONST.ID.gameList).empty();
+			// $(app.CONST.ID.gameList).empty();
 			$.each(o.games, function (i, game) {
-				app.update('list', { type: 'append', data: [game.name, game.count, game.max] });
+				app.update('list', { type: 'append', data: [game.id, game.name, game.count, game.max] });
 			});
+			Controller.activate('join');
 		},
 		// Send a chat message
 		chat: function (data) {
@@ -40,7 +59,7 @@ var Controller = (function () {
 		start: function (o) {
 			console.log('starting', o);
 			if (o.success) {
-				Game.setup(o);
+				Game.start(o);
 				Game.startTurn(o);
 			}
 		},
@@ -50,8 +69,16 @@ var Controller = (function () {
 		endTurn: function (o) {
 			Game.endTurn(o);
 		},
+		request: function (o, fn) {
+			fn(requests[o.data]());
+		},
+		update: function (o) {
+			Game.update(o);
+		},
 		// Disconnect from the server
-		disconnect: function () { }
+		disconnect: function () {
+			app.transition({ from: 'game', to: 'host' });
+		}
 	};
 	
 	// Allowable actions
@@ -63,14 +90,14 @@ var Controller = (function () {
 				// Necessary to prevent a page refresh on form submit
 				e.preventDefault();
 				// Get the form information
-				var values = {};
+				var values = { username: $('#hostGame [name="username"]').val() };
 				$.each($(this).serializeArray(), function (i, field) {
 					values[field.name] = field.value;
 				});
 				console.log(values);
 				if (values.username && values.game && values.players) {
 					// Send the data up to the server
-					values.private = values.private == 'on';
+					values.private = (values.private == 'on');
 					socket.emit('host', values);
 				}
 				else {
@@ -79,7 +106,17 @@ var Controller = (function () {
 			}
 		},
 		join: {
-			
+			el: '#gameList .join',
+			event: 'click',
+			fn: function (e) {
+				// TODO:
+				// Think of a better/cleaner way to do this
+				var gameName = $(this).closest('.game').children('.gameName').text(),
+					userName = $('#hostGame [name="username"]').val();
+				if (gameName && userName) {
+					socket.emit('join', { game: gameName, username: userName });
+				}
+			}
 		},
 		start: {
 			el: '#startGame',
@@ -204,6 +241,8 @@ var Controller = (function () {
 		}
 	};
 	
+	// Public
+	// ---------------------------------------------------------------------------------------------------------
 	return {
 		init: function (io) {
 			socket = io.connect(app.CONST.IP);
@@ -217,6 +256,10 @@ var Controller = (function () {
 		// Send the passed command up to the server, along with any optional passed data
 		go: function (comm, o) {
 			socket.emit(comm, o);
+		},
+		// Alias for Controller.go('update', o);
+		update: function (o) {
+			this.go('update', o);
 		},
 		// Set allowable actions for this player
 		activate: function (name, o) {

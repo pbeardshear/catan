@@ -20,13 +20,16 @@ var Game = (function () {
 			settlement: Settlement,
 			city: City
 		},
-		costs: {
+		costs = {
 			road: { brick: 1, wood: 1 },
 			settlement: { brick: 1, wood: 1, wheat: 1, wool: 1 },
 			city: { ore: 3, wheat: 2 },
 			developmentCard: { wheat: 1, ore: 1, wool: 1 }
 		}
-		
+	
+	
+	// Function collections
+	// ---------------------------------------------------------------------------------------------------------
 	var developmentCards = {
 		displayName: { knight: 'Knight', plenty: 'Year of Plenty', monopoly: 'Monopoly', roadBuild: 'Road Building', victory: 'Victory Points' },
 		knight: function () {
@@ -58,7 +61,29 @@ var Game = (function () {
 			Game.popup({ text: 'Victory point cards are not playable' });
 		}
 	};
-		
+	
+	var updateState = {
+		// Get the board state from the server (used when a new player joins a game)
+		board: function (data) {
+			var board = Board.init(data.board);
+			tiles = board.tiles;
+			ports = board.ports;
+		},
+		// Update the state of the board when the host makes a change
+		swap: function (data) {
+			Board.swapTiles(data[0], data[1]);
+		},
+		place: function (data) {
+			Game.addPiece(data.pos, data.type, data.id);
+		},
+		display: function (data) {
+			var player = players[data.id],
+				bonuses = player.bonuses.join(' ');
+			player.count[data.item] += data.amount;
+			app.update('status', { type: ['overwrite'], which: player.color, data: [player.name, data.achievement || bonuses, player.count.resources, player.count.cards, player.count.victoryPoints] });
+		},
+	};
+	
 	// Turn variables
 	// ---------------------------------------------------------------------------------------------------------
 	var placing = false;
@@ -77,6 +102,11 @@ var Game = (function () {
 			monopoly: 0,
 			roadBuild: 0,
 			victory: 0
+		};
+		this.count = {
+			resources: 0,
+			cards: 0,
+			victoryPoints: 0
 		};
 		this.ports = [];
 	}
@@ -98,6 +128,7 @@ var Game = (function () {
 		for (var resource in cost) {
 			if (cost.hasOwnProperty(resource)) {
 				this.resources[resource] -= cost[resource];
+				this.count.resources -= cost[resource];
 				payment[resource] = -cost[resource];
 			}
 		}
@@ -106,6 +137,7 @@ var Game = (function () {
 	
 	Player.prototype.drawCard = function (type) {
 		this.developmentCards[type] += 1;
+		this.count.cards += 1;
 		app.update('cards', { type: ['increment', 'append'], which: type, data: [type, developmentCards.displayName[type]] });
 	}
 	
@@ -113,7 +145,8 @@ var Game = (function () {
 		if (this.developmentCards[type] != 0) {
 			developmentCards[type]();
 			this.developmentCards[type] -= 1;
-			app.update({ type: ['decrement', 'remove'], which: type });
+			this.count.cards -= 1;
+			app.update('cards', { type: ['decrement', 'remove'], which: type });
 		}
 	};
 	
@@ -155,8 +188,7 @@ var Game = (function () {
 			console.log('failed validation');
 			return false;
 		}
-		else {
-			// City or settlement
+		else if (type == 'settlement') {
 			// Validation:
 			// User has a road whose start or end point is at pos, and
 			// No settlements exist only one edge away
@@ -185,6 +217,21 @@ var Game = (function () {
 			}
 			console.log('failed validation 1');
 			return false;
+		}
+		else if (type == 'city') {
+			// Validation:
+			// On a location currently occupied by a settlement owned by the player
+			var s = pieces.settlement;
+			for (var i = 0; i < s.length; i++) {
+				if (round(s[i].pos.x) == round(pos.x) && round(s[i].pos.y) == round(pos.y)) {
+					return true;
+				}
+			}
+			console.log('failed validation for city');
+			return false;
+		}
+		else {
+			console.error('Invalid type', type, 'passed to validation');
 		}
 	}
 	
@@ -258,64 +305,83 @@ var Game = (function () {
 	// Public
 	// ---------------------------------------------------------------------------------------------------------
 	return {
-		// Setup the game
+		// Initialize game state
 		init: function (o) {
 			this.turnOrder = null;
+			var playerList = o.playerList;
+			for (var i = 0; i < playerList.length; i++) {
+				var player = new Player({ id: playerList[i].id, name: playerList[i].name });
+				players[player.id] = player;
+				app.update('player', { type: 'append', data: [playerList[i].name] });
+				if (playerList[i].id == o.id) {
+					self = player;
+				}
+			}
+			app.transition({ from: 'host', to: 'setup' });
+		},
+		// Sets up functionality allowing the host to set up the game preferences
+		setup: function () {
 			var board = Board.init(app.CONST.board.size);
 			tiles = board.tiles;
 			ports = board.ports;
+			// The the current position of the robber
 			for (var i = 0; i < tiles.length; i++) {
 				if (tiles[i].robber) {
 					robberTile = tiles[i];
 					break;
 				}
 			}
-			self = new Player(o);
-			players.push(self);
-			
 			Controller.changeState('center');
 			Controller.activate('swap');
 			Controller.activate('start');
-			
-			app.transition({ from: 'host', to: 'setup' });
-			// app.swap('host', 'setup');
-			// app.apply('setup', 'player', [o.name]);
 		},
 		// Add a player to the game
 		addPlayer: function (o) {
-			players.push(new Player(o));
+			players[o.id] = new Player(o);
+			app.update('player', { type: 'append', data: [o.name] });
 		},
 		// Add a new game piece (road, settlement) to the board
 		place: function (o, rep, force) {
 			// Check that the player has enough resources to build the piece
 			if (self.canBuild(o.type) || force) {
-				var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
-					clickable = '#board-' + placementMap[o.type] + ' area';
-				placing = true;
-				Controller.changeState(placementMap[o.type]);
-				Controller.activate('place', {
-					el: clickable,
-					type: o.type,
-					scope: this,
-					callback: function (pos) {
-						// Validate the placement
-						if (validate(pos, o.type)) {
-							this.addPiece(pos, o.type, self.id);
-							// Remove the resources from the player
-							if (!force) {
-								self.deduct(costs[o.type]);
+				if (o.type != 'development') {
+					var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
+						clickable = '#board-' + placementMap[o.type] + ' area';
+					placing = true;
+					Controller.changeState(placementMap[o.type]);
+					Controller.activate('place', {
+						el: clickable,
+						type: o.type,
+						scope: this,
+						callback: function (pos) {
+							// Validate the placement
+							if (validate(pos, o.type)) {
+								this.addPiece(pos, o.type, self.id);
+								// Remove the resources from the player
+								if (!force) {
+									self.deduct(costs[o.type]);
+								}
+								if (o.type == 'settlement' || o.type == 'city') {
+									this.count.victoryPoints += 1;
+								}
+								// Kind of a misnomer, the user placed an object, so lets rollback
+								// the state to not placing anything
+								rep ? this.place(o) : this.cancel({ el: clickable });
+								// Controller.deactivate('place');
 							}
-							// Kind of a misnomer, the user placed an object, so lets rollback
-							// the state to not placing anything
-							rep ? this.place(o) : this.cancel({ el: clickable });
-							// Controller.deactivate('place');
+							else {
+								// Alert the user that they chose incorrectly
+								app.popup({ text: 'Invalid location for placement' });
+							}
 						}
-						else {
-							// Alert the user that they chose incorrectly
-							app.popup({ text: 'Invalid location for placement' });
-						}
-					}
-				});
+					});
+				}
+				else {
+					// Get a development card from the server
+					Controller.go('draw', {}, function (card) {
+						self.drawCard(card);
+					});
+				}
 			}
 			else {
 				// Alert the user that they don't have enough resources
@@ -349,12 +415,16 @@ var Game = (function () {
 		},
 		// Replace a settlement with a city
 		upgrade: function (o) { },
+		// Update the state of the game
+		update: function (o) {
+			updateState[o.type](o.data);
+		},
 		// Rollback a previous game operation (place or upgrade)
 		cancel: function (o) {
 			placing = false;
 			Controller.deactivate('place', o);
 		},
-		setup: function (o) {
+		start: function (o) {
 			this.turnOrder = o.turnOrder;
 			app.transition({ from: 'setup', to: 'game' });
 			

@@ -15,12 +15,19 @@ socket.sockets.on('connection', function (client) {
 	// Define actions that the client is allowed to make
 	var Commands = {
 		host: function (o) {
-			var game = server.newGame();
-			client.emit('host', game ? game.host(client, o) : { success: false, reason: 'server full' });
+			client.emit('host', server.newGame(client, o));
 		},
 		join: function (o) {
-			var game = server.findGame(o.game);
-			client.emit('join', game ? game.join(server, client, o.user) : { success: false, reason: 'not exist' });
+			var game = server.findGame(o.game),
+				join = game ? game.join(server, client, o.username) : { success: false, reason: 'not exist' };
+			client.emit('join', join);
+			if (join.success) {
+				client.broadcast.emit('newPlayer', { id: join.id, name: join.name });
+				// Request the board data from the host and send it up to the newly joined client
+				game.HOST.emit('request', { data: 'board' }, function (board) {
+					client.emit('update', { type: 'board', data: board });
+				});
+			}
 		},
 		list: function () {
 			client.emit('list', { games: server.listGames() });
@@ -48,6 +55,18 @@ socket.sockets.on('connection', function (client) {
 				result = game.endTurn();
 			game.broadcast(server, result.message, result);
 		},
+		draw: function (o, fn) {
+			var game = client.game,
+				card = game.drawCard();
+			// Alert all the players that this client got a new development card
+			client.game.broadcast('update', {
+				type: 'display',
+				id: game.players[client.id].id,
+				item: 'cards',
+				amount: 1
+			});
+			fn(card);
+		},
 		
 		disconnect: function () {
 			server.removeClient(client.id);
@@ -65,7 +84,7 @@ socket.sockets.on('connection', function (client) {
 // DEBUG
 // Create some test games
 for (var i = 0; i < 3; i++) {
-	var game = server.newGame();
+	// var game = server.newGame();
 }
 
 // var socket = io.listen(server);

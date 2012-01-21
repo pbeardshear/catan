@@ -26,7 +26,7 @@ var app = (function () {
 			plenty: '#plentyPopup', 
 			notice: '#eventNotice p', 
 			monopoly: '#monopolyPopup',
-			gameList: '#gameList table',
+			gameList: '#gameList table .game',
 			playerList: '#playerList ul',
 			resources: '#resources .items',
 			canvasContainer: '#mapContainer',
@@ -45,7 +45,7 @@ var app = (function () {
 	CONST.templates = {
 		host: {
 			list: {
-				template: ['<tr><td>', 0, '</td><td>', 1, '/', 2, '</td><td><a class="join button">Join</a></td></tr'],
+				template: ['<tr class="game" value="', 0, '"><td>', 1, '</td><td>', 2, '/', 3, '</td><td><a class="join button">Join</a></td></tr'],
 				container: CONST.ID.gameList
 			}
 		},
