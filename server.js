@@ -44,7 +44,7 @@ socket.sockets.on('connection', function (client) {
 		tradeComplete: function () { },
 		// Broadcast a state update to all players in this game
 		update: function (o) {
-			o.type == 'client' ? server.clients[client.id].game.broadcast(server, o.message, o.data) : client.game.update(o);
+			o.dest == 'client' ? server.clients[client.id].game.broadcast('update', o) : client.game.update(o);
 		},
 		startTurn: function () { },
 		endTurn: function () {

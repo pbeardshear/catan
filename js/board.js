@@ -32,7 +32,7 @@ var Board = (function () {
 		this.valid = o.valid;	// True if this tile actually has a port on it (some "port" tiles are actually just water)
 	}
 	Port.prototype.draw = function () {
-		Engine.draw(this);
+		Engine.draw(this, 'port');
 	};
 	
 	function Tile (o) {
@@ -271,7 +271,7 @@ var Board = (function () {
 				if (swapTile != null) {
 					var tile = this.getTile(coords);
 					swapTile.swap(tile);
-					Controller.update({ type: 'swap', data: [swapTile.id, tile.id] });
+					Controller.update({ dest: 'client', type: 'swap', data: [swapTile.id, tile.id] });
 					swapTile = null;
 				}
 				else {

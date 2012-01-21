@@ -244,7 +244,8 @@ var Game = (function () {
 	
 	// Add appropriate resources to this players count
 	function harvestResources (roll) {
-		var out = [];
+		var out = [],
+			count = 0;
 		// Compile a list of all tiles outputting resources for this roll
 		for (var i = 0; i < tiles.length; i++) {
 			if (tiles[i].quality == roll) {
@@ -259,7 +260,8 @@ var Game = (function () {
 			if (pieces.settlement[j].owner.id == self.id) {
 				for (var k = 0; k < out.length; k++) {
 					if (Board.validate(out[i], pieces.settlement[j].pos)) {
-						self.resources.push(out.resource);
+						self.resources[out[i].resource] += 1;
+						count += 1;
 					}
 				}
 			}
@@ -269,11 +271,13 @@ var Game = (function () {
 			if (pieces.city[m].owner.id == self.id) {
 				for (var n = 0; n < out.length; n++) {
 					if (Board.validate(out[n], pieces.city[m].pos)) {
-						self.resources = self.resources.concat([out[n].resource, out[n].resource]);
+						self.resources[out[n].resource] += 2;
+						count += 2;
 					}
 				}
 			}
 		}
+		Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'resources', amount: count });
 	}
 	
 	// Adds access to a port if the object is adjacent to a port
@@ -363,6 +367,7 @@ var Game = (function () {
 								}
 								if (o.type == 'settlement' || o.type == 'city') {
 									this.count.victoryPoints += 1;
+									Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'victoryPoints', amount: 1 });
 								}
 								// Kind of a misnomer, the user placed an object, so lets rollback
 								// the state to not placing anything
