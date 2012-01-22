@@ -55,6 +55,12 @@ var Controller = (function () {
 		trade: function (data) {
 			Game.startTrade(data);
 		},
+		pregame: function (o) {
+			Game.place([{ type: 'road' }, { type: 'settlement' }], 1, true, function () {
+				console.log('finishing setup');
+				socket.emit('pregame');
+			});
+		},
 		// Start a new game
 		start: function (o) {
 			console.log('starting', o);

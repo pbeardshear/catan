@@ -68,9 +68,10 @@ function Game (server) {
 	this.maxPlayers = 0;
 	this.numPlayers = 0;
 	this.currentTurn = 0;
-	this.currentRotation = 0;	// Used at the end of the turn, when each player is given a chance to build
+	this.currentRotation = 0;
 	this.turnOrder = [];
 	this.started = false;
+	this.reversing = false;
 	
 	this.HOST = null;
 	this.players = {};
@@ -127,13 +128,30 @@ Game.prototype.start = function () {
 	}
 	// Generate the turn order
 	this.util.shuffle(this.turnOrder);
-	// Alert all players of the turn order and the current turn
-	this.broadcast('start', { 
-		success: true, 
-		turnOrder: this.turnOrder,
-		roll: this.util.rollDice(),
-		turn: this.turnOrder[this.currentTurn]
-	});
+	this.initPlacement();
+};
+Game.prototype.initPlacement = function () {
+	console.log('\n\n', 'Doing the placement thing', '\n\n');
+	if (this.currentRotation < 0) {
+		this.currentRotation = 0;
+		// Actually start the game
+		this.broadcast('start', {
+			success: true,
+			turnOrder: this.turnOrder,
+			roll: this.util.rollDice(),
+			turn: this.turnOrder[this.currentTurn]
+		});
+	}
+	else {
+		var current = this.turnOrder[this.currentRotation];
+		console.log('\n\n', 'The current player is', current, '\n\n');
+		this.findPlayer(current).self.emit('pregame');
+		this.reversing ? --this.currentRotation : ++this.currentRotation;
+		if (this.currentRotation == this.turnOrder.length) {
+			this.reversing = true;
+			this.currentRotation -= 1;
+		}
+	}
 };
 Game.prototype.endTurn = function () {
 	this.currentRotation = (this.currentRotation + 1) % this.numPlayers;

@@ -37,8 +37,13 @@ socket.sockets.on('connection', function (client) {
 			client.broadcast.emit('chat', o);
 			client.emit('chat', o);
 		},
+		pregame: function () {
+			console.log('sent a pregame command');
+			server.clients[client.id].game.initPlacement();
+		},
 		start: function () {
-			server.clients[client.id].game.start(server);
+			console.log('sent a start command');
+			server.clients[client.id].game.start();
 		},
 		trade: function () { },
 		tradeComplete: function () { },

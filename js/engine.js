@@ -167,8 +167,26 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		port: function () { },
-		road: function () { },
-		settlement: function () { },
+		road: function () {
+			ctx.save();
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.lineWidth = 5;
+			ctx.beginPath();
+			ctx.moveTo(this.pos.start.x, this.pos.start.y);
+			ctx.lineTo(this.pos.end.x, this.pos.end.y);
+			ctx.closePath();
+			ctx.stroke();
+			ctx.restore();
+		},
+		settlement: function () {
+			ctx.save();
+			ctx.beginPath();
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.arc(this.pos.x, this.pos.y, 10, 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
+		},
 		city: function () { }
 	};
 	
@@ -210,7 +228,7 @@ var Engine = (function () {
 			cos = Math.cos,
 			sin = Math.sin,
 			pi = Math.PI;
-		switch (type) {
+		switch (parseInt(type)) {
 			case 0:
 				return {
 					start: { x: pos.x, y: pos.y - len },
@@ -446,7 +464,7 @@ var Engine = (function () {
 			return findTile(x, y);
 		},
 		getPosition: function (position, type) {
-			return getEdge(position, type);
+			return type ? getEdge(position, type) : position;
 		},
 		pointDistance: function (a, b) {
 			return pointDist(a, b);

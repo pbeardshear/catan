@@ -54,7 +54,7 @@ var Game = (function () {
 		roadBuild: function () {
 			Game.popup({ text: 'Place two roads' });
 			// Prompt the user to choose two locations
-			Game.place({ type: 'road'}, 1);
+			Game.place([{ type: 'road'}, { type: 'road' }], 1, true);
 		},
 		victory: function () {
 			// Prompt the user that victory cards are not playable
@@ -345,34 +345,34 @@ var Game = (function () {
 			app.update('player', { type: 'append', data: [o.name] });
 		},
 		// Add a new game piece (road, settlement) to the board
-		place: function (o, rep, force) {
+		place: function (o, rep, force, callback) {
+			var type = typeof o == 'object' && o.length ? o[rep].type : o.type;
 			// Check that the player has enough resources to build the piece
-			if (self.canBuild(o.type) || force) {
-				if (o.type != 'development') {
+			if (force || self.canBuild(type)) {
+				if (type != 'development') {
 					var placementMap = { road: 'edge', settlement: 'vertex', city: 'vertex' },
-						clickable = '#board-' + placementMap[o.type] + ' area';
+						clickable = '#board-' + placementMap[type] + ' area';
 					placing = true;
-					Controller.changeState(placementMap[o.type]);
+					Controller.changeState(placementMap[type]);
 					Controller.activate('place', {
 						el: clickable,
-						type: o.type,
+						type: type,
 						scope: this,
 						callback: function (pos) {
 							// Validate the placement
-							if (validate(pos, o.type)) {
-								this.addPiece(pos, o.type, self.id);
+							if (validate(pos, type)) {
+								this.addPiece(pos, type, self.id);
 								// Remove the resources from the player
 								if (!force) {
-									self.deduct(costs[o.type]);
+									self.deduct(costs[type]);
 								}
-								if (o.type == 'settlement' || o.type == 'city') {
-									this.count.victoryPoints += 1;
+								if (type == 'settlement' || type == 'city') {
+									self.count.victoryPoints += 1;
 									Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'victoryPoints', amount: 1 } });
 								}
 								// Kind of a misnomer, the user placed an object, so lets rollback
 								// the state to not placing anything
-								rep ? this.place(o) : this.cancel({ el: clickable });
-								// Controller.deactivate('place');
+								rep ? this.place(o, rep-1, force, callback) : this.cancel({ el: clickable }, callback);
 							}
 							else {
 								// Alert the user that they chose incorrectly
@@ -404,7 +404,7 @@ var Game = (function () {
 				// Checks if the placed piece gives the current player access to a port
 				tryPort(piece);
 			}
-			Engine.drawObject(pos, type);
+			Engine.draw({ pos: pos }, type);
 		},
 		useCard: function (type) {
 			self.useCard(type);
@@ -418,16 +418,16 @@ var Game = (function () {
 				$(app.CONST.ID.notice).text(data.text);
 			}
 		},
-		// Replace a settlement with a city
-		upgrade: function (o) { },
 		// Update the state of the game
 		update: function (o) {
 			updateState[o.type](o.data);
 		},
 		// Rollback a previous game operation (place or upgrade)
-		cancel: function (o) {
+		cancel: function (o, callback) {
 			placing = false;
 			Controller.deactivate('place', o);
+			// Pass off to the callback, if it exists
+			callback && callback();
 		},
 		start: function (o) {
 			this.turnOrder = o.turnOrder;
