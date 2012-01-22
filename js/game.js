@@ -22,9 +22,9 @@ var Game = (function () {
 		},
 		costs = {
 			road: { brick: 1, wood: 1 },
-			settlement: { brick: 1, wood: 1, wheat: 1, wool: 1 },
-			city: { ore: 3, wheat: 2 },
-			developmentCard: { wheat: 1, ore: 1, wool: 1 }
+			settlement: { brick: 1, wood: 1, grain: 1, wool: 1 },
+			city: { ore: 3, grain: 2 },
+			developmentCard: { grain: 1, ore: 1, wool: 1 }
 		}
 	
 	
@@ -54,7 +54,7 @@ var Game = (function () {
 		roadBuild: function () {
 			Game.popup({ text: 'Place two roads' });
 			// Prompt the user to choose two locations
-			Game.place([{ type: 'road'}, { type: 'road' }], 1, true);
+			Game.place([{ type: 'road', init: true }, { type: 'road', init: true }], 1, true);
 		},
 		victory: function () {
 			// Prompt the user that victory cards are not playable
@@ -93,8 +93,16 @@ var Game = (function () {
 	// ---------------------------------------------------------------------------------------------------------
 	function Player (o) {
 		this.id = o.id;
+		// TODO: Add player colors
+		this.color = 'red';
 		this.name = o.name;
-		this.resources = {};
+		this.resources = {
+			ore: 0,
+			wood: 0,
+			wool: 0,
+			brick: 0,
+			grain: 0
+		};
 		this.bonuses = [];
 		this.developmentCards = {
 			knight: 0,
@@ -132,7 +140,7 @@ var Game = (function () {
 				payment[resource] = -cost[resource];
 			}
 		}
-		app.updateResource(payment);
+		app.updateResources(payment);
 	};
 	
 	Player.prototype.drawCard = function (type) {
@@ -172,8 +180,6 @@ var Game = (function () {
 	// Private methods
 	// ---------------------------------------------------------------------------------------------------------
 	function validate (pos, type) {
-		// DEBUG
-		return true;
 		var round = Math.round;
 		if (type == 'road') {
 			return true;
@@ -246,6 +252,8 @@ var Game = (function () {
 	function harvestResources (roll) {
 		var out = [],
 			count = 0;
+		// DEBUG
+		self.resources.ore += 2;
 		// Compile a list of all tiles outputting resources for this roll
 		for (var i = 0; i < tiles.length; i++) {
 			if (tiles[i].quality == roll) {
@@ -259,8 +267,8 @@ var Game = (function () {
 		for (var j = 0; j < pieces.settlement.length; j++) {
 			if (pieces.settlement[j].owner.id == self.id) {
 				for (var k = 0; k < out.length; k++) {
-					if (Board.validate(out[i], pieces.settlement[j].pos)) {
-						self.resources[out[i].resource] += 1;
+					if (Board.validate(out[k], pieces.settlement[j].pos)) {
+						self.resources[out[k].resource] += 1;
 						count += 1;
 					}
 				}
@@ -275,6 +283,13 @@ var Game = (function () {
 						count += 2;
 					}
 				}
+			}
+		}
+		console.log('pieces', pieces);
+		// Update the resource view
+		for (var type in self.resources) {
+			if (self.resources.hasOwnProperty(type)) {
+				app.update('resources', { type: 'overwrite', which: type, data: [self.resources[type]] });
 			}
 		}
 		Controller.update({ dest: 'client', type: 'display', data: { id: self.id, item: 'resources', amount: count } });
@@ -346,7 +361,8 @@ var Game = (function () {
 		},
 		// Add a new game piece (road, settlement) to the board
 		place: function (o, rep, force, callback) {
-			var type = typeof o == 'object' && o.length ? o[rep].type : o.type;
+			var obj = typeof o == 'object' && o.length ? o[rep] : o,
+				type = obj.type;
 			// Check that the player has enough resources to build the piece
 			if (force || self.canBuild(type)) {
 				if (type != 'development') {
@@ -360,7 +376,7 @@ var Game = (function () {
 						scope: this,
 						callback: function (pos) {
 							// Validate the placement
-							if (validate(pos, type)) {
+							if (obj.init || validate(pos, type)) {
 								this.addPiece(pos, type, self.id);
 								// Remove the resources from the player
 								if (!force) {
@@ -376,7 +392,7 @@ var Game = (function () {
 							}
 							else {
 								// Alert the user that they chose incorrectly
-								app.popup({ text: 'Invalid location for placement' });
+								Game.popup({ text: 'Invalid location for placement' });
 							}
 						}
 					});
@@ -390,7 +406,7 @@ var Game = (function () {
 			}
 			else {
 				// Alert the user that they don't have enough resources
-				app.popup({ text: 'You don\'t have enough resources to build that' });
+				Game.popup({ text: 'You don\'t have enough resources to build that' });
 			}
 		},
 		// Add a game piece under the control of the player with the given id
@@ -433,6 +449,11 @@ var Game = (function () {
 			this.turnOrder = o.turnOrder;
 			app.transition({ from: 'setup', to: 'game' });
 			
+			// Set up some default views
+			for (var i = 0; i < players.length; i++) {
+				app.update('status', { type: 'append', data: [players[i].color, players[i].name, '', 0, 0, 2] });
+			}
+			
 			Controller.deactivate('swap');
 			Controller.deactivate('start');
 		},
@@ -448,6 +469,8 @@ var Game = (function () {
 				Controller.activate('trade');
 				Controller.activate('tradeRequest');
 				Controller.activate('endTurn');
+				
+				this.popup({ text: 'It is your turn' });
 			}
 		},
 		// Do cleanup

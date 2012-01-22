@@ -13,7 +13,7 @@ var app = (function () {
 	var CONST = {
 		board: { height: 620, width: 620, landSize: 50, size: 3 },
 		game: {
-			resources: { desert: 'desert', ore: 'ore', brick: 'brick', wood: 'wood', wool: 'wool', wheat: 'wheat' },
+			resources: { desert: 'desert', ore: 'ore', brick: 'brick', wood: 'wood', wool: 'wool', grain: 'grain' },
 			numTypes: 5,
 			numTiles: 19
 		},
@@ -30,10 +30,10 @@ var app = (function () {
 			playerList: '#playerList ul',
 			resources: '#resources .items',
 			canvasContainer: '#mapContainer',
-			playerInfo: '#playerInfo tbody tr',
+			playerInfo: '#playerInfo',
 			developmentCards: '#development items'
 		},
-		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'wheat': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
+		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'grain': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
 		IP: 'http://localhost:1337',
 		views: { 
 			host: { id: '#hostPage', fn: initHost },
@@ -62,7 +62,12 @@ var app = (function () {
 			},
 			status: {
 				template: ['<tr class="', 0, '"><td class="name">', 1, '</td><td class="achievement">', 2, '</td><td class="resource"><em>R:</em> ', 3, '</td><td class="development"><em>D:</em> ', 4, '</td><td class="victory"><em>V:</em> ', 5, '</td></tr>'],
+				items: ' tbody tr ',
 				container: CONST.ID.playerInfo
+			},
+			resources: {
+				template: ['<li class="', 0, '">', 1, '</li>'],
+				container: CONST.ID.resources
 			},
 			cards: {
 				template: ['<li>< a href class="button" value="', 0, '">', 1, '</a></li>'],
@@ -86,12 +91,13 @@ var app = (function () {
 	}
 	
 	function build (template, o, current) {
-		for (var i = 0; i < template.length; i++) {
-			if (typeof template[i] == 'number') {
-				template[i] = o[template[i]];
+		var copy = template.concat();
+		for (var i = 0; i < copy.length; i++) {
+			if (typeof copy[i] == 'number') {
+				copy[i] = o[copy[i]];
 			}
 		}
-		return template.join('');
+		return copy.join('');
 	}
 	
 	var apply = {
@@ -101,7 +107,7 @@ var app = (function () {
 		},
 		overwrite: function (template, o) {
 			o.data.unshift(o.which);
-			$(template.container).children(o.which).replaceWith(build(template.template, o.data));
+			$(template.container + (template.items || '')).children('.'+o.which).replaceWith(build(template.template, o.data));
 			return true;
 		},
 		remove: function (template, o) {

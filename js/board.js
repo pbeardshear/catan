@@ -68,7 +68,7 @@ var Board = (function () {
 			tiles.push(types.desert);
 		}
 		for (var i = 0; i < countLarge; i++) {
-			tiles.push(types.wheat);
+			tiles.push(types.grain);
 			tiles.push(types.wood);
 			tiles.push(types.wool);
 		}
@@ -254,7 +254,7 @@ var Board = (function () {
 			};
 		},
 		validate: function (a, b, type) {
-			return type == 'port' ? Engine.pointDistance(a, b, 0) : Engine.pointDistance(a, b, 1);
+			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= 50;
 		},
 		place: function (area, callback, scope) {
 			var coords = area.coords.split(','),
