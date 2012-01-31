@@ -337,8 +337,8 @@ var Board = (function () {
 			Engine.generateMap(tiles);
 			// Generate events for board interaction
 			Controller.on('placeCenter', $('#board-center area'), 'click', this.place, 'pregame');
-			Controller.on('placeVertex', $('#board-vertex area'), 'click', this.place, 'pregame game');
-			Controller.on('placeEdge', $('#board-edge area'), 'click', this.place, 'pregame game');
+			Controller.on('placeVertex', $('#board-vertex area'), 'click', this.place, 'game');
+			Controller.on('placeEdge', $('#board-edge area'), 'click', this.place, 'game');
 			return { tiles: tiles, ports: ports };
 		},
 		getTile: function (index, type) {

@@ -90,8 +90,9 @@ Player.prototype.useCard = function (card) {
 	}
 };
 Player.prototype.addResources = function (resources) {
+	var self = this;
 	base.each(resources, function (amt, type) {
-		this.update('resources', type, amt);
+		self.update('resources', type, amt);
 	});
 };
 

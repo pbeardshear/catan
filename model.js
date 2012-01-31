@@ -131,13 +131,8 @@ Game.prototype.start = function () {
 	// Do initial placement
 	this.currentTurn = 0;
 	this.currentRotation = 0;
+	this.broadcast('startGame', { success: true }, true);
 	this.initPlacement();
-	// var player = this.playerList[this.turnOrder[this.currentRotation]];
-	// player.self.emit('initPlacement', { }, function () {
-		// this.currentRotation = (this.currentRotation + 1) % this.numPlayers;
-		// player = this.playerList[this.turnOrder[this.currentRotation]];
-		// player.self.emit('initPlacement', { }, this.start);
-	// });
 };
 
 Game.prototype.initPlacement = function () {
@@ -145,9 +140,6 @@ Game.prototype.initPlacement = function () {
 	this.server.log('this is the current player:', this.currentRotation);
 	var self = this;	// Save local reference for closure
 	var player = this.playerList[this.turnOrder[this.currentRotation]];
-	player.self.emit('test', 'testing', function (data) {
-		console.log('this is what i got again', data);
-	});
 	player.self.emit('initPlacement', 'test', function (data) {
 		self.currentRotation = (self.currentRotation + (self.reversing ? -1 : 1)) % self.numPlayers;
 		if (!self.currentRotation) {

@@ -136,11 +136,6 @@ base.sockets.on('connection', function (client) {
 		},
 		disconnect: function () {
 			server.drop(client);
-		},
-		test: function () {
-			client.emit('test', 'testing', function (data) {
-				server.log('this is what i got', data);
-			});
 		}
 	};
 	
