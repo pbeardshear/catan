@@ -166,6 +166,13 @@ var app = (function () {
 					$.deepRemove(parent, base);
 				}
 			};
+			
+			// Prototype methods
+			// Simplified pluralizing method
+			String.prototype.pluralize = function () {
+				var last = this[this.length - 1];
+				return last == 'y' ? this.substring(0, this.length - 1) + 'ies' : this + 's';
+			};
 		},
 		// Change the view
 		transition: function (order) {
@@ -218,7 +225,7 @@ var app = (function () {
 $(document).ready(function () {
 	app.init();
 	
-	Controller.init(io);
+	Controller.init(io, true, actions);
 	Controller.activate('host');
 	Controller.go('list');
 	Engine.init();

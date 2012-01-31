@@ -25,7 +25,9 @@ var Game = (function () {
 			settlement: { brick: 1, wood: 1, grain: 1, wool: 1 },
 			city: { ore: 3, grain: 2 },
 			developmentCard: { grain: 1, ore: 1, wool: 1 }
-		}
+		},
+		currentStage = 0,
+		stages = ['setup', 'placement', 'game', 'victory'];
 	
 	
 	// Function collections
@@ -91,6 +93,7 @@ var Game = (function () {
 	
 	// Private classes
 	// ---------------------------------------------------------------------------------------------------------
+	/* Player class
 	function Player (o) {
 		this.id = o.id;
 		// TODO: Add player colors
@@ -157,7 +160,9 @@ var Game = (function () {
 			app.update('cards', { type: ['decrement', 'remove'], which: type });
 		}
 	};
+	*/
 	
+	/* Game piece private classes
 	function Road (o) {
 		this.start = o.pos.start;
 		this.end = o.pos.end;
@@ -176,6 +181,7 @@ var Game = (function () {
 		this.owner = o.owner;
 		this.type = 'vertex';
 	}
+	*/
 	
 	// Private methods
 	// ---------------------------------------------------------------------------------------------------------
@@ -323,6 +329,7 @@ var Game = (function () {
 	
 	// Public
 	// ---------------------------------------------------------------------------------------------------------
+	/* Public object
 	return {
 		// Initialize game state
 		init: function (o) {
@@ -361,6 +368,8 @@ var Game = (function () {
 		},
 		// Add a new game piece (road, settlement) to the board
 		place: function (o, rep, force, callback) {
+			console.log('place has been called, and these are its arguments:', o, rep, force, callback);
+			console.log('and place was called by:', arguments.callee.caller);
 			var obj = typeof o == 'object' && o.length ? o[rep] : o,
 				type = obj.type;
 			// Check that the player has enough resources to build the piece
@@ -463,13 +472,7 @@ var Game = (function () {
 			harvestResources(o.roll);
 			// Check if it is the current player's turn
 			if (this.turnOrder[o.turn] == self.id) {
-				// Turn on allowable functions on your turn
-				Controller.activate('build');
-				Controller.activate('useCard');
-				Controller.activate('trade');
-				Controller.activate('tradeRequest');
-				Controller.activate('endTurn');
-				
+				self.startTurn();
 				this.popup({ text: 'It is your turn' });
 			}
 		},
@@ -533,5 +536,55 @@ var Game = (function () {
 			Controller.deactivate('tradeRequest');
 			Controller.deactivate('tradeConfirm');
 		}
+	};
+	*/
+	return {
+		init: function (id, playerList) {
+			for (var i = 0; i < playerList.length; i++) {
+				var player = this.addPlayer(playerList[i].id, playerList[i].name, playerList[i].color);
+				if (player.id == id) {
+					self = players;
+				}
+			}
+			Controller.swapTo('game');
+			// Transition the view
+			currentStage = 0;
+			app.transition({ from: 'host', to: 'setup' });
+		},
+		setup: function () {
+			var board = Board.init(app.CONST.board.size);
+			this.transition();
+			Controller.activate('swap');
+			Controller.activate('startGame');
+		},
+		addPlayer: function (id, name, color) {
+			players[id] = new Player({ id: id, name: name, color: color });
+			app.update('player', { type: 'append', data: [color, name] });
+			return players[id];
+		},
+		msg: function (data) {
+			if (typeof data == 'object') {
+				
+			}
+			else if (typeof data == 'string') {
+				this.msg({ text: data });
+			}
+			else {
+				// Wrong argument type passed
+			}
+		},
+		transition: function (stage) {
+			if (stage) {
+				// Move to the passed stage
+				currentStage = stages.indexOf(stage);
+				
+			}
+			else {
+				// Move to the next stage
+			}
+		},
+		begin: function () { },
+		startTurn: function () { },
+		endTurn: function () { }
 	};
 })();

@@ -8,7 +8,6 @@ var Board = (function () {
 	var CONST = app.CONST,
 		height = CONST.board.height,
 		width = CONST.board.width,
-		resources = CONST.game.resources,
 		numResources = CONST.game.numTypes,
 		numTiles = CONST.game.numTiles;
 		
@@ -18,11 +17,13 @@ var Board = (function () {
 		tiles = [],
 		ports = [],
 		boardSize = 0;
+		
+	var robberTile = null;
 	
 	// Private classes
 	// ---------------------------------------------------------------------------------------------------------
 	// Ports are considered tiles internally,
-	// and a have one edge which is considered active (i.e. gives access to the port)
+	// and have one edge (two adjacent vertices) which is considered active (i.e. gives access to the port)
 	function Port (o) {
 		this.type = o.type;		// The type of resource that you can trade at this port
 		this.count = o.count;	// The trade ratio at this port (2:1, 3:1)
@@ -56,25 +57,66 @@ var Board = (function () {
 		this.draw();
 		tile.draw();
 	};
+	Tile.prototype.adjacent = function (pos) {
+		return Engine.pointDistance(Engine.getCoords(this.id), pos) <= 50;
+	};
+	
+	// Game piece classes
+	var pieces = {
+		road: Road,
+		settlement: Settlement,
+		city: City
+	};
+	
+	function Road (o) {
+		this.start = o.pos.start;
+		this.end = o.pos.end;
+		this.owner = o.owner;
+		this.type = 'road';
+	}
+	Road.type = 'road';
+	Road.prototype.draw = function () {
+		Engine.draw(this, 'road');
+	};
+	
+	function Settlement (o) {
+		this.pos = o.pos;
+		this.owner = o.owner;
+		this.type = 'settlement';
+	}
+	Settlement.type = 'settlement';
+	Settlement.prototype.draw = function () {
+		Engine.draw(this, 'settlement');
+	};
+	
+	function City (o) {
+		this.pos = o.pos;
+		this.owner = o.owner;
+		this.type = 'city';
+	}
+	City.type = 'city';
+	City.prototype.draw = function () {
+		Engine.draw(this, 'city');
+	};
 	
 	// Private methods
 	// ---------------------------------------------------------------------------------------------------------
 	// Generate the resources for this board size
-	function generateResources (types, size) {
+	function generateResources (size) {
 		var tiles = [],
 			countLarge = Math.ceil(numTiles/numResources),
 			countSmall = Math.floor(numTiles/numResources);
 		for (var i = 0; i < size - 2; i++) {
-			tiles.push(types.desert);
+			tiles.push('desert');
 		}
 		for (var i = 0; i < countLarge; i++) {
-			tiles.push(types.grain);
-			tiles.push(types.wood);
-			tiles.push(types.wool);
+			tiles.push('grain');
+			tiles.push('wood');
+			tiles.push('wool');
 		}
 		for (var i = 0; i < countSmall; i++) {
-			tiles.push(types.ore);
-			tiles.push(types.brick);
+			tiles.push('ore');
+			tiles.push('brick');
 		}
 		return tiles;
 	}
@@ -187,6 +229,65 @@ var Board = (function () {
 		return arr.splice(Math.floor(Math.random()*arr.length), 1)[0];
 	}
 	
+	function getPieces (type) {
+		var pieces = [],
+			players = Game.get('players'),
+			plural = base.string.pluralize(type);
+		for (var i = 0; i < players.length; i++) {
+			pieces = pieces.concat(players[i].get(plural));
+		}
+		return pieces;
+	}
+	
+	// Placement validation functions
+	// Returns true if the position is empty, otherwise returns the object at that position
+	function empty (type, pos) {
+		var pieces = getPieces(type);
+		for (var i = 0; i < pieces.length; i++) {
+			if (pieces[i].isAt(pos)) {
+				return pieces[i];
+			}
+		}
+		return true;
+	}
+	
+	// Returns true if there is a road owned by the current player adjacent to the passed position
+	function adjacentRoad (pos) {
+		var pieces = getPieces('road');
+		var player = Game.get('self');
+		for (var i = 0; i < pieces.length; i++) {
+			if (player.id == pieces[i].owner.id && pieces[i].isAt(pos)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// Returns true if there is a settlement adjacent to the passed position
+	// Adjacent in this case means two adjacent vertices
+	function adjacentSettlement (pos) {
+		var settlements = getPieces('settlement'),
+			cities = getPieces('city');
+		for (var i = 0; i < settlements; i++) {
+			if (Engine.pointDist(settlements[i].pos, pos) <= 50) {
+				return true;
+			}
+		}
+		for (var i = 0; i < cities.length; i++) {
+			if (Engine.pointDist(cities[i].pos, pos) <= 50) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// Set the placement area that should be active
+	// Valid types are 'center', 'edge', 'vertex', and 'none'
+	function placeState (type) {
+		var id = type === 'none' ? '' : '#board-' + type;
+		Engine.setActiveMap(id);
+	}
+	
 	// Public
 	// ---------------------------------------------------------------------------------------------------------
 	return {
@@ -194,7 +295,7 @@ var Board = (function () {
 		init: function (size) {
 			if (typeof size == 'number') {
 				boardSize = size;
-				var types = generateResources(resources, size),
+				var types = generateResources(size),
 					numbers = generateNumbers(size);
 				// Create all of the tile objects for the board
 				for (var i = 0; i < numTiles; i++) {
@@ -220,9 +321,8 @@ var Board = (function () {
 				// Add the docks to the ports
 				generatePortLocations(ports);
 				console.log(ports);
-			}
-			// Whole board was passed to us, we need to set up the state
-			else if (typeof size == 'object') {
+			} else if (typeof size == 'object') {
+				// Whole board was passed to us, we need to set up the state
 				var board = size;
 				boardSize = board.size;
 				// Create the tile objects
@@ -235,13 +335,16 @@ var Board = (function () {
 			}
 			// Draw the tiles
 			Engine.generateMap(tiles);
+			// Generate events for board interaction
+			Controller.on('placeCenter', $('#board-center area'), 'click', this.place, 'pregame');
+			Controller.on('placeVertex', $('#board-vertex area'), 'click', this.place, 'pregame game');
+			Controller.on('placeEdge', $('#board-edge area'), 'click', this.place, 'pregame game');
 			return { tiles: tiles, ports: ports };
 		},
 		getTile: function (index, type) {
 			if (typeof index == 'number') {
 				return type == 'tile' ? Engine.getCoords(index) : Engine.getCoords(index, boardSize+1);
-			}
-			else {
+			} else {
 				var coords = index.split(',');
 				return Engine.getTile(coords[0], coords[1]);
 			}
@@ -253,28 +356,83 @@ var Board = (function () {
 				ports: ports
 			};
 		},
+		harvestResources: function (player, roll) {
+			// Get the player's settlements and cities
+			var settlements = player.get('settlements');
+			var cities = player.get('cities');
+			
+			var resources = { grain: 0, ore: 0, wood: 0, wool: 0, brick: 0 };
+			base.each(base.filter(tiles, function (tile) { return tile.quality == roll; }), function (tile) {
+				// Check if any of the settlements or cities are adjacent to a matched tile
+				base.each(settlements, function (settlement) {
+					if (tile.adjacent(settlement.pos)) {
+						resources[tile.type] += 1;
+					}
+				});
+				
+				base.each(cities, function (city) {
+					if (tile.adjacent(city.pos)) {
+						resources[tile.type] += 2;
+					}
+				});
+			});
+			player.addResources(resources);
+		},
 		validate: function (a, b, type) {
 			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= 50;
 		},
-		place: function (area, callback, scope) {
-			var coords = area.coords.split(','),
-				pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) };
-			callback.call(scope, Engine.getPosition(pos, $(area).attr('type')));
+		validatePlacement: function (type, pos) {
+			// Road - no road there + adjacent to current road
+			// Settlement - no settlement/city there + adjacent to current road + no settlement/city at adjacent vertex
+			// City - current settlement there
+			var isEmpty = empty(type, pos);
+			return type == 'road' ? isEmpty && (adjacentRoad(pos.start) || adjacentRoad(pos.end)) :
+				   type == 'settlement' ? isEmpty && adjacentRoad(pos) && !adjacentSettlement(pos) :
+				   type == 'city' ? isEmpty && isEmpty.owner == Game.self && isEmpty.type == 'settlement' : false;
+		},
+		beginPlace: function (player, type, forcePlacement, callback) {
+			var positionMap = { road: 'Edge', settlement: 'Vertex', city: 'Vertex' };
+			Controller.request('place' + positionMap[type]);
+			placeState(positionMap[type]);
+			this.placing = { player: player, piece: pieces[type], force: forcePlacement || false, callback: callback, action: ('place' + positionMap[type]) };
+		},
+		place: function (event) {
+			var self = Board;
+			var coords = this.coords.split(','),
+				isRoad = self.placing.piece.type == 'road',
+				edgeType = isRoad ? this.attributes['type'].value : null,
+				pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) }
+				placement = self.placing;
+			if (placement.force || self.validatePlacement(placement.piece.type, pos)) {
+				var piece = new placement.piece({ owner: placement.player, pos: isRoad ? Engine.getPosition(pos, edgeType) : pos });
+				placement.player.addPiece(piece);
+				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type);
+				// Update the victory points and such
+				Game.update( );
+				// Update the other players
+				Controller.fire('update', { type: 'build', data: { type: piece } });
+				// Do some cleanup
+				Controller.release(placement.action);
+				placeState('none');
+				// Execute the callback, if it exists
+				placement.callback && placement.callback();
+			} else {
+				// Placement is no good
+				Game.msg( );
+			}
 		},
 		swapTiles: function (area, i) {
 			if (i && typeof area == 'number' && typeof i == 'number') {
 				var j = area;
 				tiles[i].swap(tiles[j]);
-			}
-			else {
+			} else {
 				var coords = area.coords;
 				if (swapTile != null) {
 					var tile = this.getTile(coords);
 					swapTile.swap(tile);
 					Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
 					swapTile = null;
-				}
-				else {
+				} else {
 					swapTile = this.getTile(coords);
 				}
 			}

@@ -4,13 +4,23 @@
 		<meta charset="utf-8" />
 		<title>Catan</title>
 		<link rel="stylesheet" href="main.css" type="text/css" media="screen" />
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+		<!--
 		<script type="text/javascript" src="http://localhost:1337/socket.io/socket.io.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/controller.js"></script>
 		<script src="js/engine.js"></script>
 		<script src="js/board.js"></script>
 		<script src="js/game.js"></script>
+		-->
+		<script type="text/javascript" src="http://localhost:1337/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="js/method.js"></script>
+		<script type="text/javascript" src="js/new/app.js"></script>
+		<script type="text/javascript" src="js/new/controller.js"></script>
+		<script type="text/javascript" src="js/new/game.js"></script>
+		<script type="text/javascript" src="js/player.js"></script>
+		<script type="text/javascript" src="js/board.js"></script>
+		<script type="text/javascript" src="js/engine.js"></script>
 		<style type="text/css">
 			#gamePage { display: none; }
 			#setupPage { display: none; }
@@ -34,7 +44,7 @@
 				<div class="body">
 					<label>Username:</label><input type="text" name="username" /><br />
 					<div class="configuration">
-						<form>
+						<form class="action host">
 							<label>Game Name:</label><input type="text" name="game" /><br />
 							<label>Players:</label><input type="number" name="players" /><br />
 							<label>Private:</label><input type="checkbox" name="private" /><br />
@@ -55,7 +65,7 @@
 							<tr class="game">
 								<td class="gameName">Not a real game</td>
 								<td>3/6</td>
-								<td><a class="join button">Join</a></td>
+								<td><a class="join button action">Join</a></td>
 							</tr>
 						</table>
 					</div>
@@ -72,7 +82,7 @@
 			<!-- -->
 			<div id="configuration">
 				<button>Randomize Map</button>
-				<button id="startGame">Start</button>
+				<button id="startGame" class="action startGame">Start</button>
 			</div>
 			<div id="playerList">
 				<ul>
@@ -296,8 +306,8 @@
 					</ul>
 				</div>
 				<p class="actions">
-					<a class="button trade">Yes, I'll Trade</a>
-					<a class="button cancel">No, Don't Trade</a>
+					<a class="button tradeResponse acceptTrade">Yes, I'll Trade</a>
+					<a class="button tradeResponse cancel">No, Don't Trade</a>
 				</p>
 			</div>
 		</div>

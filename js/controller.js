@@ -2,6 +2,37 @@
 //	controller.js
 //
 
+var actions = {
+	host: {
+		event: 'submit',
+		fn: function (e) {
+			e.preventDefault();
+			var values = { };
+			values.username = $('#hostGame [name="username"]').val();
+			$.each($(this).serializeArray(), function (i, field) {
+				values[field.name] = field.value;
+			});
+			values.private = (values.private == 'on');
+			if (values.username && values.game && values.players) {
+				Controller.go('host', values);
+			}
+		}
+	},
+	join: function (e) {
+		var gameName = $(this).closest('.game').children('.gameName').text(),
+			userName = $('#hostGame [name="username"]').val();
+		if (gameName && userName) {
+			Controller.go('join', { game: gameName, username: userName });
+		}
+	},
+	start: function () { },
+	swap: function () { },
+	build: function () { },
+	place: function () { },
+	trade: function () { },
+	endTurn: function () { }
+};
+
 var Controller = (function () {
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -145,7 +176,8 @@ var Controller = (function () {
 			el: '#build .items .button',
 			event: 'click',
 			fn: function (e) {
-				Game.place({ type: $(this).attr('value') });
+				Player.build($(this).attr('value'));
+				// Game.place({ type: $(this).attr('value') });
 			}
 		},
 		// Place a selected game piece on the map
@@ -246,13 +278,55 @@ var Controller = (function () {
 			}
 		}
 	};
+	var interceptor = (function () {
+		// State variables --------------------------------------------------------------------------------
+		// ------------------------------------------------------------------------------------------------
+		var events = { },
+			actions = { };
+		
+		// Private methods --------------------------------------------------------------------------------
+		// ------------------------------------------------------------------------------------------------
+		function handler (e) {
+			var action = events[this];
+			if (action && action.active) {
+				fn.call(this, e);
+			}
+		}
+		
+		// Public -----------------------------------------------------------------------------------------
+		// ------------------------------------------------------------------------------------------------
+		return {
+			bind: function (el, event, fn, name) {
+				var o = { event: event, fn: fn, active: false };
+				events[el] = actions[name] = o;
+				$(el).bind(event, handler);
+			},
+			activate: function (name) {
+				actions[name].active = true;
+			},
+			deactivate: function (name) {
+				actions[name].active = false;
+			}
+		};
+	})();
 	
 	// Public
 	// ---------------------------------------------------------------------------------------------------------
 	return {
-		init: function (io) {
+		init: function (io, autoLoad, actions) {
 			socket = io.connect(app.CONST.IP);
 			
+			if (autoLoad) {
+				$('.actions').each(function (i, el) {
+					var classes = this.className.split(' ');
+					for (var j = 0; j < classes.length; j++) {
+						var o = actions[classes[j]];
+						if (o) {
+							interceptor.bind($(this), o.event || 'click', o.fn || o, classes[j]);
+						}
+					}
+				});
+			}
 			for (var comm in Commands) {
 				if (Commands.hasOwnProperty(comm)) {
 					socket.on(comm, Commands[comm]);

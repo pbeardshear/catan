@@ -168,12 +168,13 @@ var Engine = (function () {
 		},
 		port: function () { },
 		road: function () {
+			var position = (!this.pos.start || !this.pos.end ? getEdge(this.pos, this.type) : this.pos);
 			ctx.save();
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
 			ctx.lineWidth = 5;
 			ctx.beginPath();
-			ctx.moveTo(this.pos.start.x, this.pos.start.y);
-			ctx.lineTo(this.pos.end.x, this.pos.end.y);
+			ctx.moveTo(position.start.x, position.start.y);
+			ctx.lineTo(position.end.x, position.end.y);
 			ctx.closePath();
 			ctx.stroke();
 			ctx.restore();
@@ -229,18 +230,21 @@ var Engine = (function () {
 			sin = Math.sin,
 			pi = Math.PI;
 		switch (parseInt(type)) {
+			case '0':
 			case 0:
 				return {
 					start: { x: pos.x, y: pos.y - len },
 					end: { x: pos.x, y: pos.y + len }
 				};
 				break;
+			case '1':
 			case 1:
 				return {
 					start: { x: pos.x + cos(pi/6)*len, y: pos.y - sin(pi/6)*len },
 					end: { x: pos.x - cos(pi/6)*len, y: pos.y + sin(pi/6)*len }
 				};
 				break;
+			case '2':
 			case 2: 
 				return {
 					start: { x: pos.x + cos(pi/6)*len, y: pos.y + sin(pi/6)*len },
@@ -465,6 +469,9 @@ var Engine = (function () {
 		},
 		getPosition: function (position, type) {
 			return type ? getEdge(position, type) : position;
+		},
+		setActiveMap: function (mapID) {
+			$(blankID).attr('usemap', mapID);
 		},
 		pointDistance: function (a, b) {
 			return pointDist(a, b);

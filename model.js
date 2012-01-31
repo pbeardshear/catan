@@ -39,8 +39,9 @@ exports.Client = function () {
 
 // Player -------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
-function Player (id, client, name, isHost) {
+function Player (id, client, name, color, isHost) {
 	this.id = id;
+	this.color = color;
 	this.self = client;
 	this.name = name;
 	this.isHost = isHost || false;
@@ -63,20 +64,21 @@ function Game (server) {
 	this.id = null;
 	this.private = false;
 	// State variables
-	this.board = null;
 	this.minPlayers = 0;
 	this.maxPlayers = 0;
 	this.numPlayers = 0;
 	this.currentTurn = 0;
 	this.currentRotation = 0;
-	this.turnOrder = [];
+	this.turnOrder = [ ];
 	this.started = false;
 	this.reversing = false;
 	
 	this.HOST = null;
-	this.players = {};
+	this.players = { };
+	this.playerList = [ ];
 	this.bonuses = { largestArmy: null, longestRoad: null };
-	this.developmentCards = [];
+	this.developmentCards = [ ];
+	this.colors = ['red', 'blue', 'green', 'orange', 'yellow', 'brown', 'white', 'purple'];
 }
 
 // Host a new game
@@ -88,7 +90,7 @@ Game.prototype.host = function (client, options) {
 		this.id = cryp.generateUniqueID(options.game);
 		// Check if any existing game has the same name
 		if (this.server.games[this.id]) {
-			return { success: false, reason: 'same name' };
+			return { success: false, reason: 'already exists' };
 		}
 		this.name = options.game;
 		this.private = options.private || false;
@@ -108,19 +110,100 @@ Game.prototype.host = function (client, options) {
 Game.prototype.join = function (client, username, hosting) {
 	if (this.available()) {
 		console.log('joining');
-		this.players[client.id] = new Player(this.numPlayers, client, username, hosting);
-		if (hosting) {
-			this.HOST = this.players[client.id];
-		}
-		++this.numPlayers;
-		console.log('server', this.server);
+		var player = new Player(this.numPlayers, client, username, this.generateColor(), hosting);
+		this.players[client.id] = player;
+		this.HOST = hosting ? player : this.HOST;
+		this.numPlayers += 1;
 		this.server.clients[client.id].game = this;
-		return { success: true, id: (this.numPlayers - 1), name: username, playerList: this.getPlayers() };
+		return { success: true, id: player.id, name: player.name, color: player.color };
 	}
 	else {
 		return { success: false, reason: 'full' };
 	}
 };
+
+Game.prototype.start = function () {
+	// Initialize game-specific state
+	this.generateTurnOrder();
+	this.buildPlayerList();
+	this.buildDeck();
+	this.started = true;
+	// Do initial placement
+	this.currentTurn = 0;
+	this.currentRotation = 0;
+	this.initPlacement();
+	// var player = this.playerList[this.turnOrder[this.currentRotation]];
+	// player.self.emit('initPlacement', { }, function () {
+		// this.currentRotation = (this.currentRotation + 1) % this.numPlayers;
+		// player = this.playerList[this.turnOrder[this.currentRotation]];
+		// player.self.emit('initPlacement', { }, this.start);
+	// });
+};
+
+Game.prototype.initPlacement = function () {
+	this.server.log('starting initial placement')
+	this.server.log('this is the current player:', this.currentRotation);
+	var self = this;	// Save local reference for closure
+	var player = this.playerList[this.turnOrder[this.currentRotation]];
+	player.self.emit('test', 'testing', function (data) {
+		console.log('this is what i got again', data);
+	});
+	player.self.emit('initPlacement', 'test', function (data) {
+		self.currentRotation = (self.currentRotation + (self.reversing ? -1 : 1)) % self.numPlayers;
+		if (!self.currentRotation) {
+			// Got to the end of the current rotation
+			if (self.reversing) {
+				// End of the initial placement
+				self.broadcast('update', { type: 'gameState', data: { turnOrder: self.turnOrder } }, true);
+				self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+			} else {
+				self.reversing = true;
+				self.currentRotation = self.numPlayers - 1;
+				// Recurse
+				self.initPlacement();
+			}
+		} else {
+			// Recurse
+			self.initPlacement();
+		}
+	});
+};
+
+Game.prototype.endTurn = function () {
+	var i = this.currentRotation;
+	var player = this.playerList[this.turnOrder[i]];
+	player.self.emit('endTurn', { }, function () {
+		this.currentRotation += 1;
+		if (this.currentRotation == this.currentTurn) {
+			this.currentTurn += 1;
+			this.currentRotation = this.currentTurn + 1;
+			this.broadcast('startTurn', { roll: this.util.roll(), turn: this.currentTurn }, true);
+		} else {
+			this.endTurn();
+		}
+	});
+};
+
+Game.prototype.trade = function (data, sender) {
+	var recipient = this.playerList[this.turnOrder.indexOf(data.id)];
+	recipient.self.emit('trade', { request: data.request }, function (accept) {
+		sender.emit('trade', { accept: accept });
+		recipient.self.emit('trade', { accept: accept });
+	});
+};
+
+Game.prototype.available = function () {
+	return !this.started && this.numPlayers < this.maxPlayers;
+};
+
+Game.prototype.close = function (force, reason) {
+	if (force) {
+		this.broadcast('update', { type: 'close', data: { error: true, reason: reason } }, true);
+		
+	}
+};
+
+/*
 Game.prototype.start = function () {
 	this.started = true;
 	for (var i = 0; i < this.numPlayers; i++) {
@@ -133,6 +216,7 @@ Game.prototype.start = function () {
 Game.prototype.initPlacement = function () {
 	console.log('\n\n', 'Doing the placement thing', '\n\n');
 	if (this.currentRotation < 0) {
+		console.log('\n', 'starting the game', '\n');
 		this.currentRotation = 0;
 		// Actually start the game
 		this.broadcast('start', {
@@ -177,7 +261,7 @@ Game.prototype.getPlayers = function () {
 	var players = [];
 	for (var id in this.players) {
 		if (this.players.hasOwnProperty(id)) {
-			players.push({ id: this.players[id].id, name: this.players[id].name });
+			players.push({ id: this.players[id].id, name: this.players[id].name, color: this.players[id].color });
 		}
 	}
 	return players;
@@ -226,6 +310,21 @@ Game.prototype.broadcast = function (message, data, sender) {
 		}
 	}
 };
+*/
+Game.prototype.broadcast = function (message, data, includeSender, sender) {
+	for (var id in this.players) {
+		if (this.players.hasOwnProperty(id)) {
+			if (includeSender || id != sender.id) {
+				this.players[id].self.emit(message, data);
+			}
+		}
+	}
+};
+
+Game.prototype.generateColor = function () {
+	return this.colors.pop();
+};
+
 // Initialize the development cards for this game
 Game.prototype.buildDeck = function () {
 	// Instantiate a full set of development cards
@@ -244,16 +343,38 @@ Game.prototype.buildDeck = function () {
 	// Shuffle the cards
 	this.util.shuffle(this.developmentCards);
 };
+
+Game.prototype.buildPlayerList = function () {
+	var players = this.players;
+	for (var i = 0; i < this.numPlayers; i++) {
+		var current = this.turnOrder[i];
+		for (var id in players) {
+			if (players.hasOwnProperty(id) && players[id].id == current) {
+				this.playerList.push(players[id]);
+			}
+		}
+	}
+};
+
+Game.prototype.generateTurnOrder = function () {
+	for (var id in this.players) {
+		if (this.players.hasOwnProperty(id)) {
+			this.turnOrder.push(this.players[id].id);
+		}
+	}
+	this.util.shuffle(this.turnOrder);
+};
+
+
 Game.prototype.drawCard = function () {
 	// Deck works as a queue
 	return this.developmentCards.shift();
 }
-
 // Utility class to help with other methods
 Game.prototype.util = {
 	shuffle: function (array) {
 		var tmp, current, top = array.length;
-		if (top) { 
+		if (top) {
 			while (--top) {
 				current = Math.floor(Math.random() * (top+1));
 				tmp = array[current];
@@ -263,9 +384,13 @@ Game.prototype.util = {
 		}
 		return array;
 	},
-	rollDice: function () {
+	roll: function () {
 		return ((Math.random()*12) >> 1) + ((Math.random()*12) >> 1);
 	}
+};
+
+exports.Game = function (server) {
+	return new Game(server);
 };
 
 // Server -------------------------------------------------------------------------------
@@ -277,7 +402,6 @@ function Server (module) {
 	this.clients = { };
 	
 	// Initialize the server
-	console.log('\n\ndirectory: ', __dirname, '\n\n');
 	this.master = module.createServer(
 		module.logger(),
 		module.static(__dirname)
@@ -288,6 +412,47 @@ Server.prototype.listen = function (port, ip) {
 	this.master.listen(port, ip);
 };
 
+Server.prototype.open = function () {
+	return this.numGames < this.maxGames;
+};
+
+Server.prototype.cleanup = function (game) {
+	delete this.games[game.id];
+	this.numGames -= 1;
+};
+
+Server.prototype.register = function (type, o) {
+	if (type == 'game') {
+		this.games[o.id] = o;
+		this.numGames += 1;
+	} else if (type == 'client') {
+		this.clients[o.id] = o;
+	}
+};
+
+Server.prototype.drop = function (client) {
+	if (client.game && client.game.HOST.self.id == client.id) {
+		client.game.close(true, 'host drop');
+		this.cleanup(client.game);
+	}
+	delete this.clients[client.id];
+};
+
+Server.prototype.get = function (type, id) {
+	var _id = type == 'games' ? cryp.generateUniqueID(id) : id;
+	return this[type][_id];
+};
+
+Server.prototype.log = function () {
+	var args = arguments;
+	console.log('\n');
+	for (var i = 0; i < args.length; i++) {
+		console.log(args[i], ' ');
+	}
+	console.log('\n');
+};
+
+/*
 // Game functionality
 Server.prototype.newGame = function (client, options) {
 	if (this.numGames < this.maxGames) {
@@ -345,6 +510,7 @@ Server.prototype.removeClient = function (id) {
 		console.log('client with id', id, 'does not exist.');
 	}
 };
+*/
 
 exports.Server = function (o) {
 	return new Server(o);

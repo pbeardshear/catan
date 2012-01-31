@@ -5,24 +5,31 @@ var connect = require('connect'),
 	model = require('./model.js');
 
 var server = new model.Server(connect);
-var socket = io.listen(server.master);
+var base = io.listen(server.master);
 server.listen(1337, 'localhost');
 
-socket.sockets.on('connection', function (client) {
-	// Add the client to the server list
-	server.addClient(client);
+base.sockets.on('connection', function (client) {
+	server.register('client', client);
 	
 	// Define actions that the client is allowed to make
+	/*
 	var Commands = {
 		host: function (o) {
-			client.emit('host', server.newGame(client, o));
+			var result = server.newGame(client, o);
+			client.emit('host', result);
+			if (result.success) {
+				client.emit('setup', { success: true });
+			}
 		},
 		join: function (o) {
 			var game = server.findGame(o.game),
 				join = game ? game.join(client, o.username, false) : { success: false, reason: 'not exist' };
 			client.emit('join', join);
 			if (join.success) {
-				client.broadcast.emit('newPlayer', { id: join.id, name: join.name });
+				var players = game.getPlayers();
+				client.emit('setup');
+				client.emit('addPlayers', { count: players.length, players: players });
+				client.broadcast.emit('addPlayers', { count: 1, players: [{ id: join.id, name: join.name, color: join.color }] });
 				// Request the board data from the host and send it up to the newly joined client
 				game.HOST.self.emit('request', { data: 'board' }, function (board) {
 					client.emit('update', { type: 'board', data: board });
@@ -77,6 +84,65 @@ socket.sockets.on('connection', function (client) {
 			server.removeClient(client.id);
 		}
 	};
+	*/
+	
+	var Commands = {
+		// Required data: game => name of game, username => username, players => max number of players
+		host: function (data) {
+			if (server.open()) {
+				var game = new model.Game(server);
+				var resp = game.host(client, data);
+				resp.success ? server.register('game', game) : server.cleanup(game);
+				client.emit('host', resp);
+				client.emit('setup', { success: resp.success });
+			} else {
+				client.emit('host', { success: false, reason: 'server unavailable' });
+			}
+		},
+		// Required data: game => name of game, username => username
+		join: function (data) {
+			var game = server.get('games', data.name);
+			if (game) {
+				var join = game.join(client, data.username, false);
+				client.emit('join', join);
+				if (join.success) {
+					game.broadcast('addPlayers', join, false, client);
+					game.emit('request', { data: 'board' }, function (board) {
+						client.emit('update', { type: 'boardState', data: board });
+					});
+				}
+			}
+			client.emit('join', { success: false, reason: 'not exist' });
+		},
+		startGame: function () {
+			var game = client.game;
+			game.start();
+		},
+		endTurn: function () {
+			var game = client.game;
+			game.endTurn();
+		},
+		draw: function (data, fn) {
+			var game = client.game;
+			fn(game.drawCard());
+		},
+		chat: function (data) {
+			var game = client.game;
+			game.broadcast('chat', { player: data.name, message: data.message }, true);
+		},
+		trade: function (data) {
+			var game = client.game;
+			game.trade(data, client);
+		},
+		disconnect: function () {
+			server.drop(client);
+		},
+		test: function () {
+			client.emit('test', 'testing', function (data) {
+				server.log('this is what i got', data);
+			});
+		}
+	};
 	
 	// Set up control
 	for (var comm in Commands) {
@@ -86,11 +152,6 @@ socket.sockets.on('connection', function (client) {
 	}
 });
 
-// DEBUG
-// Create some test games
-for (var i = 0; i < 3; i++) {
-	// var game = server.newGame();
-}
 
 
 
