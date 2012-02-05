@@ -95,9 +95,9 @@ var Controller = (function () {
 				interceptor.bind(el, event, fn, name);
 			}
 		},
-		fire: function (name, options) {
+		fire: function (name, options, fn) {
 			if (activeBundle.actions[name]) {
-				socket.emit(name, options);
+				socket.emit(name, options, fn);
 			}
 		},
 		bundle: function (name, actions, active) {

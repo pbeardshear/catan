@@ -7,12 +7,13 @@
 // will wrap just a single dom container that may be updated dynamically,
 // and so many views will generally exist per page
 var View = function (options) {
+	var container;
 	var _this = {
 		model: options.data,
 		dataType: options.data.length ? 'array' : 'object',
-		container: $(options.el),
 		attr: options.attr,
 		template: options.template,
+		container: $(options.el),
 		displayFn: options.fn
 	};
 	
@@ -20,10 +21,10 @@ var View = function (options) {
 	base.accessor(this, _this);
 };
 
-View.prototype.create = function () {
+View.prototype.create = function (o) {
 	var template = this.get('template');
 	if (template) {
-		var data = this.get('model');
+		var data = o || this.get('model');
 		var container = this.get('container');
 		base.each(data, function (player) {
 			var temp = template;
@@ -47,9 +48,10 @@ View.prototype.update = function (o) {
 		var value = fn ? fn(data) : null;
 		base.each(data, function (val, field) {
 			var accessor = ('[{0}="{1}"]').replace('{0}', attr).replace('{1}', field);
+			var text = (value && value[field]) || val;
 			var item = container.find(accessor);
-			if (item) {
-				item.text(value || val);
+			if (item && text != null) {
+				item.text(text);
 			}
 		});
 	} else {

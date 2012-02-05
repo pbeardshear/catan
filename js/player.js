@@ -94,11 +94,14 @@ Player.prototype.build = function (piece) {
 	}
 };
 Player.prototype.drawCard = function () {
-	Controller.fire('draw', {}, function (card) {
-		this.update('developmentCards', card, 1);
+	var self = this;
+	Controller.fire('draw', 'none', function (card) {
+		var hasCard = self.get('developmentCards')[card] > 0;
+		var view = Game.get('views').developmentCards;
+		self.update('developmentCards', card, 1);
 		// Create the dom view of the card
-		dom = null;
-		Controller.on('useCard', dom, 'click', function () { }, 'game');
+		hasCard ? view.update() : view.create([{ name: card, fullName: Game.get('cardNames')[card] }]);
+		Controller.on('useCard', $('#development .items a'), 'click', function () { }, 'game');
 	});
 };
 Player.prototype.useCard = function (card) {

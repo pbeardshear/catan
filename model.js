@@ -140,7 +140,7 @@ Game.prototype.initPlacement = function () {
 	this.server.log('this is the current player:', this.currentRotation);
 	var self = this;	// Save local reference for closure
 	var player = this.playerList[this.turnOrder[this.currentRotation]];
-	player.self.emit('initPlacement', 'test', function (data) {
+	player.self.emit('initPlacement', 'none', function (data) {
 		self.currentRotation = (self.currentRotation + (self.reversing ? -1 : 1)) % self.numPlayers;
 		if (!self.currentRotation) {
 			// Got to the end of the current rotation
@@ -321,15 +321,16 @@ Game.prototype.generateColor = function () {
 Game.prototype.buildDeck = function () {
 	// Instantiate a full set of development cards
 	var cardTypes = [
-		{ type: 'roadBuilding', count: 3 },
-		{ type: 'yearOfPlenty', count: 3 },
+		{ type: 'roadBuild', count: 3 },
+		{ type: 'plenty', count: 3 },
 		{ type: 'monopoly', count: 3 },
 		{ type: 'knight', count: 15 },
 		{ type: 'victory', count: 5 }
 	];
 	for (var i = 0; i < cardTypes.length; i++) {
 		for (var k = 0; k < cardTypes[i].count; k++) {
-			this.developmentCards.push(new po.DevelopmentCard(cardTypes[i].type));
+			this.developmentCards.push(cardTypes[i].type);
+			// this.developmentCards.push(new po.DevelopmentCard(cardTypes[i].type));
 		}
 	}
 	// Shuffle the cards

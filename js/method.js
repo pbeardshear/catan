@@ -60,16 +60,6 @@ base.filter = function (arr, fn) {
 	return keep;
 };
 
-base.report = function (fn, data, callback) {
-	try {
-		fn.apply(data.scope, data.arguments);
-		callback();
-	}
-	catch (ex) {
-		throw ex;
-	}
-};
-
 // String methods
 base.string = { };
 
@@ -79,6 +69,15 @@ base.string.pluralize = function (str) {
 
 base.string.capitalize = function (str) {
 	return str.substring(0, 1).toUpperCase() + str.substring(1);
+};
+
+// Function methods
+base.fn = { };
+
+base.fn.delegate = function (scope, fn) {
+	return function () {
+		return fn.apply(scope, arguments);
+	};
 };
 
 //

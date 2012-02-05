@@ -162,8 +162,10 @@ var app = (function () {
 				build: actions.build, 
 				trade: actions.trade, 
 				tradeResponse: actions.tradeResponse,
-				chat: actions.chat, 
+				chat: actions.chat,
 				useCard: actions.useCard,
+				// Set actions to true if they don't correspond directly to an event
+				draw: true
 			});
 			Controller.bundle('endgame', { cleanup: actions.cleanup, end: actions.end });
 			

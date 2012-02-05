@@ -13,6 +13,13 @@ var Game = (function () {
 				settlement: { brick: 1, wood: 1, grain: 1, wool: 1 }, 
 				city: { ore: 3, grain: 2 }, 
 				developmentCard: { ore: 1, wool: 1, grain: 1 } 
+		},
+		cardNames: {
+			knight: 'Knight',
+			plenty: 'Year of Plenty',
+			monopoly: 'Monopoly',
+			roadBuild: 'Road Building',
+			victory: 'Library'
 		}
 	};
 	
@@ -69,9 +76,21 @@ var Game = (function () {
 				el: '#development .items',
 				attr: 'value',
 				data: self.get('developmentCards'),
-				fn: function (data) {
-					return 'Knight x 2';
-				}
+				template: '<li><a href="" class="button" value="{name}">{fullName}</a></li>',
+				fn: base.fn.delegate(this, function (cards) {
+					var fullNames = this.get('cardNames');
+					var ret = { };
+					base.each(cards, function (val, field) {
+						if (val == 1) {
+							ret[field] = fullNames[field];
+						} else if (val > 1) {
+							ret[field] = [fullNames[field], val].join(' x ');
+						} else {
+							ret[field] = null;
+						}
+					});
+					return ret;
+				})
 			});
 			views.players = new View({
 				el: '#playerInfo',

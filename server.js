@@ -123,6 +123,7 @@ base.sockets.on('connection', function (client) {
 			game.endTurn();
 		},
 		draw: function (data, fn) {
+			server.log('received draw command');
 			var game = client.game;
 			fn(game.drawCard());
 		},
