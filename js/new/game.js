@@ -7,6 +7,8 @@ var Game = (function () {
 	var _this = {
 		self: null,
 		players: [],
+		playerState: [],	// A more readable structure for the state of the players
+		views: {},
 		cost: { road: { brick: 1, wood: 1 }, 
 				settlement: { brick: 1, wood: 1, grain: 1, wool: 1 }, 
 				city: { ore: 3, grain: 2 }, 
@@ -50,7 +52,39 @@ var Game = (function () {
 		// Update the game state from the server, move to game view
 		// Called on: successful start command
 		begin: function () {
+			var playerState = this.get('playerState');
+			base.each(this.get('players'), function (player) {
+				playerState.push(player.getState());
+			});
 			this.moveBoard();
+			// Create the views to house the game displays
+			var self = this.get('self');
+			var views = this.get('views');
+			views.resources = new View({
+				el: '#resources .items',
+				attr: 'class',
+				data: self.get('resources')
+			});
+			views.developmentCards = new View({
+				el: '#development .items',
+				attr: 'value',
+				data: self.get('developmentCards'),
+				fn: function (data) {
+					return 'Knight x 2';
+				}
+			});
+			views.players = new View({
+				el: '#playerInfo',
+				attr: 'class',
+				data: playerState,
+				template: '<tr class="{color}"><td class="name">{name}</td><td class="achievement">{achievement}</td>' +
+							'<td class="resource"><em>R: </em><a class="resourceCount">{resourceCount}</a></td>' +
+							'<td class="development"><em>D: </em><a class="developmentCount">{developmentCount}</a></td>' +
+							'<td class="victory"><em>V: </em><a class="victoryPoints">{victoryPoints}</a></td>' + 
+							'</tr>'
+			});
+			
+			views.players.create();
 			// Transition the view to game
 			app.transition({ from: 'setup', to: 'game' });
 			// Change the current action bundle

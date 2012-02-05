@@ -47,15 +47,28 @@ var Player = function (o) {
 
 // Prototype methods --------------------------------------------------------
 // --------------------------------------------------------------------------
+Player.prototype.getState = function () {
+	var count = this.get('count');
+	return { 
+		id: this.get('id'), 
+		name: this.get('name'), 
+		color: this.get('color'), 
+		achievement: this.get('bonuses'),
+		resourceCount: count.resources,
+		developmentCount: count.developmentCards,
+		victoryPoints: count.victoryPoints
+	};
+};
 Player.prototype.startTurn = function () {
 	// Turn on control actions
-	var res = Controller.request('build');
-	console.log('requested build', res);
-	Controller.request('useCard');
-	Controller.request('chat');
-	Controller.request('trade');
-	Controller.request('tradeResponse');
-	Controller.request('endTurn');
+	Controller.request(['build', 'useCard', 'chat', 'trade', 'tradeResponse', 'endTurn']);
+	// var res = Controller.request('build');
+	// console.log('requested build', res);
+	// Controller.request('useCard');
+	// Controller.request('chat');
+	// Controller.request('trade');
+	// Controller.request('tradeResponse');
+	// Controller.request('endTurn');
 };
 Player.prototype.endTurn = function () {
 	// Turn off control actions
@@ -83,6 +96,9 @@ Player.prototype.build = function (piece) {
 Player.prototype.drawCard = function () {
 	Controller.fire('draw', {}, function (card) {
 		this.update('developmentCards', card, 1);
+		// Create the dom view of the card
+		dom = null;
+		Controller.on('useCard', dom, 'click', function () { }, 'game');
 	});
 };
 Player.prototype.useCard = function (card) {
@@ -96,5 +112,7 @@ Player.prototype.addResources = function (resources) {
 	base.each(resources, function (amt, type) {
 		self.update('resources', type, amt);
 	});
+	var resourceView = Game.get('views').resources;
+	resourceView.update();
 };
 
