@@ -142,7 +142,7 @@
 				</table>
 				<div class="actions">
 					<a class="button" id="tradeButton">Trade Resources</a>
-					<a class="button" id="endButton">End Turn</a>	
+					<a class="button action endTurn" id="endButton">End Turn</a>	
 				</div>
 				<div id="chat">
 					<div id="chatLog">
@@ -155,7 +155,7 @@
 							-->
 						</div>
 					</div>
-					<form>
+					<form class="action chat">
 						<p class="text"><input type="text" name="message" id="chatMessage" autocomplete="off" tabindex="1" /></p>
 						<p class="send"><button type="submit">Send</button></p>
 					</form>
@@ -168,7 +168,7 @@
 					<h2><span>Build</span></h2>
 					<ul class="items">
 						<li>
-							<a class="button" value="road">
+							<a class="button action build" value="road">
 								Road 
 								<span class="cost">
 									<img src="images/icon_dot_wood.png" />
@@ -177,7 +177,7 @@
 							</a>
 						</li>
 						<li>
-							<a class="button" value="settlement">
+							<a class="button action build" value="settlement">
 								Settlement
 								<span class="cost">
 									<img src="images/icon_dot_wood.png" />
@@ -188,7 +188,7 @@
 							</a>
 						</li>
 						<li>
-							<a class="button" value="city">
+							<a class="button action build" value="city">
 								City
 								<span class="cost">
 									<img src="images/icon_dot_ore.png" />
@@ -200,8 +200,8 @@
 							</a>
 						</li>
 						<li>
-							<a class="button" value="development">
-								Development
+							<a class="button action build" value="developmentCard">
+								Development Card
 								<span class="cost">
 									<img src="images/icon_dot_ore.png" />									
 									<img src="images/icon_dot_wool.png" />
@@ -282,8 +282,8 @@
 						</ul>
 					</div>
 					<p class="actions">
-						<a class="button trade">Trade</a>
-						<a class="button cancel">Cancel</a>					
+						<a class="button trade action">Trade</a>
+						<a class="button cancel action">Cancel</a>					
 					</p>
 				</form>
 			</div>
@@ -306,8 +306,8 @@
 					</ul>
 				</div>
 				<p class="actions">
-					<a class="button tradeResponse acceptTrade">Yes, I'll Trade</a>
-					<a class="button tradeResponse cancel">No, Don't Trade</a>
+					<a class="button tradeResponse action">Yes, I'll Trade</a>
+					<a class="button tradeResponse action">No, Don't Trade</a>
 				</p>
 			</div>
 		</div>

@@ -128,7 +128,7 @@ base.sockets.on('connection', function (client) {
 		},
 		chat: function (data) {
 			var game = client.game;
-			game.broadcast('chat', { player: data.name, message: data.message }, true);
+			game.broadcast('chat', { player: data.player, message: data.message }, true);
 		},
 		trade: function (data) {
 			var game = client.game;

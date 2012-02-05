@@ -49,8 +49,10 @@ var Player = function (o) {
 // --------------------------------------------------------------------------
 Player.prototype.startTurn = function () {
 	// Turn on control actions
-	Controller.request('build');
+	var res = Controller.request('build');
+	console.log('requested build', res);
 	Controller.request('useCard');
+	Controller.request('chat');
 	Controller.request('trade');
 	Controller.request('tradeResponse');
 	Controller.request('endTurn');
@@ -64,8 +66,8 @@ Player.prototype.endTurn = function () {
 };
 Player.prototype.canBuild = function (piece) {
 	var resources = this.get('resources'),
-		cost = Game.cost(piece);
-	return base.validate(cost, function (amt) {
+		cost = Game.get('cost')[piece];
+	return base.validate(cost, function (amt, type) {
 		return amt <= resources[type];
 	});
 };

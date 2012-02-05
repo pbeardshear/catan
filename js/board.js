@@ -9,7 +9,8 @@ var Board = (function () {
 		height = CONST.board.height,
 		width = CONST.board.width,
 		numResources = CONST.game.numTypes,
-		numTiles = CONST.game.numTiles;
+		numTiles = CONST.game.numTiles,
+		round = Math.round;
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -78,6 +79,10 @@ var Board = (function () {
 	Road.prototype.draw = function () {
 		Engine.draw(this, 'road');
 	};
+	Road.prototype.isAt = function (pos) {
+		return (round(pos.x,2) == round(this.start.x,2) && round(pos.y,2) == round(this.start.y,2) 
+				|| round(pos.x,2) == round(this.start.x,2) && round(pos.y,2) == round(this.end.y,2));
+	};
 	
 	function Settlement (o) {
 		this.pos = o.pos;
@@ -88,6 +93,9 @@ var Board = (function () {
 	Settlement.prototype.draw = function () {
 		Engine.draw(this, 'settlement');
 	};
+	Settlement.prototype.isAt = function (pos) {
+		return round(pos.x,2) == round(this.pos.x,2) && round(pos.y,2) == round(this.pos.y,2);
+	};
 	
 	function City (o) {
 		this.pos = o.pos;
@@ -97,6 +105,9 @@ var Board = (function () {
 	City.type = 'city';
 	City.prototype.draw = function () {
 		Engine.draw(this, 'city');
+	};
+	City.prototype.isAt = function (pos) {
+		return round(pos.x,2) == round(this.pos.x,2) && round(pos.y,2) == round(this.pos.y,2);
 	};
 	
 	// Private methods
@@ -251,12 +262,25 @@ var Board = (function () {
 		return true;
 	}
 	
+	// Returns true if either the start or end positions of the road are adjacent to a settlement
+	// owned by the current player
+	function roadSettlementAdjacent (start, end) {
+		var pieces = getPieces('settlement');
+		var player = Game.get('self');
+		for (var i = 0; i < pieces.length; i++) {
+			if (player.get('id') == pieces[i].owner.get('id') && (pieces[i].isAt(start) || pieces[i].isAt(end))) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	// Returns true if there is a road owned by the current player adjacent to the passed position
 	function adjacentRoad (pos) {
 		var pieces = getPieces('road');
 		var player = Game.get('self');
 		for (var i = 0; i < pieces.length; i++) {
-			if (player.id == pieces[i].owner.id && pieces[i].isAt(pos)) {
+			if (player.get('id') == pieces[i].owner.get('id') && pieces[i].isAt(pos)) {
 				return true;
 			}
 		}
@@ -268,13 +292,13 @@ var Board = (function () {
 	function adjacentSettlement (pos) {
 		var settlements = getPieces('settlement'),
 			cities = getPieces('city');
-		for (var i = 0; i < settlements; i++) {
-			if (Engine.pointDist(settlements[i].pos, pos) <= 50) {
+		for (var i = 0; i < settlements.length; i++) {
+			if (Engine.pointDistance(settlements[i].pos, pos) <= 50) {
 				return true;
 			}
 		}
 		for (var i = 0; i < cities.length; i++) {
-			if (Engine.pointDist(cities[i].pos, pos) <= 50) {
+			if (Engine.pointDistance(cities[i].pos, pos) <= 50) {
 				return true;
 			}
 		}
@@ -381,30 +405,39 @@ var Board = (function () {
 		validate: function (a, b, type) {
 			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= 50;
 		},
-		validatePlacement: function (type, pos) {
+		validatePlacement: function (type, pos, adjusted) {
 			// Road - no road there + adjacent to current road
 			// Settlement - no settlement/city there + adjacent to current road + no settlement/city at adjacent vertex
 			// City - current settlement there
 			var isEmpty = empty(type, pos);
-			return type == 'road' ? isEmpty && (adjacentRoad(pos.start) || adjacentRoad(pos.end)) :
-				   type == 'settlement' ? isEmpty && adjacentRoad(pos) && !adjacentSettlement(pos) :
-				   type == 'city' ? isEmpty && isEmpty.owner == Game.self && isEmpty.type == 'settlement' : false;
+			if (!adjusted) {
+				return type == 'road' ? isEmpty && (adjacentRoad(pos.start) || adjacentRoad(pos.end)) :
+					   type == 'settlement' ? isEmpty && adjacentRoad(pos) && !adjacentSettlement(pos) :
+					   type == 'city' ? isEmpty && isEmpty.owner == Game.self && isEmpty.type == 'settlement' : false;
+		    } else {
+				// This branch is hit during initial placement
+				// Valid placements are slightly different in this case
+				return type == 'road' ? isEmpty && roadSettlementAdjacent(pos.start, pos.end) :
+					   type == 'settlement' ? isEmpty && !adjacentSettlement(pos) : false;
+			}
 		},
-		beginPlace: function (player, type, forcePlacement, callback) {
+		// Load up the state and request the placement event
+		// Assumes that the player has already been checked for resources
+		beginPlace: function (player, type, initialPlacement, callback) {
 			var positionMap = { road: 'Edge', settlement: 'Vertex', city: 'Vertex' };
 			Controller.request('place' + positionMap[type]);
 			placeState(positionMap[type]);
-			this.placing = { player: player, piece: pieces[type], force: forcePlacement || false, callback: callback, action: ('place' + positionMap[type]) };
+			this.placing = { player: player, piece: pieces[type], initial: initialPlacement || false, callback: callback, action: ('place' + positionMap[type]) };
 		},
 		place: function (event) {
 			var self = Board;
 			var coords = this.coords.split(','),
 				isRoad = self.placing.piece.type == 'road',
 				edgeType = isRoad ? this.attributes['type'].value : null,
-				pos = { x: parseFloat(coords[0]), y: parseFloat(coords[1]) }
+				pos = Engine.getPosition({ x: parseFloat(coords[0]), y: parseFloat(coords[1]) }, edgeType),
 				placement = self.placing;
-			if (placement.force || self.validatePlacement(placement.piece.type, pos)) {
-				var piece = new placement.piece({ owner: placement.player, pos: isRoad ? Engine.getPosition(pos, edgeType) : pos });
+			if (self.validatePlacement(placement.piece.type, pos, placement.initial)) {
+				var piece = new placement.piece({ owner: placement.player, pos: pos });
 				placement.player.addPiece(piece);
 				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type);
 				// Update the victory points and such
@@ -418,7 +451,7 @@ var Board = (function () {
 				placement.callback && placement.callback();
 			} else {
 				// Placement is no good
-				Game.msg( );
+				Game.msg('You can\'t place that there!');
 			}
 		},
 		swapTiles: function (area, i) {
