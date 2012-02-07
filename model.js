@@ -112,6 +112,7 @@ Game.prototype.join = function (client, username, hosting) {
 		console.log('joining');
 		var player = new Player(this.numPlayers, client, username, this.generateColor(), hosting);
 		this.players[client.id] = player;
+		this.playerList.push(player);
 		this.HOST = hosting ? player : this.HOST;
 		this.numPlayers += 1;
 		this.server.clients[client.id].game = this;
@@ -125,7 +126,6 @@ Game.prototype.join = function (client, username, hosting) {
 Game.prototype.start = function () {
 	// Initialize game-specific state
 	this.generateTurnOrder();
-	this.buildPlayerList();
 	this.buildDeck();
 	this.started = true;
 	// Do initial placement
@@ -139,7 +139,7 @@ Game.prototype.initPlacement = function () {
 	this.server.log('starting initial placement')
 	this.server.log('this is the current player:', this.currentRotation);
 	var self = this;	// Save local reference for closure
-	var player = this.playerList[this.turnOrder[this.currentRotation]];
+	var player = this.playerList[this.currentRotation];
 	player.self.emit('initPlacement', 'none', function (data) {
 		self.currentRotation = (self.currentRotation + (self.reversing ? -1 : 1)) % self.numPlayers;
 		if (!self.currentRotation) {
@@ -163,15 +163,21 @@ Game.prototype.initPlacement = function () {
 
 Game.prototype.endTurn = function () {
 	var i = this.currentRotation;
-	var player = this.playerList[this.turnOrder[i]];
+	var player = this.playerList[i];
+	var self = this;
 	player.self.emit('endTurn', { }, function () {
-		this.currentRotation += 1;
-		if (this.currentRotation == this.currentTurn) {
-			this.currentTurn += 1;
-			this.currentRotation = this.currentTurn + 1;
-			this.broadcast('startTurn', { roll: this.util.roll(), turn: this.currentTurn }, true);
+		self.currentRotation += 1;
+		if (self.currentRotation == self.currentTurn) {
+			self.currentTurn += 1;
+			self.currentRotation = self.currentTurn + 1;
+			var victory = self.victoryCheck();
+			if (victory && victory.player) {
+				self.broadcast('victory', { player: victory.player });
+			} else {
+				self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+			}
 		} else {
-			this.endTurn();
+			self.endTurn();
 		}
 	});
 };
@@ -188,6 +194,16 @@ Game.prototype.available = function () {
 	return !this.started && this.numPlayers < this.maxPlayers;
 };
 
+// Returns true and the player if any player has at least 10 victory points, and its their turn
+// Otherwise, returns false
+Game.prototype.victoryCheck = function () {
+	var currentPlayer = this.playerList[this.currentTurn];
+	if (this.currentPlayer.victoryPoints >= 10) {
+		return true;
+	}
+	return false;
+};
+
 Game.prototype.close = function (force, reason) {
 	if (force) {
 		this.broadcast('update', { type: 'close', data: { error: true, reason: reason } }, true);
@@ -195,114 +211,6 @@ Game.prototype.close = function (force, reason) {
 	}
 };
 
-/*
-Game.prototype.start = function () {
-	this.started = true;
-	for (var i = 0; i < this.numPlayers; i++) {
-		this.turnOrder.push(i);
-	}
-	// Generate the turn order
-	this.util.shuffle(this.turnOrder);
-	this.initPlacement();
-};
-Game.prototype.initPlacement = function () {
-	console.log('\n\n', 'Doing the placement thing', '\n\n');
-	if (this.currentRotation < 0) {
-		console.log('\n', 'starting the game', '\n');
-		this.currentRotation = 0;
-		// Actually start the game
-		this.broadcast('start', {
-			success: true,
-			turnOrder: this.turnOrder,
-			roll: this.util.rollDice(),
-			turn: this.turnOrder[this.currentTurn]
-		});
-	}
-	else {
-		var current = this.turnOrder[this.currentRotation];
-		console.log('\n\n', 'The current player is', current, '\n\n');
-		this.findPlayer(current).self.emit('pregame');
-		this.reversing ? --this.currentRotation : ++this.currentRotation;
-		if (this.currentRotation == this.turnOrder.length) {
-			this.reversing = true;
-			this.currentRotation -= 1;
-		}
-	}
-};
-Game.prototype.endTurn = function () {
-	this.currentRotation = (this.currentRotation + 1) % this.numPlayers;
-	if (this.currentRotation == this.currentTurn) {
-		// End and start the next turn
-		++this.currentTurn;
-		this.currentRotation = this.currentTurn;
-		// Check if the current player has won
-		var turn = this.turnOrder[this.currentTurn],
-			result = { message: 'startTurn', roll: this.util.rollDice(), turn: this.turnOrder[this.currentTurn] };
-		if (Game.findPlayer(turn).victoryPoints >= 10) {
-			result.victory = true;
-		}
-		return result;
-	}
-	else {
-		// Ask the next player if they want to build something
-		return { message: 'endTurn', turn: this.turnOrder[this.currentRotation] };
-	}
-};
-// Return a list of all the players in this game
-Game.prototype.getPlayers = function () {
-	var players = [];
-	for (var id in this.players) {
-		if (this.players.hasOwnProperty(id)) {
-			players.push({ id: this.players[id].id, name: this.players[id].name, color: this.players[id].color });
-		}
-	}
-	return players;
-};
-// Find a player based on their id in game
-Game.prototype.findPlayer = function (id) {
-	for (var player in this.players) {
-		if (this.players.hasOwnProperty(player)) {
-			if (this.players[player].id == id) {
-				return this.players[player];
-			}
-		}
-	}
-};
-Game.prototype.dropPlayer = function (client) {
-	--this.numPlayers;
-	delete this.players[client.id];
-};
-// Update the state of a player
-Game.prototype.update = function (data, client) {
-	var player = this.players[client.id];
-	if (data.card && data.type == 'victory') {
-		player.victoryPoints += 1;
-	}
-	else if (data.bonus) {
-		if (this.bonuses[data.bonus]) {
-			// Remove the bonus from the current player
-			this.bonuses[data.bonus].removeBonus();
-		}
-		this.bonuses[data.bonus] = player;
-		player.addBonus();
-	}
-};
-// Convenience function for checking if a game is available (not full, and hasn't started)
-Game.prototype.available = function () {
-	return !this.started && (this.numPlayers < this.maxPlayers);
-};
-// Send a chat message to each client in the game
-Game.prototype.broadcast = function (message, data, sender) {
-	// Send the message to each client
-	for (var player in this.players) {
-		if (this.players.hasOwnProperty(player)) {
-			if (!sender || data.self || (this.players[player].self.id != sender.id)) {
-				this.players[player].self.emit(message, data);
-			}
-		}
-	}
-};
-*/
 Game.prototype.broadcast = function (message, data, includeSender, sender) {
 	for (var id in this.players) {
 		if (this.players.hasOwnProperty(id)) {
@@ -311,6 +219,24 @@ Game.prototype.broadcast = function (message, data, includeSender, sender) {
 			}
 		}
 	}
+};
+
+Game.prototype.getPlayer = function (options) {
+	if (options.by == 'clientID') {
+		var player = this.players[options.id];
+		return { id: player.id, name: player.name, color: player.color };
+	} else if (options.by == 'gameID') {
+		// TODO: Implement
+	}
+};
+
+Game.prototype.getPlayers = function (exclude) {
+	var players = [];
+	for (var i = 0; i < this.numPlayers; i++) {
+		var p = this.playerList[i];
+		if (exclude != p.id) players.push({ name: p.name, color: p.color, id: p.id });
+	}
+	return players;
 };
 
 Game.prototype.generateColor = function () {
@@ -356,12 +282,22 @@ Game.prototype.generateTurnOrder = function () {
 		}
 	}
 	this.util.shuffle(this.turnOrder);
+	// Rearrange the player list to be in turn order
+	var tempList = [];
+	for (var i = 0; i < this.playerList.length; i++) {
+		tempList[i] = this.playerList[this.turnOrder[i]];
+	}
+	this.playerList = tempList;
 };
 
-
-Game.prototype.drawCard = function () {
+Game.prototype.drawCard = function (client) {
 	// Deck works as a queue
-	return this.developmentCards.shift();
+	var card = this.developmentCards.shift();
+	if (card == 'victory') {
+		// Increment victory points
+		this.players[client.id].victoryPoints += 1;
+	}
+	return card;
 }
 // Utility class to help with other methods
 Game.prototype.util = {
@@ -389,7 +325,7 @@ exports.Game = function (server) {
 // Server -------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
 function Server (module) {
-	this.maxGames = 10;
+	this.maxGames = 100;
 	this.numGames = 0;
 	this.games = { };
 	this.clients = { };
@@ -423,8 +359,20 @@ Server.prototype.register = function (type, o) {
 	}
 };
 
+Server.prototype.listGames = function () {
+	var gameList = []
+	for (var id in this.games) {
+		var game = this.games[id];
+		if (this.games.hasOwnProperty(id) && game.available()) {
+			gameList.push({ name: game.name, count: game.numPlayers, max: game.maxPlayers });
+		}
+	}
+	return gameList;
+};
+
 Server.prototype.drop = function (client) {
 	if (client.game && client.game.HOST.self.id == client.id) {
+		this.log('host has dropped');
 		client.game.close(true, 'host drop');
 		this.cleanup(client.game);
 	}
@@ -432,6 +380,7 @@ Server.prototype.drop = function (client) {
 };
 
 Server.prototype.get = function (type, id) {
+	console.log('this is the game id:', id);
 	var _id = type == 'games' ? cryp.generateUniqueID(id) : id;
 	return this[type][_id];
 };
@@ -444,66 +393,6 @@ Server.prototype.log = function () {
 	}
 	console.log('\n');
 };
-
-/*
-// Game functionality
-Server.prototype.newGame = function (client, options) {
-	if (this.numGames < this.maxGames) {
-		var game = new Game(this),
-			host = game.host(client, options);
-		if (host.success) {
-			this.games[game.id] = game;
-			++this.numGames;
-		}
-		return host;
-	}
-	return { success: false, reason: 'server full' };
-};
-// Remove the specified game from the server
-Server.prototype.closeGame = function (game) {
-	delete this.games[game.id];
-};
-// Return the game specified by the given name
-Server.prototype.findGame = function (name) {
-	var id = cryp.generateUniqueID(name);
-	return this.games[id] || null;
-};
-Server.prototype.listGames = function () {
-	var games = this.games,
-		results = [];
-	for (var id in games) {
-		if (games.hasOwnProperty(id) && games[id].available()) {
-			results.push({
-				name: games[id].name,
-				count: games[id].numPlayers,
-				max: games[id].maxPlayers
-			});
-		}
-	}
-	return results;
-};
-
-// Client functionality
-Server.prototype.addClient = function (client) {
-	this.clients[client.id] = { client: client, user: null, game: null };
-};
-// Remove a client from the  server, and close any games they were hosting
-Server.prototype.removeClient = function (id) {
-	console.log('removing client', id);
-	var client = this.clients[id];
-	console.log('client', client);
-	if (client) {
-		if (client.game) {
-			client.game.dropPlayer(client);
-			this.closeGame(client.game);
-		}
-		delete this.clients[id];
-	}
-	else {
-		console.log('client with id', id, 'does not exist.');
-	}
-};
-*/
 
 exports.Server = function (o) {
 	return new Server(o);

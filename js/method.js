@@ -60,6 +60,30 @@ base.filter = function (arr, fn) {
 	return keep;
 };
 
+// Merge two lists, modifying the first in place
+base.merge = function (a, b) {
+	if (base.isArray(a) && base.isArray(b)) {
+		base.each(b, function (el) {
+			a.push(el);
+		});
+		return a;
+	} else {
+		return null;
+	}
+};
+
+// Removes all elements from the array, modifying the original
+base.empty = function (arr) {
+	if (base.isArray(arr)) {
+		arr.splice(0, arr.length);
+	}
+};
+
+// Type checkers
+base.isArray = function (arr) {
+	return arr instanceof Array;
+}
+
 // String methods
 base.string = { };
 

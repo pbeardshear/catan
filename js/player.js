@@ -106,8 +106,10 @@ Player.prototype.drawCard = function () {
 };
 Player.prototype.useCard = function (card) {
 	if (this.get('developmentCards')[card] != 0) {
+		var view = Game.get('views').developmentCards;
 		Game.useCard(card);
 		this.update('developmentCards', card, -1);
+		view.update();
 	}
 };
 Player.prototype.addResources = function (resources) {

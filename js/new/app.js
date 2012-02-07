@@ -12,6 +12,10 @@ var app = (function () {
 		IP: 'http://localhost:1337'
 	};
 	var phases = { };
+	// The app manages views that are used pregame
+	var views = { };
+	// Available games
+	var games = [];
 	// Data requests that the server can make to the client
 	var dataRequest = {
 		board: function () {
@@ -91,7 +95,18 @@ var app = (function () {
 		join: function (res) {
 			if (res.success) {
 				Game.init(res);
+				Controller.release('host');
+				Controller.release('join');
+				app.transition({ from: 'host', to: 'setup' });
 			}
+		},
+		listGames: function (res) {
+			base.empty(games);
+			views.gameList.destroy('class', 'game');
+			// Update the view with the list of games
+			base.merge(games, res);
+			views.gameList.create();
+			Controller.detect('join');
 		},
 		addPlayers: function (res) {
 			Game.addPlayers(res);
@@ -142,10 +157,16 @@ var app = (function () {
 			}
 		},
 		victory: function () { },
-		request: function (data, fn) {
-			fn(dataRequest[data.type]());
+		request: function (req, fn) {
+			fn(dataRequest[req.data]());
 		},
-		update: function () { }
+		update: function (res) {
+			// TODO: Do this in a more general way
+			if (res.type == 'boardState') {
+				// Initialize the board with the full data
+				Board.init(res.data);
+			}
+		}
 	};
 	
 	return {
@@ -155,7 +176,7 @@ var app = (function () {
 			Engine.init();
 			Controller.init(io, commands, true, actions);
 			// Bundle actions into control groups
-			Controller.bundle('pregame', { host: actions.host, join: actions.join, startGame: actions.startGame }, true);
+			Controller.bundle('pregame', { host: actions.host, join: actions.join, startGame: actions.startGame, listGames: true }, true);
 			Controller.bundle('game', { 
 				startTurn: actions.startTurn, 
 				endTurn: actions.endTurn, 
@@ -168,8 +189,14 @@ var app = (function () {
 				draw: true
 			});
 			Controller.bundle('endgame', { cleanup: actions.cleanup, end: actions.end });
-			
-			Controller.request(['host', 'join']);
+			Controller.request(['host', 'join', 'listGames']);
+			// Create pregame views
+			views.gameList = new View({
+				data: games,
+				template: '<tr class="game"><td class="gameName">{name}</td><td>{count}/{max}</td><td><a class="action join button">Join</a></td></tr>',
+				el: '#gameList table'
+			});
+			Controller.fire('listGames');
 		},
 		transition: function (o) {
 			var from = CONST.views[o.from],

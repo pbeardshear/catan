@@ -23,13 +23,43 @@ var Game = (function () {
 		}
 	};
 	
+	// Development cards
+	var developmentCards = {
+		knight: function () {
+			// Move robber
+			// Then, steal from a player adjacent
+		},
+		plenty: function () {
+			// Bring up popup for user to select two resources
+			// Add those resources
+		},
+		monopoly: function () {
+			// Bring up popup for user to select one resource
+			// Remove all resources of that type from each player
+			// Give those resources to this player
+		},
+		roadBuild: function () {
+			// Popup message telling user to place two roads
+			// Tell board that user is placing roads
+		},
+		victory: function () {
+			// Popup message telling user that they can't use victory cards
+		}
+	};
+	
 	return {
 		// Called on: successful host or join
 		init: function (data) {
 			// Create getter and setter functions
 			base.accessor(this, _this);
 			this.set('self', new Player(data));
-			this.addPlayers({ count: 1, players: this.get('self') });
+			// Create the player preview view
+			this.get('views').playerPreview = new View({
+				data: this.get('playerState'),
+				template: '<li><div class="player"><div class="colorSquare {color}"></div><span>{name}</span></div></li>',
+				el: '#playerList ul'
+			});
+			this.addPlayers(this.get('self'));
 		},
 		// Set up initial game state (i.e. board, game-specific options)
 		// Called on: successful host
@@ -38,14 +68,20 @@ var Game = (function () {
 		},
 		// Called on: successful addPlayer command
 		addPlayers: function (data) {
-			var players = this.get('players');
-			var playerData = data.players;
-			if (playerData instanceof Player) {
-				players.push(playerData);
-			} else {
-				base.each(playerData, function (data) {
-					players.push(new Player(data));
+			var _this = this;
+			var self = this.get('self');
+			var views = this.get('views');
+			if (data instanceof Player) {
+				this.get('players').push(data);
+				this.get('playerState').push(data.getState());
+				views.playerPreview.create([data.getState()]);
+			} else if (base.isArray(data)) {
+				base.each(data, function (o) {
+					var player = new Player(o);
+					_this.addPlayers(player);
 				});
+			} else {
+				this.addPlayers(new Player(data));
 			}
 		},
 		// Called on: build action
@@ -60,9 +96,11 @@ var Game = (function () {
 		// Called on: successful start command
 		begin: function () {
 			var playerState = this.get('playerState');
+			/*
 			base.each(this.get('players'), function (player) {
 				playerState.push(player.getState());
 			});
+			*/
 			this.moveBoard();
 			// Create the views to house the game displays
 			var self = this.get('self');
@@ -144,6 +182,10 @@ var Game = (function () {
 		// Called on: trade command, accept property
 		acceptTrade: function () {
 			self.addResources(this.tradeRequest.receive);
+		},
+		// Called on: player.useCard
+		useCard: function (card) {
+			developmentCards[card]();
 		},
 		// Update the display state of the game
 		// Called on: update command, Board place, Board resource harvest

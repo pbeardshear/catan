@@ -24,9 +24,18 @@ var Controller = (function () {
 		// Public -----------------------------------------------------------------------------------------
 		// ------------------------------------------------------------------------------------------------
 		return {
+			add: function (actions) {
+				base.each(actions, function (o, name) {
+					var e = { fn: (typeof o == 'object' ? o.fn : o), active: false };
+					events[name] = e;
+				});
+			},
 			bind: function (el, event, fn, name) {
-				var o = { fn: fn, active: false };
+				/*
+				var e = events[name];
+				var o = { fn: fn, active: ((e && e.active) || false) };
 				events[name] = o;
+				*/
 				$(el).bind(event, { type: name }, handler);
 			},
 			activate: function (name) {
@@ -95,6 +104,18 @@ var Controller = (function () {
 				interceptor.bind(el, event, fn, name);
 			}
 		},
+		detect: function (name) {
+			base.each(bundles, function (bundle) {
+				base.each(bundle.actions, function (o, action) {
+					if (action == name) {
+						var selector = '.action.' + name;
+						$(selector).each(function (i, el) {
+							interceptor.bind(el, o.event || 'click', o.fn || o, name);
+						});
+					}
+				});
+			});
+		},
 		fire: function (name, options, fn) {
 			if (activeBundle.actions[name]) {
 				socket.emit(name, options, fn);
@@ -102,6 +123,7 @@ var Controller = (function () {
 		},
 		bundle: function (name, actions, active) {
 			var _bundle = new Bundle(name, actions);
+			interceptor.add(actions);
 			if (active) {
 				_bundle.activate();
 			}

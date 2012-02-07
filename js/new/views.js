@@ -62,8 +62,16 @@ View.prototype.update = function (o) {
 	}
 };
 
-View.prototype.destroy = function () {
-	
+View.prototype.destroy = function (attr, val) {
+	// If attr is provided, delete all elements matching attr = val
+	var container = this.get('container');
+	if (attr && val) {
+		var accessor = ('[{0}={1}]').replace('{0}', attr).replace('{1}', val);
+		var matched = container.find(accessor).remove();
+	} else {
+		// Delete all dom elements in this view
+		container.children().remove();
+	}
 };
 
 
