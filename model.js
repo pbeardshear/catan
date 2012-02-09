@@ -145,9 +145,14 @@ Game.prototype.initPlacement = function () {
 		if (!self.currentRotation) {
 			// Got to the end of the current rotation
 			if (self.reversing) {
+				// TODO: Think of a more robust solution
+				// Special case - handle the first player's second turn here, then start the game
 				// End of the initial placement
-				self.broadcast('update', { type: 'gameState', data: { turnOrder: self.turnOrder } }, true);
-				self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+				var firstPlayer = self.playerList[self.currentRotation];
+				firstPlayer.self.emit('initPlacement', 'none', function (data) {
+					self.broadcast('update', { type: 'gameState', data: { turnOrder: self.turnOrder } }, true);
+					self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+				});
 			} else {
 				self.reversing = true;
 				self.currentRotation = self.numPlayers - 1;

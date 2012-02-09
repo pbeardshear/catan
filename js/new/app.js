@@ -120,6 +120,7 @@ var app = (function () {
 			}
 		},
 		initPlacement: function (res, fn) {
+			console.log('starting initial placement');
 			var callback = function () {
 				Board.beginPlace(Game.get('self'), 'road', true, fn);
 			};

@@ -93,6 +93,9 @@ var Controller = (function () {
 			base.each(_bundleName, function (bname) {
 				var _bundle = bundles[bname];
 				if (_bundle) {
+					var action = {};
+					action[name] = fn;
+					interceptor.add(action);
 					_bundle.actions[name] = fn;
 				}
 			});
