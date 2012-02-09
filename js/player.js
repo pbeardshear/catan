@@ -112,7 +112,7 @@ Player.prototype.useCard = function (card) {
 		view.update();
 	}
 };
-Player.prototype.addResources = function (resources) {
+Player.prototype.updateResources = function (resources) {
 	var self = this;
 	base.each(resources, function (amt, type) {
 		self.update('resources', type, amt);

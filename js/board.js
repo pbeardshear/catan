@@ -400,7 +400,7 @@ var Board = (function () {
 					}
 				});
 			});
-			player.addResources(resources);
+			player.updateResources(resources);
 		},
 		validate: function (a, b, type) {
 			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= 50;
@@ -437,8 +437,6 @@ var Board = (function () {
 				pos = Engine.getPosition({ x: parseFloat(coords[0]), y: parseFloat(coords[1]) }, edgeType),
 				placement = self.placing;
 			if (self.validatePlacement(placement.piece.type, pos, placement.initial)) {
-				var piece = new placement.piece({ owner: placement.player, pos: pos });
-				placement.player.addPiece(piece);
 				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type, [placement.player.get('color')]);
 				// Update the victory points and such
 				Game.update( );
@@ -448,7 +446,9 @@ var Board = (function () {
 				Controller.release(placement.action);
 				placeState('none');
 				// Execute the callback, if it exists
-				placement.callback && placement.callback();
+				var piece = new placement.piece({ owner: placement.player, pos: pos });
+				placement.player.addPiece(piece);
+				placement.callback && placement.callback(piece);
 			} else {
 				// Placement is no good
 				Game.msg('You can\'t place that there!');

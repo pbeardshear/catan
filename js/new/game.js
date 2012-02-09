@@ -86,8 +86,19 @@ var Game = (function () {
 		},
 		// Called on: build action
 		build: function (type) {
-			if (this.get('self').canBuild(type)) {
+			var _this = this;
+			var self = this.get('self');
+			if (self.canBuild(type)) {
 				// Proceed
+				Board.beginPlace(self, type, false, function (piece) {
+					// Remove the resources from the player
+					var cost = _this.get('cost')[type];
+					var negatedCost = {};
+					base.each(cost, function (amt, name) {
+						negatedCost[name] = -amt;
+					});
+					self.updateResources(negatedCost);
+				});
 			} else {
 				this.msg('You don\'t have enough resources to build that');
 			}
@@ -96,11 +107,6 @@ var Game = (function () {
 		// Called on: successful start command
 		begin: function () {
 			var playerState = this.get('playerState');
-			/*
-			base.each(this.get('players'), function (player) {
-				playerState.push(player.getState());
-			});
-			*/
 			this.moveBoard();
 			// Create the views to house the game displays
 			var self = this.get('self');
@@ -181,7 +187,7 @@ var Game = (function () {
 		},
 		// Called on: trade command, accept property
 		acceptTrade: function () {
-			self.addResources(this.tradeRequest.receive);
+			self.updateResources(this.tradeRequest.receive);
 		},
 		// Called on: player.useCard
 		useCard: function (card) {
