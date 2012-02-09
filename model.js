@@ -78,6 +78,7 @@ function Game (server) {
 	this.playerList = [ ];
 	this.bonuses = { largestArmy: null, longestRoad: null };
 	this.developmentCards = [ ];
+	this.allowBuildBetweenTurns = false;
 	this.colors = ['red', 'blue', 'green', 'orange', 'yellow', 'brown', 'white', 'purple'];
 }
 
@@ -170,21 +171,31 @@ Game.prototype.endTurn = function () {
 	var i = this.currentRotation;
 	var player = this.playerList[i];
 	var self = this;
-	player.self.emit('endTurn', { }, function () {
-		self.currentRotation += 1;
-		if (self.currentRotation == self.currentTurn) {
-			self.currentTurn += 1;
-			self.currentRotation = self.currentTurn + 1;
-			var victory = self.victoryCheck();
-			if (victory && victory.player) {
-				self.broadcast('victory', { player: victory.player });
+	if (this.allowBuildBetweenTurns) {
+		player.self.emit('endTurn', { }, function () {
+			self.currentRotation += 1;
+			if (self.currentRotation == self.currentTurn) {
+				self.currentTurn += 1;
+				self.currentRotation = self.currentTurn + 1;
+				var victory = self.victoryCheck();
+				if (victory && victory.player) {
+					self.broadcast('victory', { player: victory.player });
+				} else {
+					self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+				}
 			} else {
-				self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
+				self.endTurn();
 			}
+		});
+	} else {
+		var victory = self.victoryCheck();
+		if (victory && victory.player) {
+			self.broadcast('victory', { player: victory.player });
 		} else {
-			self.endTurn();
+			self.currentTurn = (self.currentTurn + 1) % self.numPlayers;
+			self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
 		}
-	});
+	}
 };
 
 Game.prototype.trade = function (data, sender) {
@@ -203,7 +214,7 @@ Game.prototype.available = function () {
 // Otherwise, returns false
 Game.prototype.victoryCheck = function () {
 	var currentPlayer = this.playerList[this.currentTurn];
-	if (this.currentPlayer.victoryPoints >= 10) {
+	if (currentPlayer.victoryPoints >= 10) {
 		return true;
 	}
 	return false;

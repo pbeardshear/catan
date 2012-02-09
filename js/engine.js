@@ -13,7 +13,7 @@ var Engine = (function () {
 		canvasID = CONST.ID.canvas,
 		blankID = CONST.ID.blank,
 		imageSize = CONST.tile.img.size,
-		colors = CONST.tile.colors,
+		tileColors = CONST.tile.colors,
 		// DEBUG
 		numbers = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
 		resources = [
@@ -35,6 +35,18 @@ var Engine = (function () {
 			road: 'edge' 
 		},
 		numTiles = 19;
+	
+	// Mapping of possible player colors to their hex values
+	var colors = {
+		red: '#A2000C',
+		blue: '#09276F',
+		green: '#007D1C',
+		orange: '#FF7800',
+		yellow: '#FF3740',
+		brown: '#472F00',
+		white: '#FFFFFF',
+		purple: '#47036F'
+	};
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -152,7 +164,7 @@ var Engine = (function () {
 			center.y = -(center.y - (height/2));
 			
 			// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
-			ctx.fillStyle = colors[this.type] || colors[Math.floor(Math.random()*5)];
+			ctx.fillStyle = tileColors[this.type] || tileColors[Math.floor(Math.random()*5)];
 			ctx.beginPath();
 			ctx.moveTo(center.x + alt, center.y + (len/2));
 			ctx.lineTo(center.x, center.y + len);
@@ -167,9 +179,10 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		port: function () { },
-		road: function () {
+		road: function (color) {
 			var position = (!this.pos.start || !this.pos.end ? getEdge(this.pos, this.type) : this.pos);
 			ctx.save();
+			ctx.strokeStyle = colors[color] || "#000";
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
 			ctx.lineWidth = 5;
 			ctx.beginPath();
@@ -179,8 +192,9 @@ var Engine = (function () {
 			ctx.stroke();
 			ctx.restore();
 		},
-		settlement: function () {
+		settlement: function (color) {
 			ctx.save();
+			ctx.fillStyle = colors[color] || "#000";
 			ctx.beginPath();
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
 			ctx.arc(this.pos.x, this.pos.y, 10, 0, Math.PI*2, false);
@@ -188,7 +202,16 @@ var Engine = (function () {
 			ctx.fill();
 			ctx.restore();
 		},
-		city: function () { }
+		city: function (color) {
+			ctx.save();
+			ctx.fillStyle = colors[color] || "#000";
+			ctx.beginPath();
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.arc(this.pos.x, this.pos.y, 15, 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
+		}
 	};
 	
 	function findTile (x, y) {
@@ -333,8 +356,8 @@ var Engine = (function () {
 			// Create the image maps
 			generateImageMaps();
 		},
-		draw: function (o, type) {
-			return draw[type].call(o);
+		draw: function (o, type, args) {
+			return draw[type].apply(o, args);
 		},
 		getCoords: function (index, size) {
 			return getCenter(index, size);

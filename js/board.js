@@ -439,7 +439,7 @@ var Board = (function () {
 			if (self.validatePlacement(placement.piece.type, pos, placement.initial)) {
 				var piece = new placement.piece({ owner: placement.player, pos: pos });
 				placement.player.addPiece(piece);
-				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type);
+				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type, [placement.player.get('color')]);
 				// Update the victory points and such
 				Game.update( );
 				// Update the other players
