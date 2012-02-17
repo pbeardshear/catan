@@ -61,6 +61,18 @@ var Board = (function () {
 	Tile.prototype.adjacent = function (pos) {
 		return Engine.pointDistance(Engine.getCoords(this.id), pos) <= 50;
 	};
+	Tile.prototype.qualityMap = {
+		2: 1,
+		3: 2,
+		4: 3,
+		5: 4,
+		6: 5,
+		8: 5,
+		9: 4,
+		10: 3,
+		11: 2,
+		12: 1
+	};
 	
 	// Game piece classes
 	var pieces = {
@@ -136,8 +148,10 @@ var Board = (function () {
 	function generateNumbers (size) {
 		var numbers = [];
 		for (var i = 3; i < 12; i++) {
-			for (var j = 0; j < size - 1; j++) {
-				numbers.push(i);
+			if (i != 7) {
+				for (var j = 0; j < size - 1; j++) {
+					numbers.push(i);
+				}
 			}
 		}
 		
@@ -214,22 +228,6 @@ var Board = (function () {
 				spots.sort(function (a, b) {
 					return a.dist - b.dist;
 				});
-				
-				// DEBUG
-				var ctx = $.dom('#map').getContext('2d');
-				ctx.save();
-				ctx.setTransform(1, 0, 0, 1, 0, 0);
-				ctx.beginPath();
-				ctx.fillStyle = '#FFF';
-				ctx.arc(origin.x, origin.y, 20, 0, Math.PI*2, false);
-				ctx.fillStyle = '#000';
-				ctx.arc(pos.x, pos.y, 10, 0, Math.PI*2, false);
-				ctx.arc(spots[0].vertex.x, spots[0].vertex.y, 5, 0, Math.PI*2, false);
-				ctx.arc(spots[1].vertex.x, spots[1].vertex.y, 5, 0, Math.PI*2, false);
-				ctx.closePath();
-				ctx.fill();
-				ctx.restore();
-				
 				ports[i].docks = [spots[0].index, spots[1].index];
 			}
 		}
@@ -321,22 +319,25 @@ var Board = (function () {
 				boardSize = size;
 				var types = generateResources(size),
 					numbers = generateNumbers(size);
+				console.log('resource types', types.length);
+				console.log('resource values', numbers.length);
 				// Create all of the tile objects for the board
 				for (var i = 0; i < numTiles; i++) {
 					var type = popRandom(types);
 					tiles.push(new Tile({
 						id: i,
 						type: type,
-						quality: type != 'desert' ? popRandom(numbers) : 0
+						quality: type != 'desert' ? popRandom(numbers) : 7
 					}));
 				}
+				console.log(tiles);
 				// Create the ports
 				var portTiles = generatePorts(size);
 				console.log(portTiles);
 				for (var i = 0; i < portTiles.length; i++) {
 					ports.push(new Port({
 						id: portTiles[i],
-						type: 'random',
+						type: 'any',
 						pos: this.getTile(portTiles[i], 'port'),
 						count: 3,
 						valid: (i % 2 != 0)
@@ -358,7 +359,7 @@ var Board = (function () {
 				}
 			}
 			// Draw the tiles
-			Engine.generateMap(tiles);
+			Engine.generateMap(tiles, ports);
 			// Generate events for board interaction
 			Controller.on('placeCenter', $('#board-center area'), 'click', this.place, 'pregame');
 			Controller.on('placeVertex', $('#board-vertex area'), 'click', this.place, 'game');

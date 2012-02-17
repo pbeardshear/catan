@@ -5,9 +5,12 @@
 var app = (function () {
 	var CONST = {
 		views: { host: '#hostPage', setup: '#setupPage', game: '#gamePage' },
-		board: { size: 3, height: 620, width: 620, landSize: 50 },
-		tile: { img: { size: { x: 100, y: 114 }, path: '' }, colors: { 'grain': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
+		board: { size: 3, height: 620, width: 800, landSize: 57 },
+		tile: { img: { size: { x: 100, y: 114 } }, colors: { 'grain': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
+		port: { img: { size: { x: 45, y: 45 } }, locations: { size: { x: 52, y: 23 } } },
+		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 } },
 		game: { numTypes: 5, numTiles: 19 },
+		imagePath: 'images/',
 		ID: { canvas: '#map', blank: '#blank' },
 		IP: 'http://localhost:1337'
 	};
@@ -97,7 +100,7 @@ var app = (function () {
 				Game.init(res);
 				Controller.release('host');
 				Controller.release('join');
-				app.transition({ from: 'host', to: 'setup' });
+				//app.transition({ from: 'host', to: 'setup' });
 			}
 		},
 		listGames: function (res) {
@@ -115,7 +118,7 @@ var app = (function () {
 			if (res.success) {
 				Controller.release('host');
 				Controller.release('join');
-				app.transition({ from: 'host', to: 'setup' });
+				//app.transition({ from: 'host', to: 'setup' });
 				Controller.request('startGame');
 			}
 		},

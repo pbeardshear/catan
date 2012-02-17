@@ -13,7 +13,12 @@ var Engine = (function () {
 		canvasID = CONST.ID.canvas,
 		blankID = CONST.ID.blank,
 		imageSize = CONST.tile.img.size,
+		portImageSize = CONST.port.img.size;
+		portLocationOffset = 36,
+		portLocationSize = CONST.port.locations.size;
+		offsets = CONST.imageOffset,
 		tileColors = CONST.tile.colors,
+		tileImagePath = CONST.tile.img.path,
 		// DEBUG
 		numbers = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
 		resources = [
@@ -47,6 +52,43 @@ var Engine = (function () {
 		white: '#FFFFFF',
 		purple: '#47036F'
 	};
+	
+	// Image files
+	var tileImages = {
+		ore: 'tile_ore.png',
+		brick: 'tile_brick.png',
+		wood: 'tile_wood.png',
+		wool: 'tile_wool.png',
+		grain: 'tile_grain.png',
+		desert: 'tile_desert.png'
+	};
+	
+	var qualityImages = {
+		dot1: 'tile_n1.png',
+		dot2: 'tile_n2.png',
+		dot3: 'tile_n3.png',
+		dot4: 'tile_n4.png',
+		dot5: 'tile_n5.png'
+	};
+	
+	var buildImages = {
+		settlementRed: 'settlement_red.png',
+		settlementBlue: 'settlement_blue.png',
+		settlementCyan: 'settlement_cyan.png',
+		settlementGold: 'settlement_gold.png',
+		settlementGreen: 'settlement_green.png',
+		settlementPurple: 'settlement_purple.png',
+		cityRed: 'city_red.png',
+		cityBlue: 'city_blue.png',
+		cityCyan: 'city_cyan.png',
+		cityGold: 'city_gold.png',
+		cityGreen: 'city_green.png',
+		cityPurple: 'city_purple.png'
+	};
+	
+	var portImage = 'icon_port.png'
+	var validPortImage = 'port.png';
+	var landImage = 'bg_land.png';
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -58,103 +100,55 @@ var Engine = (function () {
 	// Convience storage
 	var centers = [];
 	
-	/*
-	// -- Private classes
-	function Port (o) {
-		this.type = o.type;
-		this.count = o.count;
-		this.pos = o.pos;
-		this.id = o.id;
-		this.validPoints = [0, 1];
-		this.hasPort = o.valid;
-	}
-	
-	Port.prototype.draw = function () {
-		var center = getCenter(this.id, 4),
-			len = landSize;
-		ctx.save();
+	// Private classes
+	// ---------------------------------------------------------------------------------------------------------
+	var ResourceManager = (function () {
+		var _images = {};
+		var _basePath;
 		
-		// Adjust the center position to the default coordinate axis
-		center.x -= (length/2);
-		center.y = -(center.y - (height/2));
-		
-		// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
-		ctx.fillStyle = colors[this.type] || colors[Math.floor(Math.random()*5)];
-		ctx.beginPath();
-		ctx.moveTo(center.x + alt, center.y + (len/2));
-		ctx.lineTo(center.x, center.y + len);
-		ctx.lineTo(center.x - alt, center.y + (len/2));
-		ctx.lineTo(center.x - alt, center.y - (len/2));
-		ctx.lineTo(center.x, center.y - len);
-		ctx.lineTo(center.x + alt, center.y - (len/2));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-		
-		if (this.hasPort) {
-			ctx.fillStyle = '#000';
-			ctx.beginPath();
-			ctx.arc(center.x, center.y, 10, 0, Math.PI*2, false);
-			ctx.closePath();
-			ctx.fill();
-		}
-		
-		ctx.restore();
-	};
-	
-	function Tile (o) {
-		this.id = o.id;
-		this.type = o.type;
-		this.quality = o.quality;
-		this.robber = o.type == 'desert';
-	}
-	
-	Tile.prototype.draw = function () {
-		var center = getCenter(this.id),
-			len = landSize;
-		ctx.save();
-		
-		// Adjust the center position to the default coordinate axis
-		center.x -= (length/2);
-		center.y = -(center.y - (height/2));
-		
-		// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
-		ctx.fillStyle = colors[this.type] || colors[Math.floor(Math.random()*5)];
-		ctx.beginPath();
-		ctx.moveTo(center.x + alt, center.y + (len/2));
-		ctx.lineTo(center.x, center.y + len);
-		ctx.lineTo(center.x - alt, center.y + (len/2));
-		ctx.lineTo(center.x - alt, center.y - (len/2));
-		ctx.lineTo(center.x, center.y - len);
-		ctx.lineTo(center.x + alt, center.y - (len/2));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-		
-		ctx.restore();	
-	};
-	
-	Tile.prototype.swap = function (tile) {
-		var type = this.type,
-			quality = this.quality;
-		
-		this.type = tile.type;
-		this.quality = tile.quality;
-		tile.type = type;
-		tile.quality = quality;
-		
-		this.draw();
-		tile.draw();
-	};
-	*/
+		return {
+			init: function (path) {
+				_basePath = path;
+			},
+			load: function (name, path, bulk) {
+				if (bulk) {
+					for (var n in path) {
+						if (path.hasOwnProperty(n)) {
+							this.load(n, path[n], false);
+						}
+					}
+					return;
+				}
+				var image = new Image();
+				image.onload = function () {
+					_images[name].loaded = true;
+				};
+				image.src = _basePath + path;
+				_images[name] = { src: image, loaded: false };
+			},
+			isLoaded: function () {
+				return (_images[image] && _images[image].loaded) || false;
+			},
+			get: function (image) {
+				return _images[image].src || null;
+			}
+		};
+	})();
 	
 	// Private methods
 	// ---------------------------------------------------------------------------------------------------------
 	// Drawing functions
 	var draw = {
+		background: function () {
+			ctx.save();
+			ctx.drawImage(this, -length/2, -height/2);
+			ctx.restore();
+		},
 		tile: function () {
 			var center = getCenter(this.id),
-				len = landSize;
+				len = landSize,
+				tileImage = ResourceManager.get(this.type),
+				qualityImage = this.quality != 7 ? ResourceManager.get('dot' + this.qualityMap[this.quality]) : null;
 			// Add the center to the list
 			centers[this.id] = center.x.toString() + center.y.toString();
 			ctx.save();
@@ -164,7 +158,12 @@ var Engine = (function () {
 			center.y = -(center.y - (height/2));
 			
 			// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
-			ctx.fillStyle = tileColors[this.type] || tileColors[Math.floor(Math.random()*5)];
+			ctx.strokeStyle = '#FFF';
+			ctx.drawImage(tileImage, center.x - alt, center.y - len);
+			if (qualityImage) {
+				ctx.drawImage(qualityImage, center.x - alt, center.y - len);
+			}
+			// ctx.fillStyle = tileColors[this.type] || tileColors[Math.floor(Math.random()*5)];
 			ctx.beginPath();
 			ctx.moveTo(center.x + alt, center.y + (len/2));
 			ctx.lineTo(center.x, center.y + len);
@@ -174,11 +173,32 @@ var Engine = (function () {
 			ctx.lineTo(center.x + alt, center.y - (len/2));
 			ctx.closePath();
 			ctx.stroke();
-			ctx.fill();
 			
 			ctx.restore();
 		},
-		port: function () { },
+		port: function () {
+			var portImage = ResourceManager.get('port');
+			var portLocation = ResourceManager.get('portLocations');
+			ctx.save();
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			// Draw the actual port
+			ctx.drawImage(portImage, this.pos.x - (portImageSize.x/2), this.pos.y - (portImageSize.y/2));
+			ctx.translate(this.pos.x, this.pos.y);
+			ctx.rotate(-Math.PI/2);
+			// TODO: This is difficult to understand, think of a better way to do this
+			var rotation = Math.abs(this.docks[0] - this.docks[1]) == 1 ? min(this.docks) : 5;
+			ctx.rotate((Math.PI/3)*rotation);
+			ctx.drawImage(portLocation, -portLocationSize.x/2, -portLocationSize.y/2 + portLocationOffset);
+			// Set text properties
+			ctx.fillStyle = "#FFF";
+			ctx.font = "11px Trebuchet MS";
+			ctx.textAlign = "center";
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			var yOffset = this.pos.y > height/2 ? 37 : -30;
+			var tradeString = [this.count, ': 1', base.string.capitalize(this.type)].join(' ');
+			ctx.fillText(tradeString, this.pos.x, this.pos.y + yOffset);
+			ctx.restore();
+		},
 		road: function (color) {
 			var position = (!this.pos.start || !this.pos.end ? getEdge(this.pos, this.type) : this.pos);
 			ctx.save();
@@ -193,23 +213,19 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		settlement: function (color) {
+			var settlementColor = 'settlement' + base.string.capitalize(color);
+			var image = ResourceManager.get(settlementColor);
 			ctx.save();
-			ctx.fillStyle = colors[color] || "#000";
-			ctx.beginPath();
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
-			ctx.arc(this.pos.x, this.pos.y, 10, 0, Math.PI*2, false);
-			ctx.closePath();
-			ctx.fill();
+			ctx.drawImage(image, this.pos.x - offsets.settlement.x, this.pos.y - offsets.settlement.y);
 			ctx.restore();
 		},
 		city: function (color) {
+			var cityColor = 'city' + base.string.capitalize(color);
+			var image = ResourceManager.get(cityColor);
 			ctx.save();
-			ctx.fillStyle = colors[color] || "#000";
-			ctx.beginPath();
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
-			ctx.arc(this.pos.x, this.pos.y, 15, 0, Math.PI*2, false);
-			ctx.closePath();
-			ctx.fill();
+			ctx.drawImage(image, this.pos.x - offsets.city.x, this.pos.y - offsets.city.y);
 			ctx.restore();
 		}
 	};
@@ -329,6 +345,14 @@ var Engine = (function () {
 		return Math.round(num * Math.pow(10, dec))/Math.pow(10, dec);
 	}
 	
+	function max (a, b) {
+		return typeof a == 'object' && a.length ? a.sort()[a.length-1] : Math.max(a, b);
+	}
+	
+	function min (a, b) {
+		return typeof a == 'object' && a.length ? a.sort()[0] : Math.min(a, b);
+	}
+	
 	function pointDist (a, b) {
 		return round(Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)), 2);
 	}
@@ -344,14 +368,37 @@ var Engine = (function () {
 			// Initialize the drawing context
 			ctx.translate(length/2, height/2);
 			ctx.scale(1, -1);
+			
+			// Initialize the resource manager
+			ResourceManager.init(app.CONST.imagePath);
+			// Load the images that we will need
+			// Bulk load
+			ResourceManager.load(null, tileImages, true);
+			ResourceManager.load(null, qualityImages, true);
+			ResourceManager.load(null, buildImages, true);
+			// Load port images
+			ResourceManager.load('port', portImage);
+			ResourceManager.load('portLocations', validPortImage);
+			ResourceManager.load('background', landImage);
 			// Set loaded flags
 			this.loaded = true;
 		},
-		generateMap: function (boardTiles) {
+		generateMap: function (boardTiles, boardPorts) {
+			app.transition({ from: 'host', to: 'setup' });
+			// Draw the background image
+			var background = ResourceManager.get('background');
+			// draw.background.call(background);
 			tiles = boardTiles;
+			ports = boardPorts;
+			console.log('tile length', tiles.length);
 			// Draw the tiles to the screen
 			for (var i = 0; i < tiles.length; i++) {
 				tiles[i].draw();
+			}
+			for (var i = 0; i < ports.length; i++) {
+				if (ports[i].valid) {
+					ports[i].draw();
+				}
 			}
 			// Create the image maps
 			generateImageMaps();

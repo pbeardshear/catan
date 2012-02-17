@@ -79,7 +79,7 @@ function Game (server) {
 	this.bonuses = { largestArmy: null, longestRoad: null };
 	this.developmentCards = [ ];
 	this.allowBuildBetweenTurns = false;
-	this.colors = ['red', 'blue', 'green', 'orange', 'yellow', 'brown', 'white', 'purple'];
+	this.colors = ['red', 'blue', 'cyan', 'gold', 'green', 'purple'];
 }
 
 // Host a new game
