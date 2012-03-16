@@ -355,12 +355,14 @@ var Board = (function () {
 					tiles[board.tiles[i].id] = new Tile(board.tiles[i]);
 				}
 				for (var i = 0; i < board.ports.length; i++) {
-					ports[board.ports[i].id] = new Port(board.ports[i]);
+					ports[i] = new Port(board.ports[i]);
 				}
 			}
 			// Draw the tiles
 			Engine.generateMap(tiles, ports);
 			// Generate events for board interaction
+			Controller.on('swap', $('#board-center area'), 'click', this.swapTiles, 'pregame');
+			placeState('center');
 			Controller.on('placeCenter', $('#board-center area'), 'click', this.place, 'pregame');
 			Controller.on('placeVertex', $('#board-vertex area'), 'click', this.place, 'game');
 			Controller.on('placeEdge', $('#board-edge area'), 'click', this.place, 'game');
@@ -455,19 +457,21 @@ var Board = (function () {
 				Game.msg('You can\'t place that there!');
 			}
 		},
-		swapTiles: function (area, i) {
-			if (i && typeof area == 'number' && typeof i == 'number') {
-				var j = area;
+		swapTiles: function (event, i) {
+			if (i && typeof event == 'number' && typeof i == 'number') {
+				var j = event;
 				tiles[i].swap(tiles[j]);
 			} else {
-				var coords = area.coords;
+				var target = event.target,
+					coords = target.coords.split(',');
 				if (swapTile != null) {
-					var tile = this.getTile(coords);
+					// Second tile in the swap
+					var tile = Engine.getTile(coords[0], coords[1]);
 					swapTile.swap(tile);
 					Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
 					swapTile = null;
 				} else {
-					swapTile = this.getTile(coords);
+					swapTile = Engine.getTile(coords[0], coords[1]);
 				}
 			}
 		}

@@ -11,6 +11,8 @@ var Engine = (function () {
 		landSize = CONST.board.landSize,
 		alt = Math.sin(Math.PI/3)*landSize,
 		canvasID = CONST.ID.canvas,
+		roadCanvasID = CONST.ID.roadCanvas,
+		piecesCanvasID = CONST.ID.piecesCanvas,
 		blankID = CONST.ID.blank,
 		imageSize = CONST.tile.img.size,
 		portImageSize = CONST.port.img.size;
@@ -43,14 +45,12 @@ var Engine = (function () {
 	
 	// Mapping of possible player colors to their hex values
 	var colors = {
-		red: '#A2000C',
-		blue: '#09276F',
-		green: '#007D1C',
-		orange: '#FF7800',
-		yellow: '#FF3740',
-		brown: '#472F00',
-		white: '#FFFFFF',
-		purple: '#47036F'
+		red: '#f32d2d',
+		blue: '#2066f2',
+		green: '#1fa926',
+		purple: '#c63af5',
+		cyan: '#23daca',
+		gold: '#f8b530'
 	};
 	
 	// Image files
@@ -86,13 +86,16 @@ var Engine = (function () {
 		cityPurple: 'city_purple.png'
 	};
 	
+	var pieceCanvasMap;
 	var portImage = 'icon_port.png'
 	var validPortImage = 'port.png';
 	var landImage = 'bg_land.png';
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
-	var ctx,
+	var backgroundCtx,
+		roadCtx,
+		piecesCtx,
 		size,
 		selectedTile = null,
 		tiles = [];
@@ -140,11 +143,13 @@ var Engine = (function () {
 	// Drawing functions
 	var draw = {
 		background: function () {
+			var ctx = pieceCanvasMap.background;
 			ctx.save();
 			ctx.drawImage(this, -length/2, -height/2);
 			ctx.restore();
 		},
 		tile: function () {
+			var ctx = pieceCanvasMap.tile;
 			var center = getCenter(this.id),
 				len = landSize,
 				tileImage = ResourceManager.get(this.type),
@@ -177,6 +182,7 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		port: function () {
+			var ctx = pieceCanvasMap.port;
 			var portImage = ResourceManager.get('port');
 			var portLocation = ResourceManager.get('portLocations');
 			ctx.save();
@@ -200,11 +206,19 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		road: function (color) {
+			var ctx = pieceCanvasMap.road
 			var position = (!this.pos.start || !this.pos.end ? getEdge(this.pos, this.type) : this.pos);
 			ctx.save();
-			ctx.strokeStyle = colors[color] || "#000";
+			ctx.strokeStyle = '#FFF';
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
-			ctx.lineWidth = 5;
+			ctx.lineWidth = 7;
+			ctx.beginPath();
+			ctx.moveTo(position.start.x, position.start.y);
+			ctx.lineTo(position.end.x, position.end.y);
+			ctx.closePath();
+			ctx.stroke();
+			ctx.strokeStyle = colors[color] || '#000';
+			ctx.lineWidth = 3;
 			ctx.beginPath();
 			ctx.moveTo(position.start.x, position.start.y);
 			ctx.lineTo(position.end.x, position.end.y);
@@ -213,6 +227,7 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		settlement: function (color) {
+			var ctx = pieceCanvasMap.settlement;
 			var settlementColor = 'settlement' + base.string.capitalize(color);
 			var image = ResourceManager.get(settlementColor);
 			ctx.save();
@@ -221,6 +236,7 @@ var Engine = (function () {
 			ctx.restore();
 		},
 		city: function (color) {
+			var ctx = pieceCanvasMap.city;
 			var cityColor = 'city' + base.string.capitalize(color);
 			var image = ResourceManager.get(cityColor);
 			ctx.save();
@@ -363,11 +379,22 @@ var Engine = (function () {
 		loaded: false,
 		init: function () {
 			// Set up state variables
-			ctx = $.dom(canvasID).getContext('2d');
+			backgroundCtx = $.dom(canvasID).getContext('2d');
+			roadCtx = $.dom(roadCanvasID).getContext('2d');
+			piecesCtx = $.dom(piecesCanvasID).getContext('2d');
+			// Establish a mapping between canvas and drawable object
+			pieceCanvasMap = {
+				road: roadCtx,
+				settlement: piecesCtx,
+				city: piecesCtx,
+				tile: backgroundCtx,
+				port: backgroundCtx,
+				background: backgroundCtx
+			};
 			size = app.CONST.board.size;
 			// Initialize the drawing context
-			ctx.translate(length/2, height/2);
-			ctx.scale(1, -1);
+			backgroundCtx.translate(length/2, height/2);
+			backgroundCtx.scale(1, -1);
 			
 			// Initialize the resource manager
 			ResourceManager.init(app.CONST.imagePath);

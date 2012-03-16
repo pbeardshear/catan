@@ -11,7 +11,7 @@ var app = (function () {
 		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 } },
 		game: { numTypes: 5, numTiles: 19 },
 		imagePath: 'images/',
-		ID: { canvas: '#map', blank: '#blank' },
+		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces' },
 		IP: 'http://localhost:1337'
 	};
 	var phases = { };
@@ -169,8 +169,11 @@ var app = (function () {
 			if (res.type == 'boardState') {
 				// Initialize the board with the full data
 				Board.init(res.data);
+			} else if (res.type == 'swap') {
+				var tiles = res.data;
+				Board.swapTiles(tiles[0], tiles[1]);
 			}
-		}
+		},
 	};
 	
 	return {

@@ -72,6 +72,15 @@ base.sockets.on('connection', function (client) {
 		},
 		disconnect: function () {
 			server.drop(client);
+		},
+		update: function (options) {
+			server.log('got update', options);
+			if (options.dest == 'client') {
+				// TODO: Hardcoded, rework to make more flexible
+				client.game.broadcast('update', { type: options.type, data: options.data }, options.self, client);
+			} else if (options.dest == 'server') {
+				
+			}
 		}
 	};
 	

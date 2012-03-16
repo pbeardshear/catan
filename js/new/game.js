@@ -65,6 +65,7 @@ var Game = (function () {
 		// Called on: successful host
 		setup: function () {
 			Board.init(app.CONST.board.size);
+			Controller.request('swap');
 		},
 		// Called on: successful addPlayer command
 		addPlayers: function (data) {

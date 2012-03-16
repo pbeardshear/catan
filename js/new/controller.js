@@ -161,6 +161,10 @@ var Controller = (function () {
 				return;
 			}
 			interceptor.deactivate(name);
+		},
+		// Send a state update request to the server
+		update: function (data) {
+			socket.emit('update', data);
 		}
 	};
 })();
