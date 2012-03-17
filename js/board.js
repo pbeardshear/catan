@@ -100,7 +100,7 @@ var Board = (function () {
 	};
 	Road.prototype.isAt = function (pos) {
 		return (round(pos.x,2) == round(this.start.x,2) && round(pos.y,2) == round(this.start.y,2) 
-				|| round(pos.x,2) == round(this.start.x,2) && round(pos.y,2) == round(this.end.y,2));
+				|| round(pos.x,2) == round(this.end.x,2) && round(pos.y,2) == round(this.end.y,2));
 	};
 	
 	function Settlement (o) {

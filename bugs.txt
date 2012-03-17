@@ -4,4 +4,3 @@ Known bugs:
 	- user list view does not remove old user when user leaves game (pregame)
 	- game does not correctly drop user when user leaves the game (pregame)
 	- game does not compute resources correctly on roll (game)
-	- occasionally (not exactly sure of the cases when this occurs) road placement is determined to be invalid even if it does correctly border a settlement (initial placement)
