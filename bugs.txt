@@ -3,7 +3,5 @@
 Known bugs:
 	- user list view does not remove old user when user leaves game (pregame)
 	- game does not correctly drop user when user leaves the game (pregame)
-	- game does not broadcast update when player places a board object (road, settlement, city) (initial placement, game)
 	- game does not compute resources correctly on roll (game)
-	- game does not correctly enforce placement restrictions (two settlements can be placed adjacent to one another) (initial placement)
 	- occasionally (not exactly sure of the cases when this occurs) road placement is determined to be invalid even if it does correctly border a settlement (initial placement)

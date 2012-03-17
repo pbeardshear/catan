@@ -64,7 +64,7 @@ var Board = (function () {
 		tile.draw();
 	};
 	Tile.prototype.adjacent = function (pos) {
-		return Engine.pointDistance(Engine.getCoords(this.id), pos) <= 50;
+		return Engine.pointDistance(Engine.getCoords(this.id), pos) <= CONST.board.landSize;
 	};
 	Tile.prototype.qualityMap = {
 		2: 1,
@@ -304,12 +304,12 @@ var Board = (function () {
 		var settlements = getPieces('settlement'),
 			cities = getPieces('city');
 		for (var i = 0; i < settlements.length; i++) {
-			if (Engine.pointDistance(settlements[i].pos, pos) <= 50) {
+			if (Engine.pointDistance(settlements[i].pos, pos) <= CONST.board.landSize) {
 				return true;
 			}
 		}
 		for (var i = 0; i < cities.length; i++) {
-			if (Engine.pointDistance(cities[i].pos, pos) <= 50) {
+			if (Engine.pointDistance(cities[i].pos, pos) <= CONST.board.landSize) {
 				return true;
 			}
 		}
@@ -419,7 +419,7 @@ var Board = (function () {
 			player.updateResources(resources);
 		},
 		validate: function (a, b, type) {
-			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= 50;
+			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= CONST.board.landSize;
 		},
 		validatePlacement: function (type, pos, adjusted) {
 			// Road - no road there + adjacent to current road
