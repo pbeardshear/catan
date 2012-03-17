@@ -172,6 +172,8 @@ var app = (function () {
 			} else if (res.type == 'swap') {
 				var tiles = res.data;
 				Board.swapTiles(tiles[0], tiles[1]);
+			} else if (res.type == 'build') {
+				Board.placePiece(res.data);
 			}
 		},
 	};

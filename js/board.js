@@ -9,8 +9,13 @@ var Board = (function () {
 		height = CONST.board.height,
 		width = CONST.board.width,
 		numResources = CONST.game.numTypes,
-		numTiles = CONST.game.numTiles,
-		round = Math.round;
+		numTiles = CONST.game.numTiles;
+		
+	// Utility methods
+	// ---------------------------------------------------------------------------------------------------------
+	function round (x, precision) {
+		return parseFloat(x.toPrecision(precision));
+	}
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -82,9 +87,11 @@ var Board = (function () {
 	};
 	
 	function Road (o) {
+		this.pos = o.pos;
 		this.start = o.pos.start;
 		this.end = o.pos.end;
 		this.owner = o.owner;
+		this.edge = o.edge;
 		this.type = 'road';
 	}
 	Road.type = 'road';
@@ -253,7 +260,13 @@ var Board = (function () {
 	function empty (type, pos) {
 		var pieces = getPieces(type);
 		for (var i = 0; i < pieces.length; i++) {
-			if (pieces[i].isAt(pos)) {
+			if (type == 'road') {
+				// For a position to be occupied, both its start and end positions must be taken by this piece
+				if (pieces[i].isAt(pos.start) && pieces[i].isAt(pos.end)) {
+					return pieces[i];
+				}
+			}
+			else if (pieces[i].isAt(pos)) {
 				return pieces[i];
 			}
 		}
@@ -440,22 +453,35 @@ var Board = (function () {
 				pos = Engine.getPosition({ x: parseFloat(coords[0]), y: parseFloat(coords[1]) }, edgeType),
 				placement = self.placing;
 			if (self.validatePlacement(placement.piece.type, pos, placement.initial)) {
-				Engine.draw({ pos: pos, type: edgeType }, placement.piece.type, [placement.player.get('color')]);
-				// Update the victory points and such
-				Game.update( );
-				// Update the other players
-				Controller.fire('update', { type: 'build', data: { type: piece } });
 				// Do some cleanup
 				Controller.release(placement.action);
 				placeState('none');
+				// Place the piece on the board
+				var options = {
+					player: placement.player.get('id'),
+					pos: pos,
+					edge: edgeType,
+					type: placement.piece.type
+				};
+				var piece = self.placePiece(options);
+				Controller.update({ dest: 'client', type: 'build', data: options });
 				// Execute the callback, if it exists
-				var piece = new placement.piece({ owner: placement.player, pos: pos });
-				placement.player.addPiece(piece);
 				placement.callback && placement.callback(piece);
 			} else {
 				// Placement is no good
 				Game.msg('You can\'t place that there!');
 			}
+		},
+		// Actually place the game piece on the board
+		// Called by Board.place, and also on placement update from the server (when another player places a piece)
+		placePiece: function (options) {
+			var player = Game.getPlayer(options.player);
+			var piece = new pieces[options.type]({ owner: player, pos: options.pos, edge: options.edge });
+			player.addPiece(piece);
+			Game.update();
+			console.log(piece.pos);
+			Engine.draw({ pos: piece.pos, type: piece.edge || null }, piece.type, [player.get('color')]);
+			return piece;
 		},
 		swapTiles: function (event, i) {
 			if (i && typeof event == 'number' && typeof i == 'number') {

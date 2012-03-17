@@ -79,7 +79,7 @@ base.sockets.on('connection', function (client) {
 				// TODO: Hardcoded, rework to make more flexible
 				client.game.broadcast('update', { type: options.type, data: options.data }, options.self, client);
 			} else if (options.dest == 'server') {
-				
+				// TODO: Update server state
 			}
 		}
 	};

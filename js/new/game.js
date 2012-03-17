@@ -67,6 +67,14 @@ var Game = (function () {
 			Board.init(app.CONST.board.size);
 			Controller.request('swap');
 		},
+		getPlayer: function (id) {
+			var players = this.get('players');
+			for (var i = 0; i < players.length; i++) {
+				if (players[i].get('id') == id) {
+					return players[i];
+				}
+			}
+		},
 		// Called on: successful addPlayer command
 		addPlayers: function (data) {
 			var _this = this;
