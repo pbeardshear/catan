@@ -52,14 +52,18 @@ var Game = (function () {
 		init: function (data) {
 			// Create getter and setter functions
 			base.accessor(this, _this);
-			this.set('self', new Player(data));
+			data.isSelf = true;
+			var self = Player.create(data);
+			this.set('self', self);
+			// TODO: Think of a better way to do this
+			App.Players.set('self', self);
 			// Create the player preview view
 			this.get('views').playerPreview = new View({
 				data: this.get('playerState'),
 				template: '<li><div class="player"><div class="colorSquare {color}"></div><span>{name}</span></div></li>',
 				el: '#playerList ul'
 			});
-			this.addPlayers(this.get('self'));
+			this.addPlayers(self);
 		},
 		// Set up initial game state (i.e. board, game-specific options)
 		// Called on: successful host
@@ -82,15 +86,19 @@ var Game = (function () {
 			var views = this.get('views');
 			if (data instanceof Player) {
 				this.get('players').push(data);
+				// TODO: Deprecate this
 				this.get('playerState').push(data.getState());
-				views.playerPreview.create([data.getState()]);
+				App.Players.addPlayer(data);
+				// views.playerPreview.create([data.getState()]);
 			} else if (base.isArray(data)) {
 				base.each(data, function (o) {
-					var player = new Player(o);
+					var player = Player.create(o);
+					// var player = new Player(o);
 					_this.addPlayers(player);
 				});
 			} else {
-				this.addPlayers(new Player(data));
+				// this.addPlayers(new Player(data));
+				this.addPlayers(Player.create(data));
 			}
 		},
 		// Called on: build action
@@ -120,45 +128,49 @@ var Game = (function () {
 			// Create the views to house the game displays
 			var self = this.get('self');
 			var views = this.get('views');
-			views.resources = new View({
-				el: '#resources .items',
-				attr: 'class',
-				data: self.get('resources')
-			});
-			views.developmentCards = new View({
-				el: '#development .items',
-				attr: 'value',
-				data: self.get('developmentCards'),
-				template: '<li><a href="" class="button" value="{name}">{fullName}</a></li>',
-				fn: base.fn.delegate(this, function (cards) {
-					var fullNames = this.get('cardNames');
-					var ret = { };
-					base.each(cards, function (val, field) {
-						if (val == 1) {
-							ret[field] = fullNames[field];
-						} else if (val > 1) {
-							ret[field] = [fullNames[field], val].join(' x ');
-						} else {
-							ret[field] = null;
-						}
-					});
-					return ret;
-				})
-			});
-			views.players = new View({
-				el: '#playerInfo',
-				attr: 'class',
-				data: playerState,
-				template: '<tr class="{color}"><td class="name">{name}</td><td class="achievement">{achievement}</td>' +
-							'<td class="resource"><em>R: </em><a class="resourceCount">{resourceCount}</a></td>' +
-							'<td class="development"><em>D: </em><a class="developmentCount">{developmentCount}</a></td>' +
-							'<td class="victory"><em>V: </em><a class="victoryPoints">{victoryPoints}</a></td>' + 
-							'</tr>'
-			});
+			// views.resources = new View({
+				// el: '#resources .items',
+				// attr: 'class',
+				// data: self.get('resources')
+			// });
+			// views.developmentCards = new View({
+				// el: '#development .items',
+				// attr: 'value',
+				// data: self.get('developmentCards'),
+				// template: '<li><a href="" class="button" value="{name}">{fullName}</a></li>',
+				// fn: base.fn.delegate(this, function (cards) {
+					// var fullNames = this.get('cardNames');
+					// var ret = { };
+					// base.each(cards, function (val, field) {
+						// if (val == 1) {
+							// ret[field] = fullNames[field];
+						// } else if (val > 1) {
+							// ret[field] = [fullNames[field], val].join(' x ');
+						// } else {
+							// ret[field] = null;
+						// }
+					// });
+					// return ret;
+				// })
+			// });
+			// views.players = new View({
+				// el: '#playerInfo',
+				// attr: 'class',
+				// data: playerState,
+				// template: '<tr class="{color}"><td class="name">{name}</td><td class="achievement">{achievement}</td>' +
+							// '<td class="resource"><em>R: </em><a class="resourceCount">{resourceCount}</a></td>' +
+							// '<td class="development"><em>D: </em><a class="developmentCount">{developmentCount}</a></td>' +
+							// '<td class="victory"><em>V: </em><a class="victoryPoints">{victoryPoints}</a></td>' + 
+							// '</tr>'
+			// });
 			
-			views.players.create();
+			// views.players.create();
 			// Transition the view to game
 			app.transition({ from: 'setup', to: 'game' });
+			// TODO: Move this somewhere more appropriate
+			$('#tradeButton').click(function (e) {
+				$('#tradePopup').toggle();
+			});
 			// Change the current action bundle
 			Controller.swapTo('game');
 		},

@@ -74,4 +74,40 @@ View.prototype.destroy = function (attr, val) {
 	}
 };
 
+/*
+ *	Ember views
+ *	Currently not touching the old view infrastructure until I get this up and working
+ */
+
+var loadViews = function () {
+	/*
+	 *	Pregame views
+	 */
+	App.user = Ember.Object.create({
+		name: 'peter'
+	});
+	App._games = Ember.ArrayController.create({
+		content: [],
+		add: function (val) {
+			this.pushObject({ name: val });
+		}
+	});
+	App.GameListView = Ember.View.extend({
+		games: App._games,
+		name: App.user.name
+	});
+	
+	
+	/*
+	 * 	Game views
+	 */
+	 /*
+	// View for the in-game player statistics
+	App.PlayerView = Ember.View.extend({
+		players: Game.get('playerState')
+	});
+	*/
+	
+	// View 
+};
 

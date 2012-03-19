@@ -104,11 +104,12 @@ var app = (function () {
 			}
 		},
 		listGames: function (res) {
-			base.empty(games);
-			views.gameList.destroy('class', 'game');
-			// Update the view with the list of games
-			base.merge(games, res);
-			views.gameList.create();
+			App.Games.set('content', res);
+			// base.empty(games);
+			// // views.gameList.destroy('class', 'game');
+			// // Update the view with the list of games
+			// base.merge(games, res);
+			// views.gameList.create();
 			Controller.detect('join');
 		},
 		addPlayers: function (res) {
@@ -169,6 +170,9 @@ var app = (function () {
 			if (res.type == 'boardState') {
 				// Initialize the board with the full data
 				Board.init(res.data);
+			} else if (res.type == 'playerState') {
+				var playerData = res.data;
+				App.Players.updatePlayer(playerData.player, playerData.property, playerData.value);
 			} else if (res.type == 'swap') {
 				var tiles = res.data;
 				Board.swapTiles(tiles[0], tiles[1]);
@@ -199,6 +203,12 @@ var app = (function () {
 			});
 			Controller.bundle('endgame', { cleanup: actions.cleanup, end: actions.end });
 			Controller.request(['host', 'join', 'listGames']);
+			
+			// Globally namespace the application
+			App = Ember.Application.create();
+			this.initControllers();
+			this.initViews();
+			
 			// Create pregame views
 			views.gameList = new View({
 				data: games,
@@ -207,11 +217,45 @@ var app = (function () {
 			});
 			Controller.fire('listGames');
 		},
+		
 		transition: function (o) {
 			var from = CONST.views[o.from],
 				to = CONST.views[o.to];
 			$(from).hide(200);
 			$(to).show(200);
+		},
+		
+		// TODO: Consider moving this function somewhere more appropriate
+		initControllers: function () {
+			// Empty controller for game list, loaded when we get a response from the server with the data
+			App.Games = Ember.ArrayController.create();
+			App.Players = Ember.ArrayController.create({
+				content: [],
+				self: null,
+				addPlayer: function (player) {
+					// Workaround for adding both static and dynamic classes to a DOM element
+					player.alwaysTrue = true;
+					this.pushObject(player);
+				},
+				
+				updatePlayer: function (id, property, value) {
+					this.find(function (player) {
+						return player.id == id;
+					}).set(property, value);
+				}
+			});
+			
+		},
+		
+		// TODO: Consider moving this function somewhere more appropriate
+		initViews: function () {
+			App.GameList = Ember.View.extend({
+				games: App.Games,
+				join: function (self, event) {
+					// TODO: Think of a better way to abstract this, preferably through the controller
+					actions.join.call(event.target, event);
+				}
+			});
 		}
 	};
 })();

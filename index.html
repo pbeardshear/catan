@@ -5,14 +5,7 @@
 		<title>Catan</title>
 		<link rel="stylesheet" href="main.css" type="text/css" media="screen" />
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
-		<!--
-		<script type="text/javascript" src="http://localhost:1337/socket.io/socket.io.js"></script>
-		<script src="js/app.js"></script>
-		<script src="js/controller.js"></script>
-		<script src="js/engine.js"></script>
-		<script src="js/board.js"></script>
-		<script src="js/game.js"></script>
-		-->
+		<script type="text/javascript" src="ember-0.9.5.js"></script>
 		<script type="text/javascript" src="http://localhost:1337/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="js/method.js"></script>
 		<script type="text/javascript" src="js/new/app.js"></script>
@@ -61,19 +54,23 @@
 				<div class="header">Join</div>
 				<div class="body">
 					<div id="gameList">
-						<table>
-							<tr>
-								<th>Game Name</th>
-								<th>Players</th>
-							</tr>
-							<!--
-							<tr class="game">
-								<td class="gameName">Not a real game</td>
-								<td>3/6</td>
-								<td><a class="join button action">Join</a></td>
-							</tr>
-							-->
-						</table>
+						<script type="text/x-handlebars">
+							{{#view App.GameList}}
+								<table>
+									<tr>
+										<th>Game Name</th>
+										<th>Players</th>
+									</tr>
+									{{#each games}}
+										<tr class="game">
+											<td class="gameName">{{unbound name}}</td>
+											<td>{{unbound count}}/{{unbound max}}</td>
+											<td><a class="join button action" {{action "join" on="click"}}>Join</a></td>
+										</tr>
+									{{/each}}
+								</table>
+							{{/view}}
+						</script>
 					</div>
 				</div>
 			</div>
@@ -93,9 +90,16 @@
 				<button id="startGame" class="action startGame">Start</button>
 			</div>
 			<div id="playerList">
-				<ul>
-					<li><div class="colorSquare"></div><div class="player">Test User</div></li>
-				</ul>
+				<script type="text/x-handlebars">
+					<ul>
+						{{#each App.Players}}
+							<li>
+								<div {{bindAttr class="color alwaysTrue:colorSquare"}}></div>
+								<div class="playerName">{{name}}</div>
+							</li>
+						{{/each}}
+					</ul>
+				</script>
 			</div>
 		</div>
 		<!-- Start Game Page -->
@@ -106,48 +110,53 @@
 					<p>Becky built a settlement</p>
 				</div>
 				<!-- Map Container goes here -->
-				<!--
-				<div id="mapContainer">
-					<canvas id="map" height="620" width="620"></canvas>
-					<img src="images/blank.png" id="blank" />
-				</div>
-				-->
 			</div>
 			<!-- Side Pane -->			
 			<div id="sidePane" class="pane">
-				<table id="playerInfo">
-					<!-- Test player statuses
-					<tr class="red">
-						<td class="name">Tim</td>
-						<td class="achievement">R</td>
-						<td class="resource"><em>R:</em> 8</td>
-						<td class="development"><em>D:</em> 2</td>
-						<td class="victory"><em>V:</em> 4</td>
-					</tr>
-					<tr class="orange">
-						<td class="name">Colin</td>
-						<td class="achievement">&nbsp;</td>
-						<td class="resource"><em>R:</em> 8</td>
-						<td class="development"><em>D:</em> 2</td>
-						<td class="victory"><em>V:</em> 4</td>
-					</tr>
-					<tr class="blue active">
-						<td class="name">Becky</td>
-						<td class="achievement">A</td>
-						<td class="resource"><em>R:</em> 8</td>
-						<td class="development"><em>D:</em> 20</td>
-						<td class="victory"><em>V:</em> 4</td>
-					</tr>
-					<tr class="white">
-						<td class="name">Peter</td>
-						<td class="achievement">&nbsp;</td>
-						<td class="resource"><em>R:</em> 10</td>
-						<td class="development"><em>D:</em> 2</td>
-						<td class="victory"><em>V:</em> 4</td>
-					</tr>
-					
-					-->
-				</table>
+				<script type="text/x-handlebars">
+					<table id="playerInfo">						
+						{{#each App.Players}}
+							<tr {{bindAttr class="color"}}>
+								<td class="name">{{name}}</td>
+								<td class="achievement">{{achievements}}</td>
+								<td class="resource"><em>R:</em>{{resourceCount}}</td>
+								<td class="development"><em>D:</em>{{developmentCount}}</td>
+								<td class="victory"><em>V:</em>{{victoryPoints}}</td>
+							</tr>
+						{{/each}}
+					</table>
+				</script>
+				<!-- Test player statuses
+				<tr class="red">
+					<td class="name">Tim</td>
+					<td class="achievement">R</td>
+					<td class="resource"><em>R:</em> 8</td>
+					<td class="development"><em>D:</em> 2</td>
+					<td class="victory"><em>V:</em> 4</td>
+				</tr>
+				<tr class="orange">
+					<td class="name">Colin</td>
+					<td class="achievement">&nbsp;</td>
+					<td class="resource"><em>R:</em> 8</td>
+					<td class="development"><em>D:</em> 2</td>
+					<td class="victory"><em>V:</em> 4</td>
+				</tr>
+				<tr class="blue active">
+					<td class="name">Becky</td>
+					<td class="achievement">A</td>
+					<td class="resource"><em>R:</em> 8</td>
+					<td class="development"><em>D:</em> 20</td>
+					<td class="victory"><em>V:</em> 4</td>
+				</tr>
+				<tr class="white">
+					<td class="name">Peter</td>
+					<td class="achievement">&nbsp;</td>
+					<td class="resource"><em>R:</em> 10</td>
+					<td class="development"><em>D:</em> 2</td>
+					<td class="victory"><em>V:</em> 4</td>
+				</tr>
+				
+				-->
 				<div class="actions">
 					<a class="button" id="tradeButton">Trade Resources</a>
 					<a class="button action endTurn" id="endButton">End Turn</a>	
@@ -221,6 +230,18 @@
 				</div>
 				<!-- Resources -->
 				<div id="resources" class="actionPane">
+					<script type="text/x-handlebars">
+						{{#with App.Players.self}}
+							<ul class="items">
+								<li class="wool">{{wool}}</li>
+								<li class="grain">{{grain}}</li>
+								<li class="ore">{{ore}}</li>
+								<li class="brick">{{brick}}</li>
+								<li class="wood">{{wood}}</li>
+							</ul>
+						{{/with}}
+					</script>
+					<!--
 					<ul class="items">
 						<li class="wool">0</li>
 						<li class="grain">0</li>
@@ -228,6 +249,7 @@
 						<li class="brick">0</li>
 						<li class="wood">0</li>
 					</ul>
+					-->
 				</div>
 				<!-- Development -->				
 				<div id="development" class="actionPane">
