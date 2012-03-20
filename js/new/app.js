@@ -8,10 +8,10 @@ var app = (function () {
 		board: { size: 3, height: 620, width: 800, landSize: 57 },
 		tile: { img: { size: { x: 100, y: 114 } }, colors: { 'grain': '#FFC500', 'wool': '#B3F36D', 'wood': '#238C47', 'brick': '#BF7130', 'ore': '#AAA', 'desert': '#000', 'port': '#3F92D2'} },
 		port: { img: { size: { x: 45, y: 45 } }, locations: { size: { x: 52, y: 23 } } },
-		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 } },
+		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 }, robber: { x: 33, y: 33 } },
 		game: { numTypes: 5, numTiles: 19 },
 		imagePath: 'images/',
-		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces' },
+		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber' },
 		IP: 'http://localhost:1337'
 	};
 	var phases = { };

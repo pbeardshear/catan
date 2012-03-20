@@ -23,8 +23,6 @@ var Board = (function () {
 		tiles = [],
 		ports = [],
 		boardSize = 0;
-		
-	var robberTile = null;
 	
 	// Private classes
 	// ---------------------------------------------------------------------------------------------------------
@@ -46,7 +44,7 @@ var Board = (function () {
 		this.id = o.id;			// Tile id (used by rendering engine)
 		this.type = o.type;		// The type of resource that this tile produces
 		this.quality = o.quality;		// The roll on which this tile will produce resources
-		this.robber = o.type == 'desert';	// Boolean flag indicating whether this tiles houses the robber
+		this.robber = false;	// Boolean flag indicating whether this tiles houses the robber
 	}
 	Tile.prototype.draw = function () {
 		Engine.draw(this, 'tile');
@@ -318,14 +316,26 @@ var Board = (function () {
 	
 	// Set the placement area that should be active
 	// Valid types are 'center', 'edge', 'vertex', and 'none'
-	function placeState (type) {
+	// Providing a callback binds a click event to the objects in the new state
+	// This callback is only called once, then is discarded
+	function placeState (type, callback) {
 		var id = type === 'none' ? '' : '#board-' + type;
 		Engine.setActiveMap(id);
+		// Register the callback
+		if (id && callback) {
+			$(id + ' area').bind('click', function (e) {
+				callback.call(Board, e);
+				$(id + ' area').unbind('click');
+			});
+		}
 	}
 	
 	// Public
 	// ---------------------------------------------------------------------------------------------------------
 	return {
+		// Board accessor state
+		robberTile: null,
+		
 		// Initialize the board state, and draw it to the canvas
 		init: function (size) {
 			if (typeof size == 'number') {
@@ -336,12 +346,17 @@ var Board = (function () {
 				console.log('resource values', numbers.length);
 				// Create all of the tile objects for the board
 				for (var i = 0; i < numTiles; i++) {
-					var type = popRandom(types);
-					tiles.push(new Tile({
-						id: i,
-						type: type,
-						quality: type != 'desert' ? popRandom(numbers) : 7
-					}));
+					var type = popRandom(types),
+						tile = new Tile({
+							id: i,
+							type: type,
+							quality: type != 'desert' ? popRandom(numbers) : 7
+						});
+					if (type == 'desert') {
+						tile.robber = true;
+						this.robberTile = tile;
+					}
+					tiles.push(tile);
 				}
 				console.log(tiles);
 				// Create the ports
@@ -501,6 +516,22 @@ var Board = (function () {
 					swapTile = Engine.getTile(coords[0], coords[1]);
 				}
 			}
+		},
+		
+		// Set up the click state and register a click callback to swap the robber tile
+		moveRobber: function () {
+			placeState('center', function (e) {
+				var coords = e.target.coords.split(','),
+					tile = Engine.getTile(coords[0], coords[1]);
+				if (tile.id != this.robberTile.id) {
+					tile.robber = true;
+					this.robberTile.robber = false;
+					this.robberTile = tile;
+					Engine.drawRobber();
+				} else {
+					Game.msg('You must move the robber to a different tile!');
+				}
+			});
 		}
 	};
 })();

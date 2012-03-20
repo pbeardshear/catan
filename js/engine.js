@@ -13,6 +13,7 @@ var Engine = (function () {
 		canvasID = CONST.ID.canvas,
 		roadCanvasID = CONST.ID.roadCanvas,
 		piecesCanvasID = CONST.ID.piecesCanvas,
+		robberCanvasID = CONST.ID.robberCanvas,
 		blankID = CONST.ID.blank,
 		imageSize = CONST.tile.img.size,
 		portImageSize = CONST.port.img.size;
@@ -90,6 +91,8 @@ var Engine = (function () {
 	var portImage = 'icon_port.png'
 	var validPortImage = 'port.png';
 	var landImage = 'bg_land.png';
+	
+	var robberImage = 'robber.png';
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -382,6 +385,7 @@ var Engine = (function () {
 			backgroundCtx = $.dom(canvasID).getContext('2d');
 			roadCtx = $.dom(roadCanvasID).getContext('2d');
 			piecesCtx = $.dom(piecesCanvasID).getContext('2d');
+			robberCtx = $.dom(robberCanvasID).getContext('2d');
 			// Establish a mapping between canvas and drawable object
 			pieceCanvasMap = {
 				road: roadCtx,
@@ -407,6 +411,7 @@ var Engine = (function () {
 			ResourceManager.load('port', portImage);
 			ResourceManager.load('portLocations', validPortImage);
 			ResourceManager.load('background', landImage);
+			ResourceManager.load('robber', robberImage);
 			// Set loaded flags
 			this.loaded = true;
 		},
@@ -432,6 +437,20 @@ var Engine = (function () {
 		},
 		draw: function (o, type, args) {
 			return draw[type].apply(o, args);
+		},
+		drawRobber: function () {
+			var robberTile = Board.robberTile,
+				tileCoords = this.getCoords(robberTile.id, CONST.board.size);
+			
+			// Get the robber image from the resource manager
+			var robber = ResourceManager.get('robber'),
+				ctx = robberCtx;
+				
+			ctx.save();
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.clearRect(0, 0, 800, 800);
+			ctx.drawImage(robber, tileCoords.x - offsets.robber.x, tileCoords.y - offsets.robber.y);
+			ctx.restore();
 		},
 		getCoords: function (index, size) {
 			return getCenter(index, size);

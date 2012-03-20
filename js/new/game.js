@@ -28,6 +28,7 @@ var Game = (function () {
 		knight: function () {
 			// Move robber
 			// Then, steal from a player adjacent
+			Board.moveRobber();
 		},
 		plenty: function () {
 			// Bring up popup for user to select two resources
@@ -177,6 +178,7 @@ var Game = (function () {
 			});
 			// Change the current action bundle
 			Controller.swapTo('game');
+			Engine.drawRobber();
 		},
 		// Request control and begin the turn
 		// Called on: successful startTurn command
