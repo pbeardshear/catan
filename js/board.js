@@ -417,7 +417,7 @@ var Board = (function () {
 			var cities = player.get('cities');
 			
 			var resources = { grain: 0, ore: 0, wood: 0, wool: 0, brick: 0 };
-			base.each(base.filter(tiles, function (tile) { return tile.quality == roll; }), function (tile) {
+			base.each(base.filter(tiles, function (tile) { return tile.quality == roll && !tile.robber; }), function (tile) {
 				// Check if any of the settlements or cities are adjacent to a matched tile
 				base.each(settlements, function (settlement) {
 					if (tile.adjacent(settlement.pos)) {

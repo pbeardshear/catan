@@ -244,10 +244,11 @@ Player = Ember.Object.extend({
 	useCard: function (card) {
 		if (this.get(card) != 0) {
 			// var view = Game.get('views').developmentCards;
-			Game.useCard(card);
-			this.incrementProperty(card, -1);
-			// this.update('developmentCards', card, -1);
-			// view.update();
+			var result = Game.useCard(card);
+			// Need to check specifically for false, because some card uses are asynchronous and return undefined, which is falsey
+			if (result == false) {
+				this.incrementProperty(card, -1);
+			}
 		}
 	},
 	
@@ -259,6 +260,17 @@ Player = Ember.Object.extend({
 				self.incrementProperty(type, amt);
 			}
 		});
+	},
+	
+	// Returns a random resource in this player's possession and removes it from their state
+	takeRandom: function () {
+		var resources = [];
+		base.each(this.get('resources'), function (count, type) {
+			for (var i = 0; i < count; i++) {
+				resources.push(type);
+			}
+		});
+		return resources[Math.floor(Math.random()*resources.length)] || null;
 	}
 });
 

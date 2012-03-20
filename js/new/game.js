@@ -42,9 +42,24 @@ var Game = (function () {
 		roadBuild: function () {
 			// Popup message telling user to place two roads
 			// Tell board that user is placing roads
+			var self = Game.get('self');
+			Game.msg('Place two roads.');
+			Controller.update({
+				dest: 'client',
+				self: false,
+				type: 'message',
+				data: {
+					text: self.name + " played 'Road Building'!";
+				}
+			});
+			Board.beginPlace(self, 'road', false, function () {
+				Board.beginPlace(self, 'road', false);
+			});
 		},
 		victory: function () {
 			// Popup message telling user that they can't use victory cards
+			Game.msg('You can\'t use a victory card.');
+			return false;
 		}
 	};
 	
@@ -120,9 +135,16 @@ var Game = (function () {
 					});
 				} else {
 					self.drawCard();
+					// Remove the resources from the player
+					var cost = _this.get('cost')[type];
+					var negatedCost = {};
+					base.each(cost, function (amt, name) {
+						negatedCost[name] = -amt;
+					});
+					self.updateResources(negatedCost);
 				}
 			} else {
-				this.msg('You don\'t have enough resources to build that');
+				this.msg('You don\'t have enough resources to build that.');
 			}
 		},
 		// Update the game state from the server, move to game view
@@ -217,7 +239,7 @@ var Game = (function () {
 		},
 		// Called on: player.useCard
 		useCard: function (card) {
-			developmentCards[card]();
+			return developmentCards[card]();
 		},
 		// Update the display state of the game
 		// Called on: update command, Board place, Board resource harvest

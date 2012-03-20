@@ -178,6 +178,8 @@ var app = (function () {
 				Board.swapTiles(tiles[0], tiles[1]);
 			} else if (res.type == 'build') {
 				Board.placePiece(res.data);
+			} else if (res.type == 'message') {
+				Game.msg(res.data.text);
 			}
 		},
 	};
