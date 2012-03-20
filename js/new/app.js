@@ -227,6 +227,11 @@ var app = (function () {
 		
 		// TODO: Consider moving this function somewhere more appropriate
 		initControllers: function () {
+			// A simple Ember object which displays an instruction or update message to the user
+			App.gameMessage = Ember.Object.create({
+				text: ''
+			});
+			
 			// Empty controller for game list, loaded when we get a response from the server with the data
 			App.Games = Ember.ArrayController.create();
 			App.Players = Ember.ArrayController.create({
@@ -254,6 +259,13 @@ var app = (function () {
 				join: function (self, event) {
 					// TODO: Think of a better way to abstract this, preferably through the controller
 					actions.join.call(event.target, event);
+				}
+			});
+			
+			// More of a controller, just handles the use action, passing off to Player.useCard
+			App.DevelopmentCards = Ember.View.extend({
+				use: function (self, event) {
+					App.Players.self.useCard(event.target.getAttribute('value'));
 				}
 			});
 		}

@@ -107,15 +107,19 @@ var Game = (function () {
 			var self = this.get('self');
 			if (self.canBuild(type)) {
 				// Proceed
-				Board.beginPlace(self, type, false, function (piece) {
-					// Remove the resources from the player
-					var cost = _this.get('cost')[type];
-					var negatedCost = {};
-					base.each(cost, function (amt, name) {
-						negatedCost[name] = -amt;
+				if (type != 'developmentCard') {
+					Board.beginPlace(self, type, false, function (piece) {
+						// Remove the resources from the player
+						var cost = _this.get('cost')[type];
+						var negatedCost = {};
+						base.each(cost, function (amt, name) {
+							negatedCost[name] = -amt;
+						});
+						self.updateResources(negatedCost);
 					});
-					self.updateResources(negatedCost);
-				});
+				} else {
+					self.drawCard();
+				}
 			} else {
 				this.msg('You don\'t have enough resources to build that');
 			}
@@ -197,8 +201,7 @@ var Game = (function () {
 		// Displays the event notice, and updates its text
 		// Called on: user interaction
 		msg: function (text) {
-			var notice = $('#eventNotice p');
-			notice.text(text);
+			App.gameMessage.set('text', text);
 		},
 		// Called on: trade command, request property
 		trade: function (request, sender) {

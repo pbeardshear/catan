@@ -233,13 +233,11 @@ Player = Ember.Object.extend({
 	drawCard: function () {
 		var self = this;
 		Controller.fire('draw', 'none', function (card) {
-			var hasCard = self.get(card) > 0;
-			// var view = Game.get('views').developmentCards;
-			this.incrementProperty(card, 1);
+			self.incrementProperty(card, 1);
 			// self.update('developmentCards', card, 1);
 			// Create the dom view of the card
 			// hasCard ? view.update() : view.create([{ name: card, fullName: Game.get('cardNames')[card] }]);
-			Controller.on('useCard', $('#development .items a'), 'click', function () { }, 'game');
+			// Controller.on('useCard', $('#development .items a'), 'click', self.useCard, 'game');
 		});
 	},
 	

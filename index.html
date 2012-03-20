@@ -106,9 +106,13 @@
 		<div id="gamePage" class="page">
 			<!-- Map Pane -->
 			<div id="mapPane" class="pane">
-				<div id="eventNotice" style="display:block;">
-					<p>Becky built a settlement</p>
-				</div>
+				<script type="text/x-handlebars">
+					{{#if App.gameMessage.text}}
+						<div id="eventNotice" style="display:block;">
+							<p>{{App.gameMessage.text}}</p>
+						</div>
+					{{/if}}
+				</script>
 				<!-- Map Container goes here -->
 			</div>
 			<!-- Side Pane -->			
@@ -254,7 +258,31 @@
 				<!-- Development -->				
 				<div id="development" class="actionPane">
 					<h2><span>Development Items</span></h2>
+					<script type="text/x-handlebars">
+						{{#view App.DevelopmentCards}}
+							<ul class="items">
+								{{#with App.Players.self}}
+									{{#if knight}}
+										<li><a href="#" class="button" value="knight" {{action "use" on="click"}}>Knight x {{knight}}</a></li>
+									{{/if}}
+									{{#if plenty}}
+										<li><a href="#" class="button" value="plenty" {{action "use" on="click"}}>Year of Plenty x {{plenty}}</a></li>
+									{{/if}}
+									{{#if monopoly}}
+										<li><a href="#" class="button" value="monopoly" {{action "use" on="click"}}>Monopoly x {{monopoly}}</a></li>
+									{{/if}}
+									{{#if roadBuild}}
+										<li><a href="#" class="button" value="roadBuild" {{action "use" on="click"}}>Road Building x {{roadBuild}}</a></li>
+									{{/if}}
+									{{#if victory}}
+										<li><a href="#" class="button" value="victory" {{action "use" on="click"}}>Victory Points x {{victory}}</a></li>
+									{{/if}}
+								{{/with}}
+							</ul>
+						{{/view}}
+					</script>
 					<ul class="items">
+						
 						<!-- Test development cards
 						<li><a href="" class="button" value="knight">Knight x 2</a></li>
 						<li><a href="" class="button" value="plenty">Year of Plenty</a></li>
