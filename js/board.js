@@ -466,7 +466,8 @@ var Board = (function () {
 				var piece = self.placePiece(options);
 				Controller.update({ dest: 'client', type: 'build', data: options });
 				// Execute the callback, if it exists
-				placement.callback && placement.callback(piece);
+				console.log('placement callback', placement.callback);
+				placement.callback && placement.callback();
 			} else {
 				// Placement is no good
 				Game.msg('You can\'t place that there!');

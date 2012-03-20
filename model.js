@@ -137,12 +137,15 @@ Game.prototype.start = function () {
 };
 
 Game.prototype.initPlacement = function () {
+	this.server.log('player list', this.playerList);
 	this.server.log('starting initial placement')
 	this.server.log('this is the current player:', this.currentRotation);
 	var self = this;	// Save local reference for closure
 	var player = this.playerList[this.currentRotation];
 	player.self.emit('initPlacement', 'none', function (data) {
+		self.server.log('got callback', self.numPlayers, self.currentRotation);
 		self.currentRotation = (self.currentRotation + (self.reversing ? -1 : 1)) % self.numPlayers;
+		self.server.log('got callback', self.numPlayers, self.currentRotation);
 		if (!self.currentRotation) {
 			// Got to the end of the current rotation
 			if (self.reversing) {

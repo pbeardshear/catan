@@ -78,15 +78,7 @@ Player = Ember.Object.extend({
 	achievements: function () {
 		return this.get('bonuses').join(' ');
 	}.property('bonuses'),
-	
-	// resourceCount:  function () {
-		// return this.get('grain') + this.get('ore') + this.get('brick') + this.get('wood') + this.get('wool');
-	// }.property('grain', 'ore', 'brick', 'wood', 'wool'),
-	
-	// developmentCount: function () {
-		// return this.get('knight') + this.get('plenty') + this.get('monopoly') + this.get('roadBuild') + this.get('victory');
-	// }.property('knight', 'plenty', 'monopoly', 'roadBuild', 'victory'),
-	
+
 	resources: function () {
 		return {
 			grain: this.get('grain'),
@@ -108,46 +100,6 @@ Player = Ember.Object.extend({
 	}.property('knight', 'plenty', 'monopoly', 'roadBuild', 'victory'),
 	
 	//
-	//	Observers
-	//
-	// Watch for changes to computed properties and pass the update to the server
-	resourceCountChanged: function () {
-		Controller.update({
-			dest: 'client',
-			type: 'playerState', 
-			data: {
-				player: this.get('id'),
-				property: 'resourceCount',
-				value: this.get('resourceCount')
-			}
-		});
-	}.observes('resourceCount'),
-	
-	developmentCountChanged: function () {
-		Controller.update({ 
-			dest: 'client',
-			type: 'playerState', 
-			data: {
-				player: this.get('id'),
-				property: 'developmentCount', 
-				value: this.get('developmentCount') 
-			} 
-		});
-	}.observes('developmentCount'),
-	
-	victoryPointsChanged: function () {
-		Controller.update({ 
-			dest: 'client',
-			type: 'playerState', 
-			data: { 
-				player: this.get('id'),
-				property: 'victoryPoints', 
-				value: this.get('victoryPoints') 
-			} 
-		});
-	}.observes('victoryPoints'),
-	
-	//
 	//	Constructor
 	//
 	init: function () {
@@ -161,7 +113,52 @@ Player = Ember.Object.extend({
 				
 				developmentCount: function () {
 					return this.get('knight') + this.get('plenty') + this.get('monopoly') + this.get('roadBuild') + this.get('victory');
-				}.property('knight', 'plenty', 'monopoly', 'roadBuild', 'victory')
+				}.property('knight', 'plenty', 'monopoly', 'roadBuild', 'victory'),
+				
+				//
+				//	Observers
+				//
+				// Watch for changes to computed properties and pass the update to the server
+				// Only watch for your own changes
+				resourceCountChanged: function () {
+					Controller.update({
+						dest: 'client',
+						self: false,
+						type: 'playerState', 
+						data: {
+							player: this.get('id'),
+							property: 'resourceCount',
+							value: this.get('resourceCount')
+						}
+					});
+				}.observes('resourceCount'),
+				
+				developmentCountChanged: function () {
+					Controller.update({ 
+						dest: 'client',
+						self: false,
+						type: 'playerState', 
+						data: {
+							player: this.get('id'),
+							property: 'developmentCount', 
+							value: this.get('developmentCount') 
+						} 
+					});
+				}.observes('developmentCount'),
+				
+				victoryPointsChanged: function () {
+					console.log('victory points changed', this.get('victoryPoints'));
+					Controller.update({ 
+						dest: 'client',
+						self: false,
+						type: 'playerState', 
+						data: { 
+							player: this.get('id'),
+							property: 'victoryPoints', 
+							value: this.get('victoryPoints') 
+						} 
+					});
+				}.observes('victoryPoints')
 			});
 		} else {
 			this.reopen({
@@ -169,13 +166,6 @@ Player = Ember.Object.extend({
 				developmentCount: 0
 			});
 		}
-		// this.set('resourceCount', Ember.computed(function () {
-			// return this.get('grain') + this.get('ore') + this.get('brick') + this.get('wood') + this.get('wool');
-		// }).property('wood', 'wool', 'ore', 'brick', 'grain'));
-		
-		// this.set('developmentCount', Ember.computed(function () {
-			// return this.get('knight') + this.get('plenty') + this.get('monopoly') + this.get('roadBuild') + this.get('victory');
-		// }).property('knight', 'plenty', 'monopoly', 'roadBuild', 'victory'));
 	},
 	
 	//
@@ -188,7 +178,10 @@ Player = Ember.Object.extend({
 	addPiece: function (piece) {
 		var plural = base.string.pluralize(piece.type);
 		this.get(plural).push(piece);
-		if (piece.type == 'settlement' || piece.type == 'city') {
+		// TODO: Structure things in a better way so that Player doesn't have to worry if
+		// it is the actual client player in order to increment on build
+		if (this.isSelf && (piece.type == 'settlement' || piece.type == 'city')) {
+			console.log('incrementing victory points');
 			this.incrementProperty('victoryPoints', 1);
 		}
 	},
@@ -217,7 +210,7 @@ Player = Ember.Object.extend({
 		Controller.release('endTurn');
 	},
 	
-	canBuild: function () {
+	canBuild: function (piece) {
 		var resources = this.get('resources'),
 			cost = Game.get('cost')[piece];
 		return base.validate(cost, function (amt, type) {
@@ -225,6 +218,8 @@ Player = Ember.Object.extend({
 		});
 	},
 	
+	// Deprecated: This is never actually called
+	// Instead, Board.beginPlace and Board.place are called
 	build: function (piece) {
 		// Check resource cost of piece
 		if (this.canBuild(piece)) {
@@ -261,10 +256,11 @@ Player = Ember.Object.extend({
 	updateResources: function (resources) {
 		var self = this;
 		base.each(resources, function (amt, type) {
-			self.incrementProperty(type, amt);
-			// self.update('resources', type, amt);
+			// Ember defaults increment to 1, so since 0 is a falsey value, it will instead increment by 1
+			if (amt != 0) {
+				self.incrementProperty(type, amt);
+			}
 		});
-		var resourceView = Game.get('views').resources;
 	}
 });
 
