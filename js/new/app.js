@@ -270,6 +270,15 @@ var app = (function () {
 					App.Players.self.useCard(event.target.getAttribute('value'));
 				}
 			});
+			
+			App.ResourceTrade = Ember.View.extend({
+				trade: function () { },		// Currently handled by the interceptor
+				
+				cancel: function () {
+					// Close the trade window
+					$('#tradePopup').hide();
+				}
+			});
 		}
 	};
 })();

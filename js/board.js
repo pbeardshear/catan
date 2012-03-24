@@ -22,7 +22,8 @@ var Board = (function () {
 	var swapTile = null,
 		tiles = [],
 		ports = [],
-		boardSize = 0;
+		boardSize = 0,
+		portLocations = {};		// Hash of dock positions -> port id
 	
 	// Private classes
 	// ---------------------------------------------------------------------------------------------------------
@@ -38,6 +39,9 @@ var Board = (function () {
 	}
 	Port.prototype.draw = function () {
 		Engine.draw(this, 'port');
+	};
+	Port.prototype.isAdjacent = function (pos) {
+		return this.valid && (Engine.pointDistance(this.docks[0], pos) == 0 || Engine.pointDistance(this.docks[1], pos));
 	};
 	
 	function Tile (o) {
@@ -129,6 +133,12 @@ var Board = (function () {
 	
 	// Private methods
 	// ---------------------------------------------------------------------------------------------------------
+	
+	// Converts a given point object into a consistently formatted string
+	function pointString (point) {
+		return [parseInt(point.x), ',', parseInt(point.y)].join('');
+	}
+	
 	// Generate the resources for this board size
 	function generateResources (size) {
 		var tiles = [],
@@ -234,8 +244,21 @@ var Board = (function () {
 					return a.dist - b.dist;
 				});
 				ports[i].docks = [spots[0].index, spots[1].index];
+				portLocations[pointString(spots[0].vertex)] = ports[i].id;
+				portLocations[pointString(spots[1].vertex)] = ports[i].id;
 			}
 		}
+	}
+	
+	// Returns a port object if one is adjacent to the provided position, otherwise returns null
+	function findPort (pos) {
+		var id = portLocations[pointString(pos)];
+		if (id) {
+			return ports.find(function (port) {
+				return id == port.id;
+			});
+		}
+		return null;
 	}
 	
 	// Return a random element from the passed array (in place)
@@ -493,9 +516,14 @@ var Board = (function () {
 		placePiece: function (options) {
 			var player = Game.getPlayer(options.player);
 			var piece = new pieces[options.type]({ owner: player, pos: options.pos, edge: options.edge });
+			var activePort = options.type == 'settlement' ? findPort(options.pos) : null;
+			if (activePort) {
+				console.log('got port');
+				player.addPort(activePort);
+			}
 			player.addPiece(piece);
-			Game.update();
-			console.log(piece.pos);
+			// Game.update();
+			// console.log(piece.pos);
 			Engine.draw({ pos: piece.pos, type: piece.edge || null }, piece.type, [player.get('color')]);
 			return piece;
 		},

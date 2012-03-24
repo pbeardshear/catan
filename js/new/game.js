@@ -49,7 +49,7 @@ var Game = (function () {
 				self: false,
 				type: 'message',
 				data: {
-					text: self.name + " played 'Road Building'!";
+					text: self.name + " played 'Road Building'!"
 				}
 			});
 			Board.beginPlace(self, 'road', false, function () {

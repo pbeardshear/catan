@@ -172,7 +172,7 @@ Player = Ember.Object.extend({
 	//	Instance methods
 	//
 	addPort: function (port) {
-		this.get('ports').push(port);
+		this.get('ports').pushObject(port);
 	},
 	
 	addPiece: function (piece) {

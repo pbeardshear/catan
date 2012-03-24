@@ -292,60 +292,86 @@
 				</div>
 			</div>
 			<!-- Trade Popup -->
-			<div id="tradePopup" class="popup" style="display:none;">
-				<h2 class="title">Trade Resources</h2>
-				<form>
-					<div class="third first">
-						<h3 class="subtitle">Trade with:</h3>
-						<ul>
-							<li>
-								<input type="radio" name="player" />	
-								<label>Tim</label>
-							</li>
-							<li>
-								<input type="radio" name="player" />	
-								<label>Colin</label>
-							</li>
-							<li>
-								<input type="radio" name="player" />	
-								<label>Becky</label>
-							</li>													
-							<li class="maritime">
-								<input type="radio" name="player" />
-								<label>Maritime Trade</label>
-								<ul class="availability">
-									<li>4:1 Any Resource</li>
-									<li>2:1 Wood</li>
-								</ul>
-							</li>							
-						</ul>
-					</div>
-					<div class="third">
-						<h3 class="subtitle">I Want:</h3>
-						<ul class="resources offer">
-							<li class="wool"><input type="text" /><label>Wool</label></li>
-							<li class="grain"><input type="text" /><label>Grain</label></li>
-							<li class="ore"><input type="text" /><label>Ore</label></li>
-							<li class="brick"><input type="text" /><label>Brick</label></li>
-							<li class="wood"><input type="text" /><label>Wood</label></li>
-						</ul>
-					</div>
-					<div class="third last">
-						<h3 class="subtitle">I'll Give:</h3>
-						<ul class="resources obtain">
-							<li class="wool"><input type="text" /><label>Wool</label></li>
-							<li class="grain"><input type="text" /><label>Grain</label></li>
-							<li class="ore"><input type="text" /><label>Ore</label></li>
-							<li class="brick"><input type="text" /><label>Brick</label></li>
-							<li class="wood"><input type="text" /><label>Wood</label></li>
-						</ul>
-					</div>
-					<p class="actions">
-						<a class="button trade action">Trade</a>
-						<a class="button cancel action">Cancel</a>					
-					</p>
-				</form>
-			</div>
+			<script type="text/x-handlebars">
+				<div id="tradePopup" class="popup" style="display:none;">
+					<h2 class="title">Trade Resources</h2>
+					<form>
+						<div class="third first">
+							<h3 class="subtitle">Trade with:</h3>
+							<ul>
+								{{#each App.Players}}
+									<li>
+										<input type="radio" name="player" />
+										<label>{{name}}</label>
+									</li>
+								<!--
+								<li>
+									<input type="radio" name="player" />	
+									<label>Tim</label>
+								</li>
+								<li>
+									<input type="radio" name="player" />	
+									<label>Colin</label>
+								</li>
+								<li>
+									<input type="radio" name="player" />	
+									<label>Becky</label>
+								</li>
+								-->
+								{{/each}}
+								{{#with App.Players.self}}
+									<li class="maritime">
+										<input type="radio" name="player" />
+										<label>Maritime Trade</label>
+										<ul class="availability">
+											<li>4:1 Any Resource</li>
+											{{#each ports}}
+												<li>{{count}}:1 {{type}}</li>
+											{{/each}}
+										</ul>
+									</li>
+								{{/with}}
+								<!--
+								<li class="maritime">
+									<input type="radio" name="player" />
+									<label>Maritime Trade</label>
+									<ul class="availability">
+										<li>4:1 Any Resource</li>
+										<li>2:1 Wood</li>
+									</ul>
+								</li>
+								-->
+							</ul>
+						</div>
+						<div class="third">
+							<h3 class="subtitle">I Want:</h3>
+							<ul class="resources offer">
+								<li class="wool"><input type="text" /><label>Wool</label></li>
+								<li class="grain"><input type="text" /><label>Grain</label></li>
+								<li class="ore"><input type="text" /><label>Ore</label></li>
+								<li class="brick"><input type="text" /><label>Brick</label></li>
+								<li class="wood"><input type="text" /><label>Wood</label></li>
+							</ul>
+						</div>
+						<div class="third last">
+							<h3 class="subtitle">I'll Give:</h3>
+							<ul class="resources obtain">
+								<li class="wool"><input type="text" /><label>Wool</label></li>
+								<li class="grain"><input type="text" /><label>Grain</label></li>
+								<li class="ore"><input type="text" /><label>Ore</label></li>
+								<li class="brick"><input type="text" /><label>Brick</label></li>
+								<li class="wood"><input type="text" /><label>Wood</label></li>
+							</ul>
+						</div>
+						{{#view App.ResourceTrade}}
+						<p class="actions">
+							<a class="button trade action">Trade</a>
+							<a class="button cancel action" {{action "cancel" on="click"}}>Cancel</a>					
+						</p>
+						{{/view}}
+					</form>
+				</div>
+			</script>
 			<!-- Trade Confirm Popup -->
 			<div id="tradeConfirmPopup" class="popup" style="display:none;">
 				<h2 class="title">Confirm Resources Trade</h2>
