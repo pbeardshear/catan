@@ -79,11 +79,30 @@ var app = (function () {
 		},
 		trade: function (e) {
 			// Data required: { id: playerID, request: { give: resourcesToGive, receive: resourcesToReceive } }
+			var playerID = parseInt($('.tradePartners').find(':checked').attr('name'));
+			if (!playerID) {
+				Game.msg('Select a player to trade with!');
+				return;
+			}
+			var request = { give: {}, receive: {} };
+			// Build up the hash of resources to give
+			$('.resources.offer').find('input').each(function (i, el) {
+				request.give[el.name] = parseInt(el.value) || 0;
+			});
+			// Build up the hash of resources to give
+			$('.resources.obtain').find('input').each(function(i, el) {
+				request.receive[el.name] = parseInt(el.value) || 0;
+			});
 			Game.trade(request, true);
-			Controller.fire('trade', { id: playerID, request: request });
+			Controller.fire('trade', { id: playerID, request: request, sender: App.Players.self.name });
 		},
-		tradeResponse: function (e) {
-			Controller.fire('trade', { accept: $(this).hasClass('acceptTrade') });
+		tradeResponse: function (e)	{
+			// Respond to the callback
+			Game.tradeResponse($(this).hasClass('acceptTrade'));
+			// Clear the response object
+			Game.tradeResponse = null;
+			App.TradeRequest.endRequest();
+			// Controller.fire('trade', { accept: $(this).hasClass('acceptTrade') });
 		}
 	};
 	// Server commands, update state on client
@@ -152,10 +171,15 @@ var app = (function () {
 			// Scroll the chat window to the bottom
 			chatWindow[0].scrollTop = chatWindow[0].scrollHeight;
 		},
-		trade: function (data) {
+		trade: function (data, fn) {
 			if (data.request) {
 				// Trade request from another player
-				Game.trade(data.request);
+				Game.trade(data.request, false, fn);
+				// Set up the request data
+				App.TradeRequest.newRequest(data.request, data.sender);
+				// Show the trade confirm popup
+				// TODO: Do this better
+				$('#tradeConfirmPopup').show();
 			} else if (data.accept) {
 				// Trade accepted, add trade resources
 				Game.acceptTrade();
@@ -252,6 +276,25 @@ var app = (function () {
 				}
 			});
 			
+			// Simple object to represent a new trade request
+			// Needs to be an Ember object to work with Ember's data binding
+			App.TradeRequest = Ember.Object.create({
+				active: false,
+				give: null,
+				receive: null,
+				sender: null,
+				
+				newRequest: function (request, sender) {
+					this.set('give', request.give);
+					this.set('receive', request.receive);
+					this.set('sender', sender);
+					this.set('active', true);
+				},
+				
+				endRequest: function () {
+					this.set('active', false);
+				}
+			});
 		},
 		
 		// TODO: Consider moving this function somewhere more appropriate
@@ -272,11 +315,18 @@ var app = (function () {
 			});
 			
 			App.ResourceTrade = Ember.View.extend({
-				trade: function () { },		// Currently handled by the interceptor
+				trade: function (self, event) {
+					actions.trade.call(event.target, event);
+				},
 				
 				cancel: function () {
 					// Close the trade window
 					$('#tradePopup').hide();
+				},
+				
+				response: function (self, event) {
+					actions.tradeResponse.call(event.target, event);
+					$('#tradeConfirmPopup').hide();
 				}
 			});
 		}

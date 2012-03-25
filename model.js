@@ -203,7 +203,7 @@ Game.prototype.endTurn = function () {
 
 Game.prototype.trade = function (data, sender) {
 	var recipient = this.playerList[this.turnOrder.indexOf(data.id)];
-	recipient.self.emit('trade', { request: data.request }, function (accept) {
+	recipient.self.emit('trade', { request: data.request, sender: data.sender }, function (accept) {
 		sender.emit('trade', { accept: accept });
 		recipient.self.emit('trade', { accept: accept });
 	});

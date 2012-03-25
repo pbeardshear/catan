@@ -228,14 +228,18 @@ var Game = (function () {
 			App.gameMessage.set('text', text);
 		},
 		// Called on: trade command, request property
-		trade: function (request, sender) {
+		trade: function (request, sender, tradeCallback) {
 			var give = request.give,
 				receive = request.receive;
 			this.tradeRequest = sender ? { give: give, receive: receive } : { give: receive, receive: give };
+			// Save a reference to the callback that contains the response message to the server
+			this.tradeResponse = tradeCallback;
 		},
 		// Called on: trade command, accept property
 		acceptTrade: function () {
-			self.updateResources(this.tradeRequest.receive);
+			this.get('self').updateResources(this.tradeRequest.receive);
+			this.tradeRequest = null;
+			Game.msg('Trade accepted!');
 		},
 		// Called on: player.useCard
 		useCard: function (card) {

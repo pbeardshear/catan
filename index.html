@@ -298,10 +298,10 @@
 					<form>
 						<div class="third first">
 							<h3 class="subtitle">Trade with:</h3>
-							<ul>
+							<ul class="tradePartners">
 								{{#each App.Players}}
 									<li>
-										<input type="radio" name="player" />
+										<input type="radio" {{bindAttr name="id"}} />
 										<label>{{name}}</label>
 									</li>
 								<!--
@@ -346,26 +346,26 @@
 						<div class="third">
 							<h3 class="subtitle">I Want:</h3>
 							<ul class="resources offer">
-								<li class="wool"><input type="text" /><label>Wool</label></li>
-								<li class="grain"><input type="text" /><label>Grain</label></li>
-								<li class="ore"><input type="text" /><label>Ore</label></li>
-								<li class="brick"><input type="text" /><label>Brick</label></li>
-								<li class="wood"><input type="text" /><label>Wood</label></li>
+								<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
+								<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
+								<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
+								<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
+								<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
 							</ul>
 						</div>
 						<div class="third last">
 							<h3 class="subtitle">I'll Give:</h3>
 							<ul class="resources obtain">
-								<li class="wool"><input type="text" /><label>Wool</label></li>
-								<li class="grain"><input type="text" /><label>Grain</label></li>
-								<li class="ore"><input type="text" /><label>Ore</label></li>
-								<li class="brick"><input type="text" /><label>Brick</label></li>
-								<li class="wood"><input type="text" /><label>Wood</label></li>
+								<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
+								<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
+								<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
+								<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
+								<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
 							</ul>
 						</div>
 						{{#view App.ResourceTrade}}
 						<p class="actions">
-							<a class="button trade action">Trade</a>
+							<a class="button trade action" {{action "trade" on="click"}}>Trade</a>
 							<a class="button cancel action" {{action "cancel" on="click"}}>Cancel</a>					
 						</p>
 						{{/view}}
@@ -375,25 +375,62 @@
 			<!-- Trade Confirm Popup -->
 			<div id="tradeConfirmPopup" class="popup" style="display:none;">
 				<h2 class="title">Confirm Resources Trade</h2>
-				<div class="half first">
-					<h3 class="subtitle">Peter Wants:</h3>
-					<ul class="resources">
-						<li class="wool"><em>5</em> Wool</li>
-						<li class="grain"><em>1</em> Grain</li>
-						<li class="ore"><em>2</em> Ore</li>
-					</ul>
-				</div>
-				<div class="half last">
-					<h3 class="subtitle">Peter Gives:</h3>
-					<ul class="resources">
-						<li class="brick"><em>3</em> Brick</li>
-						<li class="wood"><em>5</em> Wood</li>
-					</ul>
-				</div>
-				<p class="actions">
-					<a class="button tradeResponse action">Yes, I'll Trade</a>
-					<a class="button tradeResponse action">No, Don't Trade</a>
-				</p>
+				<script type="text/x-handlebars">
+					{{#with App.TradeRequest}}
+						{{#if active}}
+							<div class="half first">
+								<h3 class="subtitle">{{sender}} Wants:</h3>
+								{{#with give}}
+								<ul class="resources">
+									{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
+									{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
+									{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
+									{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
+									{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
+								</ul>
+								{{/with}}
+							</div>
+							<div class="half last">
+								<h3 class="subtitle">{{sender}} Gives:</h3>
+								{{#with receive}}
+								<ul class="resources">
+									{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
+									{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
+									{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
+									{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
+									{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
+								</ul>
+								{{/with}}
+							</div>
+						{{/if}}
+					{{/with}}
+					
+				</script>
+				<!--
+					<div class="half first">
+						<h3 class="subtitle">Peter Wants:</h3>
+						<ul class="resources">
+							<li class="wool"><em>5</em> Wool</li>
+							<li class="grain"><em>1</em> Grain</li>
+							<li class="ore"><em>2</em> Ore</li>
+						</ul>
+					</div>
+					<div class="half last">
+						<h3 class="subtitle">Peter Gives:</h3>
+						<ul class="resources">
+							<li class="brick"><em>3</em> Brick</li>
+							<li class="wood"><em>5</em> Wood</li>
+						</ul>
+					</div>
+				-->
+				<script type="text/x-handlebars">
+					{{#view App.ResourceTrade}}
+					<p class="actions">
+						<a class="button tradeResponse action acceptTrade" {{action "response" on="click"}}>Yes, I'll Trade</a>
+						<a class="button tradeResponse action" {{action "response" on="click"}}>No, Don't Trade</a>
+					</p>
+					{{/view}}
+				</script>
 			</div>
 		</div>
 		<!-- End Game Page -->

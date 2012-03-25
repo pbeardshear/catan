@@ -404,6 +404,9 @@ var Board = (function () {
 				// Create the tile objects
 				for (var i = 0; i < board.tiles.length; i++) {
 					tiles[board.tiles[i].id] = new Tile(board.tiles[i]);
+					if (board.tiles[i].robber) {
+						this.robberTile = tiles[board.tiles[i].id];
+					}
 				}
 				for (var i = 0; i < board.ports.length; i++) {
 					ports[i] = new Port(board.ports[i]);
