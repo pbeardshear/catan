@@ -87,11 +87,11 @@ var app = (function () {
 			var request = { give: {}, receive: {} };
 			// Build up the hash of resources to give
 			$('.resources.offer').find('input').each(function (i, el) {
-				request.give[el.name] = parseInt(el.value) || 0;
+				request.receive[el.name] = parseInt(el.value) || 0;
 			});
 			// Build up the hash of resources to give
 			$('.resources.obtain').find('input').each(function(i, el) {
-				request.receive[el.name] = parseInt(el.value) || 0;
+				request.give[el.name] = parseInt(el.value) || 0;
 			});
 			Game.trade(request, true);
 			Controller.fire('trade', { id: playerID, request: request, sender: App.Players.self.name });

@@ -237,6 +237,13 @@ var Game = (function () {
 		},
 		// Called on: trade command, accept property
 		acceptTrade: function () {
+			// Negate the give
+			// TODO: Should probably create a method to abstract this away
+			var tradeCost = {};
+			base.each(this.tradeRequest.give, function (amt, name) {
+				tradeCost[name] = -amt;
+			});
+			this.get('self').updateResources(tradeCost);
 			this.get('self').updateResources(this.tradeRequest.receive);
 			this.tradeRequest = null;
 			Game.msg('Trade accepted!');

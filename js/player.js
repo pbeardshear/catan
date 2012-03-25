@@ -64,12 +64,6 @@ Player = Ember.Object.extend({
 	monopoly: 0,
 	roadBuild: 0,
 	victory: 0,
-	// Game pieces
-	ports: [],
-	bonuses: [],
-	settlements: [],
-	roads: [],
-	cities: [],
 	victoryPoints: 0,
 	
 	//
@@ -105,6 +99,14 @@ Player = Ember.Object.extend({
 	init: function () {
 		this._super();
 		
+		// Set up some properties with objects as values, as Ember will use the same across all instances of the class
+		this.set('ports', []);
+		this.set('bonuses', []);
+		this.set('settlements', []);
+		this.set('roads', []);
+		this.set('cities', []);
+		
+		// Set up watchers depending on whether this is the client player or other players
 		if (this.get('isSelf')) {
 			this.reopen({
 				resourceCount: function () {
@@ -177,7 +179,7 @@ Player = Ember.Object.extend({
 	
 	addPiece: function (piece) {
 		var plural = base.string.pluralize(piece.type);
-		this.get(plural).push(piece);
+		this.get(plural).pushObject(piece);
 		// TODO: Structure things in a better way so that Player doesn't have to worry if
 		// it is the actual client player in order to increment on build
 		if (this.isSelf && (piece.type == 'settlement' || piece.type == 'city')) {
