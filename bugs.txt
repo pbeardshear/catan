@@ -4,8 +4,5 @@ Known bugs:
 	- None!
 
 Missing features:
-	- port trading
-	- different port types
-	- fix some view stuff (message look weird, ports are getting clipped)
-	- add colors for player display
+	- fix some view stuff (ports are getting clipped)
 	- development cards uses (stealing from another player, monopoly, year of plenty)
