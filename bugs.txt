@@ -1,6 +1,11 @@
 // Ghetto bug tracker for Catan
 
 Known bugs:
-	- user list view does not remove old user when user leaves game (pregame)
-	- game does not correctly drop user when user leaves the game (pregame)
-	- game does not compute resources correctly on roll (game)
+	- None!
+
+Missing features:
+	- port trading
+	- different port types
+	- fix some view stuff (message look weird, ports are getting clipped)
+	- add colors for player display
+	- development cards uses (stealing from another player, monopoly, year of plenty)

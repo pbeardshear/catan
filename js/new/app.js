@@ -79,22 +79,62 @@ var app = (function () {
 		},
 		trade: function (e) {
 			// Data required: { id: playerID, request: { give: resourcesToGive, receive: resourcesToReceive } }
-			var playerID = parseInt($('.tradePartners').find(':checked').attr('name'));
+			var playerID = $('.tradePartners').find(':checked').attr('name');
 			if (!playerID) {
 				Game.msg('Select a player to trade with!');
 				return;
 			}
+			playerID = playerID == 'port' ? 'port' : parseInt(playerID);	// TODO: Do this nicer
 			var request = { give: {}, receive: {} };
+			var resourcesTrading = [];		// Helper structure to simplify resource checking when trading with ports
+			var resourcesReceivingCount = 0;
 			// Build up the hash of resources to give
 			$('.resources.offer').find('input').each(function (i, el) {
 				request.receive[el.name] = parseInt(el.value) || 0;
+				resourcesReceivingCount += request.receive[el.name];
 			});
 			// Build up the hash of resources to give
 			$('.resources.obtain').find('input').each(function(i, el) {
 				request.give[el.name] = parseInt(el.value) || 0;
+				if (el.value) {
+					resourcesTrading.push(el.name);
+				}
 			});
-			Game.trade(request, true);
-			Controller.fire('trade', { id: playerID, request: request, sender: App.Players.self.name });
+			// Check if the user selected a port to trade with
+			// If so, we need to do some inference
+			if (playerID == 'port') {
+				// Get all the ports that the player has access to
+				var ports = App.Players.self.ports;
+				// Find the resource that they are trading (if there is more than one, we have a problem)
+				if (resourcesTrading.length == 1) {
+					var resourceName = resourcesTrading[0];
+					var count = request.give[resourceName];
+					for (var i = 0; i < ports.length; i++) {
+						if (ports[i].type == resourceName || ports[i].type == 'any') {
+							// One last validation - their request count has to match with the cost ratio of the port
+							if (ports[i].count * resourcesReceivingCount == count) {
+								Game.acceptTrade(request);
+								return;
+							}
+						}
+					}
+					// Check against the 4:1 trade (which everyone has)
+					if (count == 4 * resourcesReceivingCount) {
+						Game.acceptTrade(request);
+						return;
+					}
+					// Couldn't find a matching port
+					Game.msg('No port accepts that trade request.');
+					return;
+				} else {
+					// Bad trade
+					Game.msg('Invalid trade request for port.');
+					return;
+				}
+			} else {
+				Game.trade(request, true);
+				Controller.fire('trade', { id: playerID, request: request, sender: App.Players.self.name });
+			}
 		},
 		tradeResponse: function (e)	{
 			// Respond to the callback
@@ -317,6 +357,7 @@ var app = (function () {
 			App.ResourceTrade = Ember.View.extend({
 				trade: function (self, event) {
 					actions.trade.call(event.target, event);
+					$('#tradePopup').hide();
 				},
 				
 				cancel: function () {

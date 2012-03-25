@@ -16,6 +16,19 @@ var Board = (function () {
 	function round (x, precision) {
 		return parseFloat(x.toPrecision(precision));
 	}
+	
+	function shuffle (array) {
+		var tmp, current, top = array.length;
+		if (top) {
+			while (--top) {
+				current = Math.floor(Math.random() * (top+1));
+				tmp = array[current];
+				array[current] = array[top];
+				array[top] = tmp;
+			}
+		}
+		return array;
+	}
 		
 	// State variables
 	// ---------------------------------------------------------------------------------------------------------
@@ -29,9 +42,10 @@ var Board = (function () {
 	// ---------------------------------------------------------------------------------------------------------
 	// Ports are considered tiles internally,
 	// and have one edge (two adjacent vertices) which is considered active (i.e. gives access to the port)
+	var portTypes = [];		// TODO: Do this in a less hard-coded way
 	function Port (o) {
 		this.type = o.type;		// The type of resource that you can trade at this port
-		this.count = o.count;	// The trade ratio at this port (2:1, 3:1)
+		this.count = o.type && o.type == 'any' ? 3 : 2;		// The trade ratio at this port (2:1, 3:1)
 		this.id = o.id;			// Tile id of this port tile	
 		this.pos = o.pos;		// x-y position of the center of this tile
 		this.docks = o.docks;	// The two vertices on this tile which give access to the port
@@ -261,6 +275,24 @@ var Board = (function () {
 		return null;
 	}
 	
+	// Build up the list of port types
+	function generatePortTypes () {
+		// The breakdown is 1:1 with 3:1 any ports and 2:1 [resource] ports
+		var activePortCount = 9;	// Actually count this
+		var anyPortCount = Math.floor(activePortCount/2);
+		var resourcePortCount = Math.ceil(activePortCount/2);
+		for (var i = 0; i < anyPortCount; i++) {
+			portTypes.push('any');
+		}
+		// Break down the resource ports
+		var resources = ['brick', 'wood', 'wheat', 'ore', 'wool'];
+		for (var i = 0; i < resourcePortCount; i++) {
+			portTypes.push(resources[i % 5]);
+		}
+		// Randomize the port types
+		shuffle(portTypes);
+	}
+	
 	// Return a random element from the passed array (in place)
 	function popRandom (arr) {
 		return arr.splice(Math.floor(Math.random()*arr.length), 1)[0];
@@ -384,14 +416,15 @@ var Board = (function () {
 				console.log(tiles);
 				// Create the ports
 				var portTiles = generatePorts(size);
+				generatePortTypes();
 				console.log(portTiles);
 				for (var i = 0; i < portTiles.length; i++) {
+					var valid = i % 2 != 0;
 					ports.push(new Port({
 						id: portTiles[i],
-						type: 'any',
+						type: valid ? portTypes.pop() : null,
 						pos: this.getTile(portTiles[i], 'port'),
-						count: 3,
-						valid: (i % 2 != 0)
+						valid: valid
 					}));
 				}
 				// Add the docks to the ports

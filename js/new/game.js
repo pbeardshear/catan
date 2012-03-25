@@ -9,10 +9,11 @@ var Game = (function () {
 		players: [],
 		playerState: [],	// A more readable structure for the state of the players
 		views: {},
-		cost: { road: { brick: 1, wood: 1 }, 
-				settlement: { brick: 1, wood: 1, grain: 1, wool: 1 }, 
-				city: { ore: 3, grain: 2 }, 
-				developmentCard: { ore: 1, wool: 1, grain: 1 } 
+		cost: { 
+			road: { brick: 1, wood: 1 }, 
+			settlement: { brick: 1, wood: 1, grain: 1, wool: 1 }, 
+			city: { ore: 3, grain: 2 }, 
+			developmentCard: { ore: 1, wool: 1, grain: 1 } 
 		},
 		cardNames: {
 			knight: 'Knight',
@@ -236,7 +237,10 @@ var Game = (function () {
 			this.tradeResponse = tradeCallback;
 		},
 		// Called on: trade command, accept property
-		acceptTrade: function () {
+		acceptTrade: function (request) {
+			if (request) {
+				this.tradeRequest = request;
+			}
 			// Negate the give
 			// TODO: Should probably create a method to abstract this away
 			var tradeCost = {};
