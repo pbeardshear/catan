@@ -14,7 +14,7 @@ var fs = require('fs');
  */
 
 // Primary mailer object
-this.Mailer = (function () {
+Mailer = (function () {
 	// Private variables
 	var _messageQueue = [];
 	

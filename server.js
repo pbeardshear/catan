@@ -7,7 +7,7 @@ var connect = require('connect'),
 // Global require
 require('./mail/mailer.js');
 // Initialize the email system that will track errors
-Mailer.init('config.txt', 'template.txt');
+Mailer.init('mail/config.txt', 'mail/template.txt');
 
 try {
 	var server = new model.Server(connect);
