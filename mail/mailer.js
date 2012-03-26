@@ -7,27 +7,6 @@
 var email = require('mailer');
 var fs = require('fs');
 
-// TEST
-/*
-email.send({
-	host: 'smtp.gmail.com',
-	port: '465',
-	ssl: true,
-	domain: 'smtp.gmail.com',
-	to: 'pbeardshear@gmail.com',
-	from: 'pbeardshear@gmail.com',
-	subject: 'test of automated emails',
-	body: 'This is a test of the mailer.js mailing system',
-	authentication: 'login',
-	username: 'pbeardshear@gmail.com',
-	password: "FV8?!nDN<d?X$'n"
-},
-function (err, result) {
-	if (err) { console.log('Error:', err); return; }
-	console.log('result:', result);
-});
-*/
-
 /*
  *
  *	Exports
@@ -116,20 +95,3 @@ this.Mailer = (function () {
 	};
 })();
 
-// TEST
-
-this.Mailer.init('config.txt', 'template.txt');
-
-try {
-	// Intentionally throw an error
-	notAFunction();
-} catch (err) {
-	// We need to format the stack trace in an email-friendly way (using html instead of conventional line breaks)
-	this.Mailer.send({
-		subject: err.toString(),
-		data: {
-			message: err.toString(),
-			stack: this.Mailer.formatErrorStack(err.stack)
-		}
-	});
-}
