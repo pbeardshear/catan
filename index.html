@@ -15,6 +15,7 @@
 		<script type="text/javascript" src="js/board.js"></script>
 		<script type="text/javascript" src="js/engine.js"></script>
 		<script type="text/javascript" src="js/new/views.js"></script>
+
 		<style type="text/css">
 			#gamePage { display: none; }
 			#setupPage { display: none; }
@@ -292,8 +293,8 @@
 				</div>
 			</div>
 			<!-- Trade Popup -->
-			<script type="text/x-handlebars">
-				<div id="tradePopup" class="popup" style="display:none;">
+      <script type="text/x-handlebars">
+				<div id="tradePopup" class="popup" style="display:block;">
 					<h2 class="title">Trade Resources</h2>
 					<form>
 						<div class="third first">
@@ -371,7 +372,7 @@
 						{{/view}}
 					</form>
 				</div>
-			</script>
+      </script>
 			<!-- Trade Confirm Popup -->
 			<div id="tradeConfirmPopup" class="popup" style="display:none;">
 				<h2 class="title">Confirm Resources Trade</h2>
@@ -406,6 +407,7 @@
 					{{/with}}
 					
 				</script>
+
 				<!--
 					<div class="half first">
 						<h3 class="subtitle">Peter Wants:</h3>
@@ -432,6 +434,28 @@
 					{{/view}}
 				</script>
 			</div>
+			
+			<div id="stealPopup" class="popup" style="display:none;">
+        <h2 class="title">Steal A Resource</h2>
+        <ul class="buttonList">
+          <li><a href="#">Steal from <strong>Tim</strong></a></li>
+          <li><a href="#">Steal from <strong>Colin</strong></a></li>
+          <li><a href="#">Steal from <strong>Becky</strong></a></li>
+        </ul>
+      </div>
+      
+      <div id="monopolyPopup" class="popup" style="display:none;">
+        <h2 class="title">Resource Monopoly</h2>
+        <p>Choose a resource to monopolize:</p>
+        <ul>
+					<li class="wool"> <a href="#">Wool</a></li>
+					<li class="grain"><a href="#">Grain</a></li>
+					<li class="ore">  <a href="#">Ore</a></li>
+					<li class="brick"><a href="#">Brick</a></li>
+					<li class="wood"> <a href="#">Wood</a></li>
+				</ul>
+      </div>
+      
 		</div>
 		<!-- End Game Page -->
 	</body>
