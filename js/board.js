@@ -369,6 +369,31 @@ var Board = (function () {
 		return false;
 	}
 	
+	// Returns a list of the players that have settlements or cities
+	// adjacent to the given tile
+	function listAdjacentPlayers (tile) {
+		var players = App.Players.toArray(),
+			tileCenter = Engine.getCoords(tile.id),
+			matchedPlayers = [];
+		outer: for (var i = 0; i < players.length && players[i] != App.Players.self; i++) {
+			var settlements = players[i].settlements,
+				cities = players[i].cities;
+			for (var j = 0; j < settlements.length; j++) {
+				if (Engine.pointDistance(settlements[j].pos, tileCenter) <= CONST.board.landSize) {
+					matchedPlayers.push(players[i]);
+					continue outer;
+				}
+			}
+			for (var j = 0; j < cities.length; j++) {
+				if (Engine.pointDistance(cities[j].pos, tileCenter) <= CONST.board.landSize) {
+					matchedPlayers.push(players[i]);
+					continue outer;
+				}
+			}
+		}
+		return matchedPlayers;
+	}
+	
 	// Set the placement area that should be active
 	// Valid types are 'center', 'edge', 'vertex', and 'none'
 	// Providing a callback binds a click event to the objects in the new state
@@ -583,7 +608,7 @@ var Board = (function () {
 		},
 		
 		// Set up the click state and register a click callback to swap the robber tile
-		moveRobber: function () {
+		moveRobber: function (callback) {
 			placeState('center', function (e) {
 				var coords = e.target.coords.split(','),
 					tile = Engine.getTile(coords[0], coords[1]);
@@ -592,6 +617,7 @@ var Board = (function () {
 					this.robberTile.robber = false;
 					this.robberTile = tile;
 					Engine.drawRobber();
+					callback && callback(listAdjacentPlayers(this.robberTile));
 				} else {
 					Game.msg('You must move the robber to a different tile!');
 				}

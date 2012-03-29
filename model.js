@@ -252,7 +252,13 @@ try {
 			var player = this.players[options.id];
 			return { id: player.id, name: player.name, color: player.color };
 		} else if (options.by == 'gameID') {
-			// TODO: Implement
+			var players = this.playerList;
+			// Player list is sorted by turn order, not game id...
+			for (var i = 0; i < players.length; i++) {
+				if (players[i].id == options.id) {
+					return players[i];
+				}
+			}
 		}
 	};
 
@@ -325,6 +331,37 @@ try {
 		}
 		return card;
 	}
+	
+	// Server-side development card effects
+	Game.prototype.useCard = {
+		knight: function (data, fn) {
+			var player = this.getPlayer({ id: data.player });
+			player.self.emit('steal', 'none', function (resource) {
+				// Return to the sender the resource that was stolen
+				fn(resource);
+			});
+		},
+		
+		monopoly: function (data, client, fn) {
+			var players = this.playerList,
+				resources = {};
+			// Iterate over each player, and request their resources in turn
+			var asyncIterator = function (i) {
+				if (i >= players.length) {
+					fn(resources);
+					return;
+				}
+				players[i].self.emit('monopoly', 'none', function (count) {
+					resources[data.resource] += count;
+					asyncIterator(i + 1);
+				});
+			}
+			
+			resources[data.resource] = 0;
+			asyncIterator(0);
+		}
+	};
+	
 	// Utility class to help with other methods
 	Game.prototype.util = {
 		shuffle: function (array) {

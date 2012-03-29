@@ -87,6 +87,17 @@ try {
 				} else if (options.dest == 'server') {
 					// TODO: Update server state
 				}
+			},
+			
+			// Development card messages
+			steal: function (data, fn) {
+				var game = client.game;
+				game.useCard.knight(data, fn);
+			},
+			
+			monopoly: function (data, fn) {
+				var game = client.game;
+				game.useCard.monopoly(data, client, fn);
 			}
 		};
 		

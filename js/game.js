@@ -41,7 +41,7 @@ var Game = (function () {
 					moveRobber(tiles[i]);
 					// TODO:
 					// Steal from someone next to the tile
-					Game.popup({ template: app.CONST.ID.steal });
+					
 				}
 			});
 		},

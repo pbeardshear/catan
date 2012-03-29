@@ -246,6 +246,17 @@ var app = (function () {
 				Game.msg(res.data.text);
 			}
 		},
+		
+		steal: function (_, fn) {
+			// Someone is stealing from you
+			// Remove a random resource from your bank and return it
+			fn(App.Players.self.takeRandom());
+		},
+		
+		monopoly: function (_, fn) {
+			// Return all of your resources
+			fn(App.Players.self.takeAll());
+		}
 	};
 	
 	return {
@@ -333,6 +344,20 @@ var app = (function () {
 				
 				endRequest: function () {
 					this.set('active', false);
+				}
+			});
+			
+			// Array controller which manages the players which are valid targets for stealing
+			// after the robber is moved
+			App.RobberTargets = Ember.ArrayController.create({
+				content: [],
+				
+				setTargets: function (targets) {
+					this.pushObjects(targets);
+				},
+				
+				clearTargets: function () {
+					this.removeObjects(this.content);
 				}
 			});
 		},

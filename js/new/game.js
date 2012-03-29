@@ -29,7 +29,26 @@ var Game = (function () {
 		knight: function () {
 			// Move robber
 			// Then, steal from a player adjacent
-			Board.moveRobber();
+			Board.moveRobber(function (players) {
+				App.RobberTargets.setTargets(players);
+				$('#stealPopup').show();
+				Controller.bindOnce('.action.steal', 'click', function (e) {
+					// Determine the selected player's id
+					var id = $(this).attr('value');
+					// 0 is a valid id...
+					if (id != undefined) {
+						// TODO: Work with controller on this
+						Controller.emit('steal', { player: id }, function (resource) {
+							// Add the stolen resource to the player
+							App.Players.self.updateResources(resource);
+						});
+						$('#stealPopup').hide();
+					} else {
+						Game.msg('Not a valid selection.');
+						return false;
+					}
+				});
+			});
 		},
 		plenty: function () {
 			// Bring up popup for user to select two resources
@@ -39,6 +58,19 @@ var Game = (function () {
 			// Bring up popup for user to select one resource
 			// Remove all resources of that type from each player
 			// Give those resources to this player
+			$('#monopolyPopup').show();
+			Controller.bindOnce('.action.monopoly', 'click', function (e) {
+				var resource = this.innerHTML;
+				if (resource) {
+					Controller.emit('monopoly', { resource: resource.toLowerCase() }, function (resource) {
+						App.Players.self.updateResources(resource);
+					});
+					$('#monopolyPopup').hide();
+				} else {
+					Game.msg('Not a valid selection.');
+					return false;
+				}
+			});
 		},
 		roadBuild: function () {
 			// Popup message telling user to place two roads

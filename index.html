@@ -435,25 +435,34 @@
 				</script>
 			</div>
 			
-			<div id="stealPopup" class="popup" style="display:none;">
+	  <div id="stealPopup" class="popup" style="display:none;">
         <h2 class="title">Steal A Resource</h2>
+		<script type="text/x-handlebars">
+			<ul class="buttonList">
+				{{#each App.RobberTargets}}
+					<li><a href="#" class="action steal" {{bindAttr value="id"}}>Steal from <strong>{{name}}</strong></a></li>
+				{{/each}}
+			</ul>
+		</script>
+		<!--
         <ul class="buttonList">
           <li><a href="#">Steal from <strong>Tim</strong></a></li>
           <li><a href="#">Steal from <strong>Colin</strong></a></li>
           <li><a href="#">Steal from <strong>Becky</strong></a></li>
         </ul>
+		-->
       </div>
       
       <div id="monopolyPopup" class="popup" style="display:none;">
         <h2 class="title">Resource Monopoly</h2>
         <p>Choose a resource to monopolize:</p>
         <ul>
-					<li class="wool"> <a href="#">Wool</a></li>
-					<li class="grain"><a href="#">Grain</a></li>
-					<li class="ore">  <a href="#">Ore</a></li>
-					<li class="brick"><a href="#">Brick</a></li>
-					<li class="wood"> <a href="#">Wood</a></li>
-				</ul>
+			<li class="wool"><a href="#" class="action monopoly">Wool</a></li>
+			<li class="grain"><a href="#" class="action monopoly">Grain</a></li>
+			<li class="ore"><a href="#" class="action monopoly">Ore</a></li>
+			<li class="brick"><a href="#" class="action monopoly">Brick</a></li>
+			<li class="wood"><a href="#" class="action monopoly">Wood</a></li>
+		</ul>
       </div>
       
 		</div>

@@ -273,6 +273,13 @@ Player = Ember.Object.extend({
 			}
 		});
 		return resources[Math.floor(Math.random()*resources.length)] || null;
+	},
+	
+	// Removes all of one type of resource from a player's possession and returns the count
+	takeAll: function (resource) {
+		var count = this.get(resource);
+		this.set(resource, 0);
+		return count;
 	}
 });
 

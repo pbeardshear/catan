@@ -71,22 +71,27 @@ var Controller = (function () {
 	
 	return {
 		init: function (io, commands, autoLoad, actions) {
-			socket = io.connect(app.CONST.IP);
-			if (autoLoad && actions) {
-				$('.action').each(function (i, el) {
-					var classes = el.className.split(' ');
-					for (var j = 0; j < classes.length; j++) {
-						var o = actions[classes[j]];
-						if (o) {
-							interceptor.bind(el, o.event || 'click', o.fn || o, classes[j]);
+			// Check if we got socket.io from the server
+			if (io) {
+				socket = io.connect(app.CONST.IP);
+				if (autoLoad && actions) {
+					$('.action').each(function (i, el) {
+						var classes = el.className.split(' ');
+						for (var j = 0; j < classes.length; j++) {
+							var o = actions[classes[j]];
+							if (o) {
+								interceptor.bind(el, o.event || 'click', o.fn || o, classes[j]);
+							}
 						}
-					}
+					});
+				}
+				
+				base.each(commands, function (fn, name) {
+					socket.on(name, fn);
 				});
+			} else {
+				alert("Sorry, it seems you weren't able to connect to the server.  Please refresh and try again.");
 			}
-			
-			base.each(commands, function (fn, name) {
-				socket.on(name, fn);
-			});
 		},
 		on: function (name, el, event, fn, bundleName) {
 			var _bundleName = bundleName.split(' ');
@@ -119,11 +124,21 @@ var Controller = (function () {
 				});
 			});
 		},
+		
+		// Alias for websocket.emit
+		// Sends message to server if it is active in the current bundle
 		fire: function (name, options, fn) {
 			if (activeBundle.actions[name]) {
 				socket.emit(name, options, fn);
 			}
 		},
+		
+		// Unsafe alias for websocket.emit
+		// To ensure that the action is active in the bundle, use Controller.fire instead
+		emit: function (name, options, fn) {
+			socket.emit(name, options, fn);
+		},
+		
 		bundle: function (name, actions, active) {
 			var _bundle = new Bundle(name, actions);
 			interceptor.add(actions);
@@ -132,11 +147,13 @@ var Controller = (function () {
 			}
 			bundles[name] = _bundle;
 		},
+		
 		swapTo: function (to) {
 			// Change the active bundle
 			var _bundle = bundles[to];
 			_bundle.activate();
 		},
+		
 		request: function (name) {
 			if (typeof name == 'object' && name.length) {
 				var self = this;
@@ -152,6 +169,7 @@ var Controller = (function () {
 			}
 			return false;
 		},
+		
 		release: function (name) {
 			if (typeof name == 'object' && name.length) {
 				var self = this;
@@ -162,9 +180,23 @@ var Controller = (function () {
 			}
 			interceptor.deactivate(name);
 		},
+		
 		// Send a state update request to the server
 		update: function (data) {
 			socket.emit('update', data);
+		},
+		
+		// Binds the an event listener to all objects matching
+		// the passed selector, then unbinds after the first execution
+		bindOnce: function (selector, event, fn) {
+			var handler = function (e) {
+				// Returning false can cancel the unbinding, in case the user made a mistake
+				var result = fn.call(this, e);
+				if (result !== false) {
+					$(selector).unbind(event, handler);
+				}
+			};
+			$(selector).bind(event, handler);
 		}
 	};
 })();
