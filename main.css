@@ -31,9 +31,9 @@ button { cursor:pointer; }
 #sidePane { width:25%; height:70%; min-width:100px; right:0; top:0; padding:0 0 1px; background:#555; }
 #bottomPane { width:100%; height:30%; left:0; bottom:0; background:#000; }
 
-#mapContainer { margin:0 auto; width:620px; }
-#mapContainer img { position:absolute; }
-#mapContainer canvas { position:absolute; margin:0 auto; }
+#mapContainer { margin:0; width:auto; }
+#mapContainer img,
+#mapContainer canvas { position:absolute; margin:0 auto; height:100%; max-width:800px; max-height:620px; }
 
 #playerInfo { color:#999; width:100%; height:20%; background:#292929; margin:0; position:relative; font-size:14px; }
 #playerInfo td { border-bottom:1px solid #777; padding:0 0; }
