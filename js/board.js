@@ -375,19 +375,21 @@ var Board = (function () {
 		var players = App.Players.toArray(),
 			tileCenter = Engine.getCoords(tile.id),
 			matchedPlayers = [];
-		outer: for (var i = 0; i < players.length && players[i] != App.Players.self; i++) {
-			var settlements = players[i].settlements,
-				cities = players[i].cities;
-			for (var j = 0; j < settlements.length; j++) {
-				if (Engine.pointDistance(settlements[j].pos, tileCenter) <= CONST.board.landSize) {
-					matchedPlayers.push(players[i]);
-					continue outer;
+		outer: for (var i = 0; i < players.length; i++) {
+			if (players[i] != App.Players.self) {
+				var settlements = players[i].settlements,
+					cities = players[i].cities;
+				for (var j = 0; j < settlements.length; j++) {
+					if (Engine.pointDistance(settlements[j].pos, tileCenter) <= CONST.board.landSize) {
+						matchedPlayers.push(players[i]);
+						continue outer;
+					}
 				}
-			}
-			for (var j = 0; j < cities.length; j++) {
-				if (Engine.pointDistance(cities[j].pos, tileCenter) <= CONST.board.landSize) {
-					matchedPlayers.push(players[i]);
-					continue outer;
+				for (var j = 0; j < cities.length; j++) {
+					if (Engine.pointDistance(cities[j].pos, tileCenter) <= CONST.board.landSize) {
+						matchedPlayers.push(players[i]);
+						continue outer;
+					}
 				}
 			}
 		}

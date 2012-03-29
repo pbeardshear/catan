@@ -294,7 +294,7 @@
 			</div>
 			<!-- Trade Popup -->
       <script type="text/x-handlebars">
-				<div id="tradePopup" class="popup" style="display:block;">
+				<div id="tradePopup" class="popup" style="display:none;">
 					<h2 class="title">Trade Resources</h2>
 					<form>
 						<div class="third first">
@@ -438,11 +438,13 @@
 	  <div id="stealPopup" class="popup" style="display:none;">
         <h2 class="title">Steal A Resource</h2>
 		<script type="text/x-handlebars">
+			{{#view App.RobberList}}
 			<ul class="buttonList">
 				{{#each App.RobberTargets}}
-					<li><a href="#" class="action steal" {{bindAttr value="id"}}>Steal from <strong>{{name}}</strong></a></li>
+					<li><a href="#" class="action steal" {{bindAttr value="id"}} {{action "steal" on="click"}}>Steal from <strong>{{name}}</strong></a></li>
 				{{/each}}
 			</ul>
+			{{/view}}
 		</script>
 		<!--
         <ul class="buttonList">

@@ -253,9 +253,9 @@ var app = (function () {
 			fn(App.Players.self.takeRandom());
 		},
 		
-		monopoly: function (_, fn) {
+		monopoly: function (data, fn) {
 			// Return all of your resources
-			fn(App.Players.self.takeAll());
+			fn(App.Players.self.takeAll(data.resource));
 		}
 	};
 	
@@ -369,6 +369,25 @@ var app = (function () {
 				join: function (self, event) {
 					// TODO: Think of a better way to abstract this, preferably through the controller
 					actions.join.call(event.target, event);
+				}
+			});
+			
+			App.RobberList = Ember.View.extend({
+				// Handlers
+				steal: function (self, event) {
+					var id = $(event.target).attr('value');
+					// 0 is a valid id...
+					if (id != undefined) {
+						// TODO: Work with controller on this
+						Controller.emit('steal', { player: parseInt(id) }, function (resource) {
+							// Add the stolen resource to the player
+							App.Players.self.updateResources(resource);
+						});
+						$('#stealPopup').hide();
+					} else {
+						Game.msg('Not a valid selection.');
+						return false;
+					}
 				}
 			});
 			

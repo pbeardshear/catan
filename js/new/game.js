@@ -32,22 +32,22 @@ var Game = (function () {
 			Board.moveRobber(function (players) {
 				App.RobberTargets.setTargets(players);
 				$('#stealPopup').show();
-				Controller.bindOnce('.action.steal', 'click', function (e) {
-					// Determine the selected player's id
-					var id = $(this).attr('value');
-					// 0 is a valid id...
-					if (id != undefined) {
-						// TODO: Work with controller on this
-						Controller.emit('steal', { player: id }, function (resource) {
-							// Add the stolen resource to the player
-							App.Players.self.updateResources(resource);
-						});
-						$('#stealPopup').hide();
-					} else {
-						Game.msg('Not a valid selection.');
-						return false;
-					}
-				});
+				// Controller.bindOnce('.action.steal', 'click', function (e) {
+					// // Determine the selected player's id
+					// var id = $(this).attr('value');
+					// // 0 is a valid id...
+					// if (id != undefined) {
+						// // TODO: Work with controller on this
+						// Controller.emit('steal', { player: parseInt(id) }, function (resource) {
+							// // Add the stolen resource to the player
+							// App.Players.self.updateResources(resource);
+						// });
+						// $('#stealPopup').hide();
+					// } else {
+						// Game.msg('Not a valid selection.');
+						// return false;
+					// }
+				// });
 			});
 		},
 		plenty: function () {

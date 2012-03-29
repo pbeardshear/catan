@@ -92,12 +92,13 @@ try {
 			// Development card messages
 			steal: function (data, fn) {
 				var game = client.game;
-				game.useCard.knight(data, fn);
+				game.useCard.knight.call(game, data, fn);
 			},
 			
 			monopoly: function (data, fn) {
+				server.log('got monopoly');
 				var game = client.game;
-				game.useCard.monopoly(data, client, fn);
+				game.useCard.monopoly.call(game, data, client, fn);
 			}
 		};
 		

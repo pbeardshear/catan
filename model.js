@@ -335,8 +335,10 @@ try {
 	// Server-side development card effects
 	Game.prototype.useCard = {
 		knight: function (data, fn) {
-			var player = this.getPlayer({ id: data.player });
-			player.self.emit('steal', 'none', function (resource) {
+			var player = this.getPlayer({ by: 'gameID', id: data.player });
+			player.self.emit('steal', 'none', function (type) {
+				var resource = {};
+				resource[type] = 1;
 				// Return to the sender the resource that was stolen
 				fn(resource);
 			});
@@ -348,15 +350,22 @@ try {
 			// Iterate over each player, and request their resources in turn
 			var asyncIterator = function (i) {
 				if (i >= players.length) {
+					console.log('finished monopoly:', fn);
 					fn(resources);
 					return;
 				}
-				players[i].self.emit('monopoly', 'none', function (count) {
-					resources[data.resource] += count;
+				if (players[i].self != client) {
+					console.log('emitting to player:', players[i].name);
+					players[i].self.emit('monopoly', { resource: data.resource }, function (count) {
+						resources[data.resource] += count;
+						asyncIterator(i + 1);
+					});
+				} else {
 					asyncIterator(i + 1);
-				});
+				}
 			}
 			
+			this.server.log('got monopoly call');	
 			resources[data.resource] = 0;
 			asyncIterator(0);
 		}
