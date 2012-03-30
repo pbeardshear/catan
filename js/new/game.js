@@ -270,6 +270,7 @@ var Game = (function () {
 		// Called on: user interaction
 		msg: function (text) {
 			App.gameMessage.set('text', text);
+			setTimeout(function () { App.gameMessage.set('text', null); }, 3000);
 		},
 		// Called on: trade command, request property
 		trade: function (request, sender, tradeCallback) {

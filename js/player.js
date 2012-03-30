@@ -248,7 +248,7 @@ Player = Ember.Object.extend({
 			// var view = Game.get('views').developmentCards;
 			var result = Game.useCard(card);
 			// Need to check specifically for false, because some card uses are asynchronous and return undefined, which is falsey
-			if (result == false) {
+			if (result !== false) {
 				this.incrementProperty(card, -1);
 			}
 		}

@@ -242,6 +242,7 @@ var app = (function () {
 				Board.swapTiles(tiles[0], tiles[1]);
 			} else if (res.type == 'build') {
 				Board.placePiece(res.data);
+				Game.msg([Game.getPlayer(res.player).name, 'placed a', res.type].join(' '));
 			} else if (res.type == 'message') {
 				Game.msg(res.data.text);
 			}
