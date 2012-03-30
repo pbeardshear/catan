@@ -256,6 +256,7 @@ var Game = (function () {
 			// Check if it is our turn
 			if (self.get('id') == data.turn) {
 				// Our turn!
+				this.msg('It is your turn.');
 				self.startTurn();
 			}
 		},

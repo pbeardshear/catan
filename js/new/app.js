@@ -184,6 +184,7 @@ var app = (function () {
 		},
 		initPlacement: function (res, fn) {
 			console.log('starting initial placement');
+			Game.msg('It is your turn to place a settlement and road.');
 			var callback = function () {
 				Board.beginPlace(Game.get('self'), 'road', true, fn);
 			};
