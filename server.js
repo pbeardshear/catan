@@ -11,16 +11,9 @@ require('./mail/mailer.js');
 Mailer.init('mail/config.txt', 'mail/template.txt');
 
 try {
-	// Read in the server config
-	var configFile = fs.readFileSync('config.json', 'utf-8');
-	var config = { ip: 'localhost', port: 1337 };
-	if (configFile) {
-		config = JSON.parse(configFile);
-	}
-	
 	var server = new model.Server(connect);
 	var base = io.listen(server.master);
-	server.listen(config.port, config.ip);
+	server.listen(process.env.PORT || 3000);
 
 	base.sockets.on('connection', function (client) {
 		server.register('client', client);
