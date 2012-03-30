@@ -295,6 +295,7 @@ var app = (function () {
 				el: '#gameList table'
 			});
 			Controller.fire('listGames');
+			$('#mapContainer').draggable();
 		},
 		
 		transition: function (o) {
