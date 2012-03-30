@@ -7,7 +7,6 @@
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 		<script type="text/javascript" src="jquery-ui-min.js"></script>
 		<script type="text/javascript" src="ember-0.9.5.js"></script>
-		<!--<script type="text/javascript" src="http://cdn.socket.io/stable/socket.io.js"></script>-->
 		<script type="text/javascript" src="http://localhost:1337/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="js/method.js"></script>
 		<script type="text/javascript" src="js/new/app.js"></script>
@@ -31,9 +30,13 @@
 			#playerList ul { list-style: none; }
 			#playerList ul li { margin: 5px 0px; }
 			.colorSquare { height: 20px; width: 20px; }
-			.colorSquare.purple { background-color: purple; }
-			.colorSquare.red { background-color: red; }
-			.colorSquare.white { background-color: white; }
+			
+			.colorSquare.red { background-color: '#f32d2d'; }
+			.colorSquare.blue { background-color: '#2066f2'; }
+			.colorSquare.green { background-color: '#1fa926'; }
+			.colorSquare.purple { background-color: '#c63af5'; }
+			.colorSquare.cyan { background-color: '#23daca'; }
+			.colorSquare.gold { background-color: '#f8b530'; }
 		</style>
 	</head>
 	<body>
@@ -134,37 +137,6 @@
 						{{/each}}
 					</table>
 				</script>
-				<!-- Test player statuses
-				<tr class="red">
-					<td class="name">Tim</td>
-					<td class="achievement">R</td>
-					<td class="resource"><em>R:</em> 8</td>
-					<td class="development"><em>D:</em> 2</td>
-					<td class="victory"><em>V:</em> 4</td>
-				</tr>
-				<tr class="orange">
-					<td class="name">Colin</td>
-					<td class="achievement">&nbsp;</td>
-					<td class="resource"><em>R:</em> 8</td>
-					<td class="development"><em>D:</em> 2</td>
-					<td class="victory"><em>V:</em> 4</td>
-				</tr>
-				<tr class="blue active">
-					<td class="name">Becky</td>
-					<td class="achievement">A</td>
-					<td class="resource"><em>R:</em> 8</td>
-					<td class="development"><em>D:</em> 20</td>
-					<td class="victory"><em>V:</em> 4</td>
-				</tr>
-				<tr class="white">
-					<td class="name">Peter</td>
-					<td class="achievement">&nbsp;</td>
-					<td class="resource"><em>R:</em> 10</td>
-					<td class="development"><em>D:</em> 2</td>
-					<td class="victory"><em>V:</em> 4</td>
-				</tr>
-				
-				-->
 				<div class="actions">
 					<a class="button" id="tradeButton">Trade Resources</a>
 					<a class="button action endTurn" id="endButton">End Turn</a>	
@@ -172,12 +144,6 @@
 				<div id="chat">
 					<div id="chatLog">
 						<div class="wrap">
-							<!-- Test chat messages
-							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-							<p><em class="name">Tim:</em> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-							-->
 						</div>
 					</div>
 					<form class="action chat">
@@ -249,15 +215,6 @@
 							</ul>
 						{{/with}}
 					</script>
-					<!--
-					<ul class="items">
-						<li class="wool">0</li>
-						<li class="grain">0</li>
-						<li class="ore">0</li>
-						<li class="brick">0</li>
-						<li class="wood">0</li>
-					</ul>
-					-->
 				</div>
 				<!-- Development -->				
 				<div id="development" class="actionPane">
@@ -285,13 +242,6 @@
 							</ul>
 						{{/view}}
 					</script>
-					<ul class="items">
-						
-						<!-- Test development cards
-						<li><a href="" class="button" value="knight">Knight x 2</a></li>
-						<li><a href="" class="button" value="plenty">Year of Plenty</a></li>
-						-->
-					</ul>
 				</div>
 			</div>
 			<!-- Trade Popup -->
@@ -307,20 +257,6 @@
 										<input type="radio" {{bindAttr name="id"}} />
 										<label>{{name}}</label>
 									</li>
-								<!--
-								<li>
-									<input type="radio" name="player" />	
-									<label>Tim</label>
-								</li>
-								<li>
-									<input type="radio" name="player" />	
-									<label>Colin</label>
-								</li>
-								<li>
-									<input type="radio" name="player" />	
-									<label>Becky</label>
-								</li>
-								-->
 								{{/each}}
 								{{#with App.Players.self}}
 									<li class="maritime">
@@ -334,16 +270,6 @@
 										</ul>
 									</li>
 								{{/with}}
-								<!--
-								<li class="maritime">
-									<input type="radio" name="player" />
-									<label>Maritime Trade</label>
-									<ul class="availability">
-										<li>4:1 Any Resource</li>
-										<li>2:1 Wood</li>
-									</ul>
-								</li>
-								-->
 							</ul>
 						</div>
 						<div class="third">
@@ -409,24 +335,6 @@
 					{{/with}}
 					
 				</script>
-
-				<!--
-					<div class="half first">
-						<h3 class="subtitle">Peter Wants:</h3>
-						<ul class="resources">
-							<li class="wool"><em>5</em> Wool</li>
-							<li class="grain"><em>1</em> Grain</li>
-							<li class="ore"><em>2</em> Ore</li>
-						</ul>
-					</div>
-					<div class="half last">
-						<h3 class="subtitle">Peter Gives:</h3>
-						<ul class="resources">
-							<li class="brick"><em>3</em> Brick</li>
-							<li class="wood"><em>5</em> Wood</li>
-						</ul>
-					</div>
-				-->
 				<script type="text/x-handlebars">
 					{{#view App.ResourceTrade}}
 					<p class="actions">
@@ -448,13 +356,6 @@
 			</ul>
 			{{/view}}
 		</script>
-		<!--
-        <ul class="buttonList">
-          <li><a href="#">Steal from <strong>Tim</strong></a></li>
-          <li><a href="#">Steal from <strong>Colin</strong></a></li>
-          <li><a href="#">Steal from <strong>Becky</strong></a></li>
-        </ul>
-		-->
       </div>
 	  <div id="monopolyPopup" class="popup" style="display:none;">
       <script type="text/x-handlebars">
