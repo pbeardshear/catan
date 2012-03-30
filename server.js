@@ -1,4 +1,5 @@
-var connect = require('connect'),
+var fs = require('fs'),
+	connect = require('connect'),
 	io = require('socket.io'),
 	po = require('./player_objects.js'),
 	go = require('./game.js'),
@@ -10,9 +11,16 @@ require('./mail/mailer.js');
 Mailer.init('mail/config.txt', 'mail/template.txt');
 
 try {
+	// Read in the server config
+	var configFile = fs.readFileSync('config.json', 'utf-8');
+	var config = { ip: 'localhost', port: 1337 };
+	if (configFile) {
+		config = JSON.parse(configFile);
+	}
+	
 	var server = new model.Server(connect);
 	var base = io.listen(server.master);
-	server.listen(1337, 'localhost');
+	server.listen(config.port, config.ip);
 
 	base.sockets.on('connection', function (client) {
 		server.register('client', client);
