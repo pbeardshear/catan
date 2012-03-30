@@ -12,7 +12,7 @@ var app = (function () {
 		game: { numTypes: 5, numTiles: 19 },
 		imagePath: 'images/',
 		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber' },
-		IP: 'http://localhost:1337'
+		IP: window.location.href
 	};
 	var phases = { };
 	// The app manages views that are used pregame
