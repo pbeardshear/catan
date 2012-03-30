@@ -32,32 +32,43 @@ var Game = (function () {
 			Board.moveRobber(function (players) {
 				App.RobberTargets.setTargets(players);
 				$('#stealPopup').show();
-				// Controller.bindOnce('.action.steal', 'click', function (e) {
-					// // Determine the selected player's id
-					// var id = $(this).attr('value');
-					// // 0 is a valid id...
-					// if (id != undefined) {
-						// // TODO: Work with controller on this
-						// Controller.emit('steal', { player: parseInt(id) }, function (resource) {
-							// // Add the stolen resource to the player
-							// App.Players.self.updateResources(resource);
-						// });
-						// $('#stealPopup').hide();
-					// } else {
-						// Game.msg('Not a valid selection.');
-						// return false;
-					// }
-				// });
 			});
 		},
 		plenty: function () {
 			// Bring up popup for user to select two resources
 			// Add those resources
+			// We are reappropriating the monopoly popup for Year of Plenty as well
+			App.Popup.useCard('plenty');
+			$('#monopolyPopup').show();
+			Controller.bindOnce('.action.monopoly', 'click', function (e) {
+				var resourceName = this.innerHTML;
+				if (resourceName) {
+					Controller.bindOnce('.action.monopoly', 'click', function (e) {
+						var nextResourceName = this.innerHTML;
+						if (nextResourceName) {
+							var resources = {};
+							if (resourceName == nextResourceName) {
+								resources[resourceName.toLowerCase()] = 2;
+							} else {
+								resources[resourceName.toLowerCase()] = 1;
+								resources[nextResourceName.toLowerCase()] = 1;
+							}
+							App.Players.self.updateResources(resources);
+							$('#monopolyPopup').hide();
+						} else {
+							Game.msg('Not a valid selection.');
+						}
+					});
+				} else {
+					Game.msg('Not a valid selection.');
+				}
+			});
 		},
 		monopoly: function () {
 			// Bring up popup for user to select one resource
 			// Remove all resources of that type from each player
 			// Give those resources to this player
+			App.Popup.useCard('monopoly');
 			$('#monopolyPopup').show();
 			Controller.bindOnce('.action.monopoly', 'click', function (e) {
 				var resource = this.innerHTML;

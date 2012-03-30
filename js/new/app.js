@@ -398,6 +398,26 @@ var app = (function () {
 				}
 			});
 			
+			App.Popup = Ember.Object.create({
+				header: null,
+				subheader: null,
+				
+				useCard: function (cardType) {
+					switch (cardType) {
+						case 'plenty':
+							this.set('header', 'Year of Plenty');
+							this.set('subheader', 'Choose a resource to add:');
+							break;
+						case 'monopoly':
+							this.set('header', 'Resource Monopoly');
+							this.set('subheader', 'Choose a resource to monopolize:');
+							break;
+					}
+				}
+			});
+			
+			App.PopupView = Ember.View.extend();
+			
 			App.ResourceTrade = Ember.View.extend({
 				trade: function (self, event) {
 					actions.trade.call(event.target, event);

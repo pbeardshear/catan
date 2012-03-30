@@ -454,18 +454,21 @@
         </ul>
 		-->
       </div>
-      
-      <div id="monopolyPopup" class="popup" style="display:none;">
-        <h2 class="title">Resource Monopoly</h2>
-        <p>Choose a resource to monopolize:</p>
-        <ul>
-			<li class="wool"><a href="#" class="action monopoly">Wool</a></li>
-			<li class="grain"><a href="#" class="action monopoly">Grain</a></li>
-			<li class="ore"><a href="#" class="action monopoly">Ore</a></li>
-			<li class="brick"><a href="#" class="action monopoly">Brick</a></li>
-			<li class="wood"><a href="#" class="action monopoly">Wood</a></li>
-		</ul>
-      </div>
+	  <div id="monopolyPopup" class="popup" style="display:none;">
+      <script type="text/x-handlebars">
+		  {{#view App.PopupView}}
+			<h2 class="title">{{App.Popup.header}}</h2>
+			<p>{{App.Popup.subheader}}</p>
+			<ul>
+				<li class="wool"><a href="#" class="action monopoly">Wool</a></li>
+				<li class="grain"><a href="#" class="action monopoly">Grain</a></li>
+				<li class="ore"><a href="#" class="action monopoly">Ore</a></li>
+				<li class="brick"><a href="#" class="action monopoly">Brick</a></li>
+				<li class="wood"><a href="#" class="action monopoly">Wood</a></li>
+			</ul>
+		  {{/view}}
+	  </script>
+	  </div>
       
 		</div>
 		<!-- End Game Page -->
