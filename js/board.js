@@ -526,7 +526,7 @@ var Board = (function () {
 			// Road - no road there + adjacent to current road
 			// Settlement - no settlement/city there + adjacent to current road + no settlement/city at adjacent vertex
 			// City - current settlement there
-			var isEmpty = empty(type, pos);
+			var isEmpty = empty(type == 'city' ? 'settlement' : type, pos);
 			if (!adjusted) {
 				return type == 'road' ? isEmpty && (adjacentRoad(pos.start) || adjacentRoad(pos.end)) :
 					   type == 'settlement' ? isEmpty && adjacentRoad(pos) && !adjacentSettlement(pos) :
