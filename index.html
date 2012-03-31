@@ -18,8 +18,9 @@
 		<script type="text/javascript" src="js/new/views.js"></script>
 		
 		<style type="text/css">
-			#gamePage { display: none; }
+		  #hostPage { display:block; }
 			#setupPage { display: none; }
+			#gamePage { display: none; }			
 			#startGame { z-index: 5; }
 			#playerList ul { list-style: none; }
 			#playerList ul li { margin: 5px 0px; }
@@ -139,19 +140,21 @@
 			</div>
 			<!-- Side Pane -->			
 			<div id="sidePane" class="pane">
-				<script type="text/x-handlebars">
-					<table id="playerInfo">						
-						{{#each App.Players}}
-							<tr {{bindAttr class="color isTurn:active"}}>
-								<td class="name">{{name}}</td>
-								<td class="achievement">{{achievements}}</td>
-								<td class="resource"><em>R:</em>{{resourceCount}}</td>
-								<td class="development"><em>D:</em>{{developmentCount}}</td>
-								<td class="victory"><em>V:</em>{{victoryPoints}}</td>
-							</tr>
-						{{/each}}
-					</table>
-				</script>
+			  <div id="wrapperPlayerInfo">
+  				<script type="text/x-handlebars">
+  					<table id="playerInfo">
+  						{{#each App.Players}}
+  							<tr {{bindAttr class="color isTurn:active"}}>
+  								<td class="name">{{name}}</td>
+  								<td class="achievement">{{achievements}}</td>
+  								<td class="resource"><em>R:</em> {{resourceCount}}</td>
+  								<td class="development"><em>D:</em> {{developmentCount}}</td>
+  								<td class="victory"><em>V:</em> {{victoryPoints}}</td>
+  							</tr>
+  						{{/each}}
+  					</table>
+  				</script>
+				</div>
 				<div class="actions">
 					<a class="button" id="tradeButton">Trade Resources</a>
 					<a class="button action endTurn" id="endButton">End Turn</a>	

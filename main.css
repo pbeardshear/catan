@@ -8,7 +8,7 @@ button { cursor:pointer; }
 
 .page { position:absolute; width:100%; height:100%; min-height:0; background:#CCC; }
 .pane { position:absolute; }
-.button { text-decoration:none; text-align:center; cursor:pointer; border:none; background:#333; color:#CCC; padding:8px 20px; text-transform:uppercase; font-size:12px; line-height:1; border-radius:5px; }
+.button { text-decoration:none; text-align:center; cursor:pointer; border:none; background:#333; color:#CCC; padding:8px 20px; text-transform:uppercase; font-size:12px; border-radius:5px; line-height:1.4; }
 .popup { position:absolute; z-index:100; width:60%; top:5%; left:20%; padding:0 20px 1px; background:#FFF; box-sizing:border-box; border-radius:5px; box-shadow:0 2px 8px rgba(0,0,0,0.5); }
 .popup .title { text-transform:uppercase; margin:0 -20px 15px; padding:12px 20px 8px; background:#CCC; color:#333; font:bold 16px/1 Helvetica,Arial,sans-serif; border-bottom:1px solid #999; border-radius:5px 5px 0 0; }
 .popup .subtitle { border-bottom:1px solid #AAA; padding:0 0 5px; margin:0 0 15px; }
@@ -60,37 +60,45 @@ button { cursor:pointer; }
 #mapContainer img,
 #mapContainer canvas { position:absolute; margin:0 auto; }
 
-#playerInfo { color:#999; width:100%; height:20%; background:#292929; margin:0; position:relative; font-size:14px; }
-#playerInfo td { border-bottom:1px solid #777; padding:0 0; }
+#wrapperPlayerInfo { height:25%; width:100%; position:relative; }
+#wrapperPlayerInfo > div { width:100%; height:100%; }
+#playerInfo { color:#999; width:100%; height:100%; background:#222; margin:0; padding:0; font-size:14px; }
+#playerInfo td { border-bottom:1px solid #EEE; padding:0 0; color:#FFF; }
 #playerInfo em { font-style:normal; font-weight:normal; color:#777; }
 #playerInfo .name { padding-left:5%; }
 #playerInfo .achievement { color:#FF0; font-weight:bold; }
 #playerInfo .resource,
 #playerInfo .development,
 #playerInfo .victory { width:50px; font-weight:bold; }
+#playerInfo .swatch { width:20px; }
 
-#playerInfo .active { background:#000; }
-#playerInfo .red    { color:#f32d2d; }
-#playerInfo .blue   { color:#2066f2; }
-#playerInfo .green  { color:#1fa926; }
-#playerInfo .purple { color:#c63af5; }
-#playerInfo .cyan   { color:#23daca; }
-#playerInfo .gold   { color:#f8b530; }
+#playerInfo .active td { background:#999; color:#000; }
+#playerInfo .active em { color:#111; }
+#playerInfo .active .name { font-weight:bold; }
+
+#playerInfo .red    .swatch { background-color:#f32d2d; }
+#playerInfo .blue   .swatch { background-color:#2066f2; }
+#playerInfo .green  .swatch { background-color:#1fa926; }
+#playerInfo .purple .swatch { background-color:#c63af5; }
+#playerInfo .cyan   .swatch { background-color:#23daca; }
+#playerInfo .gold   .swatch { background-color:#f8b530; }
 
 #sidePane .actions { position:relative; width:100%; height:10%; }
-#sidePane .actions .button { background:#111; color:#CCC; padding:8px 0; height:16px; display:block; float:left; width:40%; position:relative; top:50%; }
+#sidePane .actions .button { background:#111; color:#CCC; padding:8px 0; height:16px; display:block; float:left; position:relative; top:50%; line-height:1.4; }
 #sidePane .actions .button:hover { background:#000; color:#FFF; }
 #sidePane .actions #tradeButton { width:47%; margin:-16px 3% 0 5%; }
 #sidePane .actions #endButton { width:40%; margin:-16px 5% 0 0; }
 
-#chat { position:relative; height:70%; width:100%; margin:0; padding:0; border-top:1px solid #999; }
-#chat #chatLog { position:absolute; height:100%; overflow:hidden; color:#EEE; padding:0 0 60px 5%; box-sizing:border-box; }
-#chat #chatLog .wrap { height:100%; overflow:auto; padding:15px 15px 1px 0; box-sizing:border-box; }
+#chat { position:relative; height:65%; width:100%; margin:0; padding:0; border-top:1px solid #EEE; }
+#chat #chatLog { position:absolute; height:100%; overflow:hidden; color:#FFF; padding:0 0 60px 5%; box-sizing:border-box; }
+#chat #chatLog .wrap { height:100%; overflow:auto; padding:15px 15px 1px 0; box-sizing:border-box; width:100%; }
 #chat #chatLog .wrap::-webkit-scrollbar { width: 12px; }
 #chat #chatLog .wrap::-webkit-scrollbar-track { background:#777; }
 #chat #chatLog .wrap::-webkit-scrollbar-thumb { background:#333; }
+#chat #chatLog p { margin:0 0 12px; }
 #chat #chatLog .name { color:#999; font-weight:bold; padding:0 5px 0 0; }
-#chat form { position:absolute; width:90%; height:47px; padding:13px 5% 0; bottom:0; border-top:1px solid #999; }
+#chat #chatLog .systemChat { color:#FDD106; }
+#chat form { position:absolute; width:90%; height:47px; padding:13px 5% 0; bottom:0; border-top:1px solid #EEE; }
 #chat form p { margin:0; }
 #chat .text { float:left; width:78%; }
 #chat #chatMessage { display:block; width:90%; height:34px; margin:0; padding:0 5%; background:#333; border:none; border-radius:4px; font-size:13px; color:#FFF; box-shadow:inset 0 0 5px rgba(0,0,0,0.5); -webkit-transition:all 300ms; }
@@ -112,7 +120,7 @@ button { cursor:pointer; }
 .actionPane .items .button:hover { background-color:#555; }
 
 #build { width:25%; left:0; border-right:1px solid #999; }
-#build .items .button { text-align:left; }
+#build .items .button { text-align:left; padding:8px 10px; display:block; font-size:13px; line-height:1.3; text-transform:none; }
 #build .items .cost { float:right; }
 #build .items .cost img { float:left; margin:3px 0 0 4px; }
 
@@ -173,3 +181,4 @@ button { cursor:pointer; }
 #reportBugPopup label { display: block; margin-left: 2px; }
 #reportBugPopup label.notFirst { margin-top: 10px; }
 #reportBugPopup textarea { height: 40px; width: 400px; margin: 5px 0px; font: 13px/1.3 Helvetica,Arial,sans-serif; }
+
