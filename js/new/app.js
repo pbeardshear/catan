@@ -11,7 +11,7 @@ var app = (function () {
 		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 }, robber: { x: 33, y: 33 } },
 		game: { numTypes: 5, numTiles: 19 },
 		imagePath: 'images/',
-		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber' },
+		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber', highlightCanvas: '#highlight' },
 		IP: window.location.href
 	};
 	var phases = { };

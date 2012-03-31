@@ -482,6 +482,12 @@ var Board = (function () {
 			Controller.on('placeEdge', $('#board-edge area'), 'click', this.place, 'game');
 			return { tiles: tiles, ports: ports };
 		},
+		
+		// Do any initial setup or cleanup now that the game has started
+		beginGame: function () {
+			placeState('none');
+		},
+		
 		getTile: function (index, type) {
 			if (typeof index == 'number') {
 				return type == 'tile' ? Engine.getCoords(index) : Engine.getCoords(index, boardSize+1);
@@ -538,6 +544,7 @@ var Board = (function () {
 					   type == 'settlement' ? isEmpty && !adjacentSettlement(pos) : false;
 			}
 		},
+		
 		// Load up the state and request the placement event
 		// Assumes that the player has already been checked for resources
 		beginPlace: function (player, type, initialPlacement, callback) {
@@ -604,8 +611,10 @@ var Board = (function () {
 					swapTile.swap(tile);
 					Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
 					swapTile = null;
+					Engine.clearHighlight();
 				} else {
 					swapTile = Engine.getTile(coords[0], coords[1]);
+					Engine.highlightTile(swapTile);
 				}
 			}
 		},
