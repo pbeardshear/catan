@@ -93,12 +93,12 @@ button { cursor:pointer; }
 #playerInfo .active em { color:#111; }
 #playerInfo .active .name { font-weight:bold; }
 
-.playerList .red    .swatch { background-color:#f32d2d; }
-.playerList .blue   .swatch { background-color:#2066f2; }
-.playerList .green  .swatch { background-color:#1fa926; }
-.playerList .purple .swatch { background-color:#c63af5; }
-.playerList .cyan   .swatch { background-color:#23daca; }
-.playerList .gold   .swatch { background-color:#f8b530; }
+.playerList .red    .swatch { background-color:#f32d2d !important; }
+.playerList .blue   .swatch { background-color:#2066f2 !important; }
+.playerList .green  .swatch { background-color:#1fa926 !important; }
+.playerList .purple .swatch { background-color:#c63af5 !important; }
+.playerList .cyan   .swatch { background-color:#23daca !important; }
+.playerList .gold   .swatch { background-color:#f8b530 !important; }
 
 #sidePane .actions { position:relative; width:100%; height:10%; }
 #sidePane .actions .button { background:#111; color:#CCC; padding:8px 0; height:16px; display:block; float:left; position:relative; top:50%; line-height:1.4; }
