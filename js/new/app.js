@@ -11,7 +11,7 @@ var app = (function () {
 		imageOffset: { settlement: { x: 30, y: 30 }, city: { x: 40, y: 40 }, robber: { x: 33, y: 33 } },
 		game: { numTypes: 5, numTiles: 19 },
 		imagePath: 'images/',
-		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber' },
+		ID: { canvas: '#map', blank: '#blank', roadCanvas: '#roads', piecesCanvas: '#pieces', robberCanvas: '#robber', highlightCanvas: '#highlight' },
 		IP: window.location.href
 	};
 	var phases = { };
@@ -44,7 +44,7 @@ var app = (function () {
 		},
 		join: function (e) {
 			var gameName = $(this).closest('.game').children('.gameName').text(),
-				userName = $('#hostGame [name="username"]').val();
+				userName = $('#username [name="username"]').val();
 			if (gameName && userName) {
 				Controller.fire('join', { game: gameName, username: userName });
 			}
@@ -232,9 +232,7 @@ var app = (function () {
 				Game.acceptTrade();
 			}
 		},
-		victory: function () {
-			
-		},
+		victory: function () { },
 		request: function (req, fn) {
 			fn(dataRequest[req.data]());
 		},
@@ -251,7 +249,6 @@ var app = (function () {
 				Board.swapTiles(tiles[0], tiles[1]);
 			} else if (res.type == 'build') {
 				Board.placePiece(res.data);
-				Game.msg([Game.getPlayer(res.player).name, 'placed a', res.type].join(' '));
 			} else if (res.type == 'message') {
 				Game.msg(res.data.text);
 			}

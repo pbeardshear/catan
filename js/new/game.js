@@ -117,13 +117,6 @@ var Game = (function () {
 			this.set('self', self);
 			// TODO: Think of a better way to do this
 			App.Players.set('self', self);
-			// Create the player preview view
-			this.get('views').playerPreview = new View({
-				data: this.get('playerState'),
-				template: '<li><div class="player"><div class="colorSquare {color}"></div><span>{name}</span></div></li>',
-				el: '#playerList ul'
-			});
-			this.addPlayers(self);
 		},
 		// Set up initial game state (i.e. board, game-specific options)
 		// Called on: successful host
@@ -196,45 +189,9 @@ var Game = (function () {
 		begin: function () {
 			var playerState = this.get('playerState');
 			this.moveBoard();
+			Board.beginGame();
 			// Create the views to house the game displays
 			var self = this.get('self');
-			var views = this.get('views');
-			// views.resources = new View({
-				// el: '#resources .items',
-				// attr: 'class',
-				// data: self.get('resources')
-			// });
-			// views.developmentCards = new View({
-				// el: '#development .items',
-				// attr: 'value',
-				// data: self.get('developmentCards'),
-				// template: '<li><a href="" class="button" value="{name}">{fullName}</a></li>',
-				// fn: base.fn.delegate(this, function (cards) {
-					// var fullNames = this.get('cardNames');
-					// var ret = { };
-					// base.each(cards, function (val, field) {
-						// if (val == 1) {
-							// ret[field] = fullNames[field];
-						// } else if (val > 1) {
-							// ret[field] = [fullNames[field], val].join(' x ');
-						// } else {
-							// ret[field] = null;
-						// }
-					// });
-					// return ret;
-				// })
-			// });
-			// views.players = new View({
-				// el: '#playerInfo',
-				// attr: 'class',
-				// data: playerState,
-				// template: '<tr class="{color}"><td class="name">{name}</td><td class="achievement">{achievement}</td>' +
-							// '<td class="resource"><em>R: </em><a class="resourceCount">{resourceCount}</a></td>' +
-							// '<td class="development"><em>D: </em><a class="developmentCount">{developmentCount}</a></td>' +
-							// '<td class="victory"><em>V: </em><a class="victoryPoints">{victoryPoints}</a></td>' + 
-							// '</tr>'
-			// });
-			
 			// views.players.create();
 			// Transition the view to game
 			app.transition({ from: 'setup', to: 'game' });
@@ -287,9 +244,19 @@ var Game = (function () {
 		},
 		// Displays the event notice, and updates its text
 		// Called on: user interaction
-		msg: function (text) {
-			App.gameMessage.set('text', text);
-			setTimeout(function () { App.gameMessage.set('text', null); }, 3000);
+		msg: function (text, location) {
+			if (location == 'chat') {
+				// Post update message to the chat log
+				var template = ['<p class="systemChat">', text, '</p>'].join('');
+				var chatWindow = $('#chatLog .wrap');
+				chatWindow.append(template);
+				// Scroll the chat window to the bottom
+				chatWindow.scrollTop = chatWindow[0].scrollHeight;
+			} else {
+				// Default: Show the message in the event notice dropdown
+				App.gameMessage.set('text', text);
+				setTimeout(function () { App.gameMessage.set('text', null); }, 3000);
+			}
 		},
 		// Called on: trade command, request property
 		trade: function (request, sender, tradeCallback) {

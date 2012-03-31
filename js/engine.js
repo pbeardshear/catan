@@ -11,6 +11,7 @@ var Engine = (function () {
 		landSize = CONST.board.landSize,
 		alt = Math.sin(Math.PI/3)*landSize,
 		canvasID = CONST.ID.canvas,
+		highlightID = CONST.ID.highlightCanvas,
 		roadCanvasID = CONST.ID.roadCanvas,
 		piecesCanvasID = CONST.ID.piecesCanvas,
 		robberCanvasID = CONST.ID.robberCanvas,
@@ -53,6 +54,9 @@ var Engine = (function () {
 		cyan: '#23daca',
 		gold: '#f8b530'
 	};
+	
+	// Color used for designating a highlighted tile
+	var highlightColor = '#000';
 	
 	// Image files
 	var tileImages = {
@@ -151,7 +155,7 @@ var Engine = (function () {
 			ctx.drawImage(this, -length/2, -height/2);
 			ctx.restore();
 		},
-		tile: function () {
+		tile: function (highlight) {
 			var ctx = pieceCanvasMap.tile;
 			var center = getCenter(this.id),
 				len = landSize,
@@ -165,22 +169,27 @@ var Engine = (function () {
 			center.x -= (length/2);
 			center.y = -(center.y - (height/2));
 			
-			// ctx.drawImage(tile, 0, 0, imageSize.x, imageSize.y, center.x - imageSize.x/2, center.y - imageSize.y/2, imageSize.x, imageSize.y);
-			ctx.strokeStyle = '#FFF';
 			ctx.drawImage(tileImage, center.x - alt, center.y - len);
 			if (qualityImage) {
 				ctx.drawImage(qualityImage, center.x - alt, center.y - len);
 			}
-			// ctx.fillStyle = tileColors[this.type] || tileColors[Math.floor(Math.random()*5)];
-			ctx.beginPath();
-			ctx.moveTo(center.x + alt, center.y + (len/2));
-			ctx.lineTo(center.x, center.y + len);
-			ctx.lineTo(center.x - alt, center.y + (len/2));
-			ctx.lineTo(center.x - alt, center.y - (len/2));
-			ctx.lineTo(center.x, center.y - len);
-			ctx.lineTo(center.x + alt, center.y - (len/2));
-			ctx.closePath();
-			ctx.stroke();
+			
+			var strokeCtx = highlight ? pieceCanvasMap.tileHighlight : pieceCanvasMap.tile;
+			strokeCtx.save();
+			strokeCtx.strokeStyle = highlight ? highlightColor : '#FFF';
+			strokeCtx.lineWidth = highlight ? 4 : 1;
+			
+			strokeCtx.beginPath();
+			strokeCtx.moveTo(center.x + alt, center.y + (len/2));
+			strokeCtx.lineTo(center.x, center.y + len);
+			strokeCtx.lineTo(center.x - alt, center.y + (len/2));
+			strokeCtx.lineTo(center.x - alt, center.y - (len/2));
+			strokeCtx.lineTo(center.x, center.y - len);
+			strokeCtx.lineTo(center.x + alt, center.y - (len/2));
+			strokeCtx.closePath();
+			strokeCtx.stroke();
+			
+			strokeCtx.restore();
 			
 			ctx.restore();
 		},
@@ -383,6 +392,7 @@ var Engine = (function () {
 		init: function () {
 			// Set up state variables
 			backgroundCtx = $.dom(canvasID).getContext('2d');
+			highlightCtx = $.dom(highlightID).getContext('2d');
 			roadCtx = $.dom(roadCanvasID).getContext('2d');
 			piecesCtx = $.dom(piecesCanvasID).getContext('2d');
 			robberCtx = $.dom(robberCanvasID).getContext('2d');
@@ -392,13 +402,16 @@ var Engine = (function () {
 				settlement: piecesCtx,
 				city: piecesCtx,
 				tile: backgroundCtx,
+				tileHighlight: highlightCtx,
 				port: backgroundCtx,
-				background: backgroundCtx
+				background: backgroundCtx,
 			};
 			size = app.CONST.board.size;
 			// Initialize the drawing context
 			backgroundCtx.translate(length/2, height/2);
 			backgroundCtx.scale(1, -1);
+			highlightCtx.translate(length/2, height/2);
+			highlightCtx.scale(1, -1);
 			
 			// Initialize the resource manager
 			ResourceManager.init(app.CONST.imagePath);
@@ -466,6 +479,14 @@ var Engine = (function () {
 		},
 		pointDistance: function (a, b) {
 			return pointDist(a, b);
+		},
+		
+		highlightTile: function (tile) {
+			draw.tile.call(tile, true);
+		},
+		
+		clearHighlight: function () {
+			highlightCtx.clearRect(-400, -400, 800, 800);
 		}
 	};
 })();
