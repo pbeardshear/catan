@@ -245,6 +245,17 @@ var Game = (function () {
 			// Change the current action bundle
 			Controller.swapTo('game');
 			Engine.drawRobber();
+			// Bind event listener to chat submit
+			// TODO: Do this in a better way using the Controller
+			$('#chat .chat').bind('submit', function (e) {
+				e.preventDefault();
+				// Data required: { player: playerName, message: chatMessage }
+				var playerName = Game.get('self').get('name');
+				var chatMessage = $('#chatMessage').val();
+				Controller.emit('chat', { player: playerName, message: chatMessage });
+				// Clear the text field
+				$('#chatMessage').val('');
+			});
 		},
 		// Request control and begin the turn
 		// Called on: successful startTurn command
