@@ -32,7 +32,7 @@ var app = (function () {
 			fn: function (e) {
 				var values = { };
 				e.preventDefault();
-				values.username = $('#hostGame [name="username"]').val();
+				values.username = $('#username [name="username"]').val();
 				$.each($(this).serializeArray(), function (i, field) {
 					values[field.name] = field.value;
 				});
@@ -71,6 +71,7 @@ var app = (function () {
 				$('#chatMessage').val('');
 			}
 		},
+		// Deprecated: Development card use is bound to Ember view
 		useCard: function (e) {
 			// Determine the type of card that was used
 		},
@@ -80,9 +81,13 @@ var app = (function () {
 		},
 		trade: function (e) {
 			// Data required: { id: playerID, request: { give: resourcesToGive, receive: resourcesToReceive } }
-			var playerID = $('.tradePartners').find(':checked').attr('name');
+			var playerID = $('.tradePartners').find(':checked').attr('value');
 			if (!playerID) {
 				Game.msg('Select a player to trade with!');
+				return;
+			}
+			else if (playerID == App.Players.self.id) {
+				Game.msg('Why would you want to trade with yourself?');
 				return;
 			}
 			playerID = playerID == 'port' ? 'port' : parseInt(playerID);	// TODO: Do this nicer
@@ -227,7 +232,9 @@ var app = (function () {
 				Game.acceptTrade();
 			}
 		},
-		victory: function () { },
+		victory: function () {
+			
+		},
 		request: function (req, fn) {
 			fn(dataRequest[req.data]());
 		},
