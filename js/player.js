@@ -52,6 +52,7 @@ Player = Ember.Object.extend({
 	id: null,
 	color: null,
 	name: null,
+	isTurn: false,
 	// Base resources
 	grain: 0,
 	ore: 0,

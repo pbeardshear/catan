@@ -53,6 +53,7 @@ var app = (function () {
 			Controller.fire('startGame');
 		},
 		endTurn: function (e) {
+			App.Players.self.endTurn();
 			Controller.fire('endTurn');
 		},
 		build: function (e) {
@@ -322,6 +323,8 @@ var app = (function () {
 			App.Players = Ember.ArrayController.create({
 				content: [],
 				self: null,
+				activePlayer: null,		// Represents the player whose turn it currently is
+				
 				addPlayer: function (player) {
 					// Workaround for adding both static and dynamic classes to a DOM element
 					player.alwaysTrue = true;

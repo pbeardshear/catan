@@ -127,7 +127,7 @@
 				<script type="text/x-handlebars">
 					<table id="playerInfo">						
 						{{#each App.Players}}
-							<tr {{bindAttr class="color"}}>
+							<tr {{bindAttr class="color isTurn:active"}}>
 								<td class="name">{{name}}</td>
 								<td class="achievement">{{achievements}}</td>
 								<td class="resource"><em>R:</em>{{resourceCount}}</td>

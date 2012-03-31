@@ -264,8 +264,15 @@ var Game = (function () {
 			var self = this.get('self');
 			// Check if we receive any resources from this roll
 			Board.harvestResources(self, roll);
+			var player = this.getPlayer(data.turn);
+			if (App.Players.activePlayer) {
+				App.Players.activePlayer.set('isTurn', false);
+			}
+			App.Players.activePlayer = player;
+			player.set('isTurn', true);
+			
 			// Check if it is our turn
-			if (self.get('id') == data.turn) {
+			if (App.Players.self.isTurn) {
 				// Our turn!
 				this.msg('It is your turn.');
 				self.startTurn();
