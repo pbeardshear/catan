@@ -21,16 +21,9 @@
 			#gamePage { display: none; }
 			#setupPage { display: none; }
 			#startGame { z-index: 5; }
-			.header { font-family: Verdana, Helvetica, sans-serif; font-size: 16px; margin: 10px; }
-			.body { margin: 10px; }
-			.body label { margin-right: 10px; }
-			#gameList table { text-align: left; font-family: Verdana, Helvetica, sans-serif; }
-			#gameList table th { width: 200px; }
-			#gameList table td { width: 200px; }
 			#playerList ul { list-style: none; }
 			#playerList ul li { margin: 5px 0px; }
 			.colorSquare { height: 20px; width: 20px; }
-			
 			.colorSquare.red { background-color: #f32d2d; }
 			.colorSquare.blue { background-color: #2066f2; }
 			.colorSquare.green { background-color: #1fa926; }
@@ -42,43 +35,65 @@
 	<body>
 		<!-- Start Game Host Page -->
 		<div id="hostPage" class="page">
-			<div id="hostGame">
-				<div class="header">Host</div>
-				<div class="body">
-					<label>Username:</label><input type="text" name="username" /><br />
-					<div class="configuration">
-						<form class="action host">
-							<label>Game Name:</label><input type="text" name="game" /><br />
-							<label>Players:</label><input type="number" name="players" /><br />
-							<label>Private:</label><input type="checkbox" name="private" /><br />
-							<input type="submit" value="Start" />
-						</form>
-					</div>
-				</div>
-			</div>
-			<div id="joinGame">
-				<div class="header">Join</div>
-				<div class="body">
-					<div id="gameList">
-						<script type="text/x-handlebars">
-							{{#view App.GameList}}
-								<table>
-									<tr>
-										<th>Game Name</th>
-										<th>Players</th>
-									</tr>
-									{{#each games}}
-										<tr class="game">
-											<td class="gameName">{{unbound name}}</td>
-											<td>{{unbound count}}/{{unbound max}}</td>
-											<td><a class="join button action" {{action "join" on="click"}}>Join</a></td>
-										</tr>
-									{{/each}}
-								</table>
-							{{/view}}
-						</script>
-					</div>
-				</div>
+		  <img src="images/vignette.png" class="vignette" />
+		  <div id="hostWrapper">
+		    <h1>Catan</h1>
+		    <div id="username" class="block">
+		      <label>Username:</label>
+		      <input type="text" name="username" />
+		    </div>
+  			<div id="hostGame" class="col block">
+  				<h2>Host a Game</h2>
+  				<div class="body">
+  					<div class="configuration">
+  						<form class="action host">
+  						  <table>
+  						    <tr>
+  						      <th><label>Game Name:</label></th>
+  						      <td><input type="text" name="game" /></td>
+  						    </tr>
+  						    <tr>
+  						      <th><label>Players:</label></th>
+  						      <td><input type="number" name="players" /></td>
+  						    </tr>
+  						    <tr>
+  						      <th>&nbsp;</th>
+  						      <td><label><input type="checkbox" name="private" /> Private</label></td>
+  						    </tr>
+  						    <tr>
+  						      <td>&nbsp;</td>
+  						      <td><button type="submit" class="button">Start</button></td>
+  						    </tr>
+  							</table>
+  							
+  						</form>
+  					</div>
+  				</div>
+  			</div>
+  			<div id="joinGame" class="col block">
+  				<h2>Join a Game</h2>
+  				<div class="body">
+  					<div id="gameList">
+  						<script type="text/x-handlebars">
+  							{{#view App.GameList}}
+  								<table>
+  									<tr>
+  										<th>Game Name</th>
+  										<th>Players</th>
+  									</tr>
+  									{{#each games}}
+  										<tr class="game">
+  											<td class="gameName">{{unbound name}}</td>
+  											<td class="playerCount">{{unbound count}}/{{unbound max}}</td>
+  											<td class="joinAction"><a class="join button action" {{action "join" on="click"}}>Join</a></td>
+  										</tr>
+  									{{/each}}
+  								</table>
+  							{{/view}}
+  						</script>
+  					</div>
+  				</div>
+  			</div>
 			</div>
 		</div>
 		<!-- Start Game Setup Page -->
@@ -254,14 +269,18 @@
 						<ul class="tradePartners">
 							{{#each App.Players}}
 								<li>
-									<input type="radio" {{bindAttr name="id"}} />
-									<label>{{name}}</label>
+									<label>
+									  <input type="radio" name="tradePartner" {{bindAttr name="value"}} />
+									  {{name}}
+									</label>
 								</li>
 							{{/each}}
 							{{#with App.Players.self}}
 								<li class="maritime">
-									<input type="radio" name="port" />
-									<label>Maritime Trade</label>
+									<label>
+									  <input type="radio" name="tradePartner" value="port" />
+									  Maritime Trade
+									</label>
 									<ul class="availability">
 										<li>4:1 Any Resource</li>
 										{{#each ports}}
