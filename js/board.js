@@ -551,7 +551,7 @@ var Board = (function () {
 			if (!adjusted) {
 				return type == 'road' ? isEmpty && (adjacentRoad(pos.start) || adjacentRoad(pos.end)) :
 					   type == 'settlement' ? isEmpty && adjacentRoad(pos) && !adjacentSettlement(pos) :
-					   type == 'city' ? isEmpty && isEmpty.owner == Game.self && isEmpty.type == 'settlement' : false;
+					   type == 'city' ? isEmpty && isEmpty.owner == App.Players.self && isEmpty.type == 'settlement' : false;
 		    } else {
 				// This branch is hit during initial placement
 				// Valid placements are slightly different in this case
