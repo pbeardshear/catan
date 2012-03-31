@@ -67,7 +67,7 @@ Mailer = (function () {
 					from: mailOptions.from || config.username,
 					subject: data.subject,
 					body: template ? null : data.body,
-					template: template || data.template || null,
+					template: data.template || template || null,
 					data: data.data || null,
 					authentication: 'login',
 					username: config.username,

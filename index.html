@@ -16,7 +16,7 @@
 		<script type="text/javascript" src="js/board.js"></script>
 		<script type="text/javascript" src="js/engine.js"></script>
 		<script type="text/javascript" src="js/new/views.js"></script>
-
+		
 		<style type="text/css">
 			#gamePage { display: none; }
 			#setupPage { display: none; }
@@ -244,136 +244,175 @@
 					</script>
 				</div>
 			</div>
-			<!-- Trade Popup -->
-      <script type="text/x-handlebars">
-				<div id="tradePopup" class="popup" style="display:none;">
-					<h2 class="title">Trade Resources</h2>
-					<form>
-						<div class="third first">
-							<h3 class="subtitle">Trade with:</h3>
-							<ul class="tradePartners">
-								{{#each App.Players}}
-									<li>
-										<input type="radio" {{bindAttr name="id"}} />
-										<label>{{name}}</label>
-									</li>
-								{{/each}}
-								{{#with App.Players.self}}
-									<li class="maritime">
-										<input type="radio" name="port" />
-										<label>Maritime Trade</label>
-										<ul class="availability">
-											<li>4:1 Any Resource</li>
-											{{#each ports}}
-												<li>{{count}}:1 {{type}}</li>
-											{{/each}}
-										</ul>
-									</li>
-								{{/with}}
-							</ul>
-						</div>
-						<div class="third">
-							<h3 class="subtitle">I Want:</h3>
-							<ul class="resources offer">
-								<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
-								<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
-								<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
-								<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
-								<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
-							</ul>
-						</div>
-						<div class="third last">
-							<h3 class="subtitle">I'll Give:</h3>
-							<ul class="resources obtain">
-								<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
-								<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
-								<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
-								<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
-								<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
-							</ul>
-						</div>
-						{{#view App.ResourceTrade}}
-						<p class="actions">
-							<a class="button trade action" {{action "trade" on="click"}}>Trade</a>
-							<a class="button cancel action" {{action "cancel" on="click"}}>Cancel</a>					
-						</p>
-						{{/view}}
-					</form>
-				</div>
-      </script>
-			<!-- Trade Confirm Popup -->
-			<div id="tradeConfirmPopup" class="popup" style="display:none;">
-				<h2 class="title">Confirm Resources Trade</h2>
-				<script type="text/x-handlebars">
-					{{#with App.TradeRequest}}
-						{{#if active}}
-							<div class="half first">
-								<h3 class="subtitle">{{sender}} Wants:</h3>
-								{{#with receive}}
-								<ul class="resources">
-									{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
-									{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
-									{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
-									{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
-									{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
-								</ul>
-								{{/with}}
-							</div>
-							<div class="half last">
-								<h3 class="subtitle">{{sender}} Gives:</h3>
-								{{#with give}}
-								<ul class="resources">
-									{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
-									{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
-									{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
-									{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
-									{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
-								</ul>
-								{{/with}}
-							</div>
-						{{/if}}
-					{{/with}}
-					
-				</script>
-				<script type="text/x-handlebars">
+		<!-- Trade Popup -->
+		<script type="text/x-handlebars">
+			<div id="tradePopup" class="popup" style="display:none;">
+				<h2 class="title">Trade Resources</h2>
+				<form>
+					<div class="third first">
+						<h3 class="subtitle">Trade with:</h3>
+						<ul class="tradePartners">
+							{{#each App.Players}}
+								<li>
+									<input type="radio" {{bindAttr name="id"}} />
+									<label>{{name}}</label>
+								</li>
+							{{/each}}
+							{{#with App.Players.self}}
+								<li class="maritime">
+									<input type="radio" name="port" />
+									<label>Maritime Trade</label>
+									<ul class="availability">
+										<li>4:1 Any Resource</li>
+										{{#each ports}}
+											<li>{{count}}:1 {{type}}</li>
+										{{/each}}
+									</ul>
+								</li>
+							{{/with}}
+						</ul>
+					</div>
+					<div class="third">
+						<h3 class="subtitle">I Want:</h3>
+						<ul class="resources offer">
+							<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
+							<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
+							<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
+							<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
+							<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
+						</ul>
+					</div>
+					<div class="third last">
+						<h3 class="subtitle">I'll Give:</h3>
+						<ul class="resources obtain">
+							<li class="wool"><input type="text" name="wool" /><label>Wool</label></li>
+							<li class="grain"><input type="text" name="grain" /><label>Grain</label></li>
+							<li class="ore"><input type="text" name="ore" /><label>Ore</label></li>
+							<li class="brick"><input type="text" name="brick" /><label>Brick</label></li>
+							<li class="wood"><input type="text" name="wood" /><label>Wood</label></li>
+						</ul>
+					</div>
 					{{#view App.ResourceTrade}}
 					<p class="actions">
-						<a class="button tradeResponse action acceptTrade" {{action "response" on="click"}}>Yes, I'll Trade</a>
-						<a class="button tradeResponse action" {{action "response" on="click"}}>No, Don't Trade</a>
+						<a class="button trade action" {{action "trade" on="click"}}>Trade</a>
+						<a class="button cancel action" {{action "cancel" on="click"}}>Cancel</a>					
 					</p>
 					{{/view}}
-				</script>
+				</form>
 			</div>
-			
-	  <div id="stealPopup" class="popup" style="display:none;">
-        <h2 class="title">Steal A Resource</h2>
+		</script>
+		<!-- Trade Confirm Popup -->
+		<div id="tradeConfirmPopup" class="popup" style="display:none;">
+			<h2 class="title">Confirm Resources Trade</h2>
+			<script type="text/x-handlebars">
+				{{#with App.TradeRequest}}
+					{{#if active}}
+						<div class="half first">
+							<h3 class="subtitle">{{sender}} Wants:</h3>
+							{{#with receive}}
+							<ul class="resources">
+								{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
+								{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
+								{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
+								{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
+								{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
+							</ul>
+							{{/with}}
+						</div>
+						<div class="half last">
+							<h3 class="subtitle">{{sender}} Gives:</h3>
+							{{#with give}}
+							<ul class="resources">
+								{{#if wool}}<li class="wool"><em>{{wool}}</em> Wool</li>{{/if}}
+								{{#if grain}}<li class="grain"><em>{{grain}}</em> Grain</li>{{/if}}
+								{{#if ore}}<li class="ore"><em>{{ore}}</em> Ore</li>{{/if}}
+								{{#if brick}}<li class="brick"><em>{{brick}}</em> Brick</li>{{/if}}
+								{{#if wood}}<li class="wood"><em>{{wood}}</em> Wood</li>{{/if}}
+							</ul>
+							{{/with}}
+						</div>
+					{{/if}}
+				{{/with}}
+				
+			</script>
+			<script type="text/x-handlebars">
+				{{#view App.ResourceTrade}}
+				<p class="actions">
+					<a class="button tradeResponse action acceptTrade" {{action "response" on="click"}}>Yes, I'll Trade</a>
+					<a class="button tradeResponse action" {{action "response" on="click"}}>No, Don't Trade</a>
+				</p>
+				{{/view}}
+			</script>
+		</div>			
+		<div id="stealPopup" class="popup" style="display:none;">
+			<h2 class="title">Steal A Resource</h2>
+			<script type="text/x-handlebars">
+				{{#view App.RobberList}}
+				<ul class="buttonList">
+					{{#each App.RobberTargets}}
+						<li><a href="#" class="action steal" {{bindAttr value="id"}} {{action "steal" on="click"}}>Steal from <strong>{{name}}</strong></a></li>
+					{{/each}}
+				</ul>
+				{{/view}}
+			</script>
+		</div>
+		<div id="monopolyPopup" class="popup" style="display:none;">
 		<script type="text/x-handlebars">
-			{{#view App.RobberList}}
-			<ul class="buttonList">
-				{{#each App.RobberTargets}}
-					<li><a href="#" class="action steal" {{bindAttr value="id"}} {{action "steal" on="click"}}>Steal from <strong>{{name}}</strong></a></li>
-				{{/each}}
-			</ul>
+			{{#view App.PopupView}}
+				<h2 class="title">{{App.Popup.header}}</h2>
+				<p>{{App.Popup.subheader}}</p>
+				<ul>
+					<li class="wool"><a href="#" class="action monopoly">Wool</a></li>
+					<li class="grain"><a href="#" class="action monopoly">Grain</a></li>
+					<li class="ore"><a href="#" class="action monopoly">Ore</a></li>
+					<li class="brick"><a href="#" class="action monopoly">Brick</a></li>
+					<li class="wood"><a href="#" class="action monopoly">Wood</a></li>
+				</ul>
 			{{/view}}
 		</script>
-      </div>
-	  <div id="monopolyPopup" class="popup" style="display:none;">
-      <script type="text/x-handlebars">
-		  {{#view App.PopupView}}
-			<h2 class="title">{{App.Popup.header}}</h2>
-			<p>{{App.Popup.subheader}}</p>
-			<ul>
-				<li class="wool"><a href="#" class="action monopoly">Wool</a></li>
-				<li class="grain"><a href="#" class="action monopoly">Grain</a></li>
-				<li class="ore"><a href="#" class="action monopoly">Ore</a></li>
-				<li class="brick"><a href="#" class="action monopoly">Brick</a></li>
-				<li class="wood"><a href="#" class="action monopoly">Wood</a></li>
-			</ul>
-		  {{/view}}
-	  </script>
-	  </div>
+		</div>
       
 		</div>
 		<!-- End Game Page -->
+		<!-- Footer allowing users to submit requested features -->
+		<div id="featureBar" class="footer">
+			<span><a href="#" id="reportBug">Report Bug</a></span>
+			<span><a href="#" id="requestFeature">Request a Feature</a></span>
+		</div>
+		<!-- Feature request popup -->
+		<div id="requestPopup" class="popup" style="display:none;">
+			<h2 class="title">Request a Feature</h2>
+			<form>
+				<label class="first">Name of Feature</label><input type="text" name="featureName" class="formField" />
+				<label class="notFirst last">Short Description of Feature</label><textarea name="featureDescription" class="formField"></textarea>
+				<input type="hidden" name="type" value="feature" class="formField" />
+				<p class="actions">
+					<a class="button" id="submitFeature">Submit</a>
+					<a class="button cancel">Cancel</a>
+				</p>
+			</form>
+		</div>
+		<!-- Bug report popup -->
+		<div id="reportBugPopup" class="popup" style="display:none;">
+			<h2 class="title">Report a Bug</h2>
+			<form>
+				<label class="first">Short Description of Bug</label>
+				<textarea name="bugDescription" class="formField"></textarea>
+				<label class="notFirst">What Were You Trying To Do When You Encountered the Bug?</label>
+				<textarea name="bugSteps" class="formField"></textarea>
+				<label class="notFirst last">Any Additional Information You Would Like to Provide?</label>
+				<textarea name="bugAdditional" class="formField"></textarea>
+				<input type="hidden" name="type" value="bug" class="formField" />
+				<p class="actions">
+					<a class="button" id="submitBug">Submit</a>
+					<a class="button cancel">Cancel</a>
+				</p>
+			</form>
+		</div>
+		<!-- Confirmation popup -->
+		<div id="confirmationPopup" class="popup" style="display:none;">
+			<h2 class="title">Submit Confirmation</h2>
+			<p>Thank you for making Catan a better game!</p>
+		</div>
 	</body>
 </html>

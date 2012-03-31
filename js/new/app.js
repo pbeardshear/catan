@@ -258,6 +258,11 @@ var app = (function () {
 		monopoly: function (data, fn) {
 			// Return all of your resources
 			fn(App.Players.self.takeAll(data.resource));
+		},
+		
+		confirmation: function () {
+			$('#confirmationPopup').show();
+			setTimeout(function () { $('#confirmationPopup').hide(); }, 2500);
 		}
 	};
 	
@@ -444,4 +449,31 @@ var app = (function () {
 
 $(document).ready(function () {
 	app.init();
+	
+	// Bind some simple event listeners to the bottom footer
+	$('#reportBug').bind('click', function () {
+		$('#reportBugPopup').show();
+	});
+	$('#requestFeature').bind('click', function () {
+		$('#requestPopup').show();
+	});
+	
+	// Handle submission
+	var submitHandler = function (e) {
+		e.preventDefault();
+		var form = $(this).closest('form');
+		var payload = {};
+		$.each(form.children('.formField'), function (i, child) {
+			payload[child.name] = child.value;
+		});
+		Controller.emit('userSubmit', payload);
+		$(this).closest('.popup').hide();
+	};
+	$('#submitFeature').bind('click', submitHandler);
+	$('#submitBug').bind('click', submitHandler);
+	
+	// Set up a general cancel handler
+	$('.popup .cancel').bind('click', function () {
+		$(this).closest('.popup').hide();
+	});
 });

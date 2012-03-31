@@ -100,6 +100,39 @@ try {
 				server.log('got monopoly');
 				var game = client.game;
 				game.useCard.monopoly.call(game, data, client, fn);
+			},
+			
+			// User submitted a bug report or feature request
+			userSubmit: function (data) {
+				server.log('got user submission', data);
+				switch (data.type) {
+					case 'bug':
+						Mailer.send({
+							subject: 'Catan - User Bug Report',
+							template: 'mail/bug.txt',
+							data: {
+								description: data.bugDescription,
+								steps: data.bugSteps || '',
+								additional: data.bugAdditional || ''
+							}
+						});
+						client.emit('confirmation');
+						break;
+					case 'feature':
+						Mailer.send({
+							subject: 'Catan - User Feature Request',
+							template: 'mail/feature.txt',
+							data: {
+								name: data.featureName,
+								description: data.featureDescription
+							}
+						});
+						client.emit('confirmation');
+						break;
+					default:
+						// We don't support this kind of behavior
+						break;
+				}
 			}
 		};
 		
