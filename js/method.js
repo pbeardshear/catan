@@ -84,6 +84,17 @@ base.isArray = function (arr) {
 	return arr instanceof Array;
 }
 
+// Converts a dictionary into a comma separated list of key,values
+// Optionally, you can pass a function which should return a string for each key, value pair
+base.toString = function (hash, fn) {
+	var result = [];
+	base.each(hash, function (val, key) {
+		var val = fn ? fn(key, val) : (key + ':' + val);
+		if (val) { result.push(val); }
+	});
+	return result.join(', ');
+};
+
 // String methods
 base.string = { };
 

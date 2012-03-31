@@ -514,6 +514,8 @@ var Board = (function () {
 			
 			var resources = { grain: 0, ore: 0, wood: 0, wool: 0, brick: 0 };
 			base.each(base.filter(tiles, function (tile) { return tile.quality == roll && !tile.robber; }), function (tile) {
+				// Highlight all tiles returning resources this turn
+				Engine.highlightTile(tile, 3000);
 				// Check if any of the settlements or cities are adjacent to a matched tile
 				base.each(settlements, function (settlement) {
 					if (tile.adjacent(settlement.pos)) {
@@ -528,6 +530,15 @@ var Board = (function () {
 				});
 			});
 			player.updateResources(resources);
+			// Write a chat message with the resources the player earned this turn
+			var earnings = base.toString(resources, function (name, count) {
+				return count > 0 ? (count + " " + name) : "";
+			});
+			if (earnings) {
+				Game.msg(['You earned', earnings, 'this turn.'].join(' '), 'chat');
+			} else {
+				Game.msg('You didn\'t earn any resources this turn.', 'chat');
+			}
 		},
 		validate: function (a, b, type) {
 			return type == 'port' ? Engine.pointDistance(a, b) == 0 : Engine.pointDistance(a, b) <= CONST.board.landSize;

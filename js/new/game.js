@@ -27,6 +27,7 @@ var Game = (function () {
 	// Development cards
 	var developmentCards = {
 		knight: function () {
+			Game.msg('Select a new location for the robber.');
 			// Move robber
 			// Then, steal from a player adjacent
 			Board.moveRobber(function (players) {
@@ -219,20 +220,27 @@ var Game = (function () {
 		startTurn: function (data) {
 			var roll = data.roll;
 			var self = this.get('self');
-			// Check if we receive any resources from this roll
-			Board.harvestResources(self, roll);
-			var player = this.getPlayer(data.turn);
+			
+			var newActivePlayer = this.getPlayer(data.turn);
 			if (App.Players.activePlayer) {
 				App.Players.activePlayer.set('isTurn', false);
 			}
-			App.Players.activePlayer = player;
-			player.set('isTurn', true);
+			App.Players.activePlayer = newActivePlayer;
+			newActivePlayer.set('isTurn', true);
 			
 			// Check if it is our turn
-			if (App.Players.self.isTurn) {
+			if (self.id == newActivePlayer.id) {
 				// Our turn!
 				this.msg('It is your turn.');
 				self.startTurn();
+			}
+			
+			if (roll != 7) {
+				// Check if we receive any resources from this roll
+				Board.harvestResources(self, roll);
+			} else if (self.id == newActivePlayer.id) {
+				// Rolling a 7 is equivalent to playing the knight
+				developmentCards.knight();
 			}
 		},
 		// Release control and end the turn, or build between turns

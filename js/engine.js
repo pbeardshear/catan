@@ -481,8 +481,13 @@ var Engine = (function () {
 			return pointDist(a, b);
 		},
 		
-		highlightTile: function (tile) {
+		// Highlight tile
+		// [duration] -> how long the highlight should last before it clears
+		highlightTile: function (tile, duration) {
 			draw.tile.call(tile, true);
+			if (duration) {
+				setTimeout((function () { this.clearHighlight(); }).bind(this), duration);
+			}
 		},
 		
 		clearHighlight: function () {
