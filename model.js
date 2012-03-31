@@ -386,7 +386,7 @@ try {
 			return array;
 		},
 		roll: function () {
-			return ((Math.random()*12) >> 1) + ((Math.random()*12) >> 1);
+			return Math.ceil(Math.random()*6) + Math.ceil(Math.random()*6);
 		}
 	};
 

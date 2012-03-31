@@ -113,11 +113,9 @@ var Game = (function () {
 		init: function (data) {
 			// Create getter and setter functions
 			base.accessor(this, _this);
-			data.isSelf = true;
-			var self = Player.create(data);
-			this.set('self', self);
-			// TODO: Think of a better way to do this
-			App.Players.set('self', self);
+			// Set up the data object that is this player
+			this.set('self', data);
+			// Hold off on creating the player until we get the list of players in this game
 		},
 		// Set up initial game state (i.e. board, game-specific options)
 		// Called on: successful host
@@ -135,10 +133,17 @@ var Game = (function () {
 		},
 		// Called on: successful addPlayer command
 		addPlayers: function (data) {
+			// TODO: Clean up this function
 			var _this = this;
 			var self = this.get('self');
 			var views = this.get('views');
 			if (data instanceof Player) {
+				if (data.id == self.id) {
+					// This is the current player, so we need to do some additional setup
+					data.set('isSelf', true);
+					this.set('self', data);
+					App.Players.set('self', data);
+				}
 				this.get('players').push(data);
 				// TODO: Deprecate this
 				this.get('playerState').push(data.getState());
