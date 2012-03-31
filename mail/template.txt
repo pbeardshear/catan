@@ -1,0 +1,6 @@
+An error occurred in the application Catan. <br /><br />
+
+Stack Trace: <br />
+{{#stack}}
+  {{line}} <br />
+{{/stack}}

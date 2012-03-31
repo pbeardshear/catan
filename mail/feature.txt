@@ -1,0 +1,4 @@
+A Catan user suggested the following feature: {{name}} <br /><br />
+
+Description of the feature: <br />
+{{description}}

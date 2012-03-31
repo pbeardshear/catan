@@ -1,0 +1,9 @@
+A Catan user has reported the following bug. <br /><br />
+
+{{description}} <br /><br />
+
+They encountered this bug while: <br />
+{{steps}} <br /><br />
+
+Additional Information: <br />
+{{additional}}
