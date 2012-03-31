@@ -245,8 +245,8 @@ var app = (function () {
 				var playerData = res.data;
 				App.Players.updatePlayer(playerData.player, playerData.property, playerData.value);
 			} else if (res.type == 'swap') {
-				var tiles = res.data;
-				Board.swapTiles(tiles[0], tiles[1]);
+				// var tiles = res.data;
+				Board.swapTiles.apply(Board, res.data);
 			} else if (res.type == 'build') {
 				Board.placePiece(res.data);
 			} else if (res.type == 'message') {

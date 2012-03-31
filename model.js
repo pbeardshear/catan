@@ -207,7 +207,7 @@ try {
 			}
 		}
 	};
-
+	
 	Game.prototype.trade = function (data, sender) {
 		var recipient = this.playerList[this.turnOrder.indexOf(data.id)];
 		recipient.self.emit('trade', { request: data.request, sender: data.sender }, function (accept) {

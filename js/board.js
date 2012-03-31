@@ -613,12 +613,12 @@ var Board = (function () {
 			Game.msg([player.name, 'placed a', piece.type].join(' '), 'chat');
 			return piece;
 		},
-		swapTiles: function (event, i) {
+		swapTiles: function (event, i, type) {
 			// This method is an event handler, so "this" will be bound to the event target
 			var self = Board;
-			if (i && typeof event == 'number' && typeof i == 'number') {
+			if (i && type && typeof event == 'number' && typeof i == 'number') {
 				var j = event;
-				tiles[i].swap(tiles[j]);
+				tiles[i].swap(tiles[j], type);
 			} else {
 				var target = event.target,
 					coords = target.coords.split(','),
@@ -629,7 +629,7 @@ var Board = (function () {
 						// Second tile in the swap
 						var tile = Engine.getTile(coords[0], coords[1]);
 						swapTile.swap(tile, swapType);
-						Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
+						Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id, swapType] });
 					}					
 					swapTile = null;
 					Engine.clearHighlight();
