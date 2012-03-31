@@ -90,14 +90,14 @@ button { cursor:pointer; }
 #sidePane .actions #endButton { width:40%; margin:-16px 5% 0 0; }
 
 #chat { position:relative; height:65%; width:100%; margin:0; padding:0; border-top:1px solid #EEE; }
-#chat #chatLog { position:absolute; height:100%; overflow:hidden; color:#FFF; padding:0 0 60px 5%; box-sizing:border-box; }
+#chat #chatLog { position:absolute; height:100%; overflow:hidden; color:#FFF; padding:0 0 60px 5%; box-sizing:border-box; width:100%; }
 #chat #chatLog .wrap { height:100%; overflow:auto; padding:15px 15px 1px 0; box-sizing:border-box; width:100%; }
 #chat #chatLog .wrap::-webkit-scrollbar { width: 12px; }
 #chat #chatLog .wrap::-webkit-scrollbar-track { background:#777; }
 #chat #chatLog .wrap::-webkit-scrollbar-thumb { background:#333; }
 #chat #chatLog p { margin:0 0 12px; }
 #chat #chatLog .name { color:#999; font-weight:bold; padding:0 5px 0 0; }
-#chat #chatLog .systemChat { color:#FDD106; }
+#chat #chatLog .systemChat { color:#FDD106; font-style:italic; }
 #chat form { position:absolute; width:90%; height:47px; padding:13px 5% 0; bottom:0; border-top:1px solid #EEE; }
 #chat form p { margin:0; }
 #chat .text { float:left; width:78%; }

@@ -259,7 +259,7 @@ var Game = (function () {
 				var chatWindow = $('#chatLog .wrap');
 				chatWindow.append(template);
 				// Scroll the chat window to the bottom
-				chatWindow.scrollTop = chatWindow[0].scrollHeight;
+				chatWindow[0].scrollTop = chatWindow[0].scrollHeight;
 			} else {
 				// Default: Show the message in the event notice dropdown
 				App.gameMessage.set('text', text);
