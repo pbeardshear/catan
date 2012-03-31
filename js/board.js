@@ -588,6 +588,7 @@ var Board = (function () {
 			// Game.update();
 			// console.log(piece.pos);
 			Engine.draw({ pos: piece.pos, type: piece.edge || null }, piece.type, [player.get('color')]);
+			Game.msg([player.name, 'placed a', piece.type].join(' '), 'chat');
 			return piece;
 		},
 		swapTiles: function (event, i) {

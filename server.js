@@ -27,6 +27,7 @@ try {
 					var resp = game.host(client, data);
 					resp.success ? server.register('game', game) : server.cleanup(game);
 					client.emit('host', resp);
+					client.emit('addPlayers', game.getPlayers(), true);
 					client.emit('setup', { success: resp.success });
 				} else {
 					client.emit('host', { success: false, reason: 'server unavailable' });
@@ -41,8 +42,8 @@ try {
 					var join = game.join(client, data.username, false);
 					client.emit('join', join);
 					if (join.success) {
-						client.broadcast.emit('addPlayers', game.getPlayer({ by: 'clientID', id: client.id}));
-						client.emit('addPlayers', game.getPlayers(join.id), true);
+						client.broadcast.emit('addPlayers', game.getPlayer({ by: 'clientID', id: client.id }));
+						client.emit('addPlayers', game.getPlayers(), true);
 						game.HOST.self.emit('request', { data: 'board' }, function (board) {
 							client.emit('update', { type: 'boardState', data: board });
 						});

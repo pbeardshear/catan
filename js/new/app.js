@@ -44,7 +44,7 @@ var app = (function () {
 		},
 		join: function (e) {
 			var gameName = $(this).closest('.game').children('.gameName').text(),
-				userName = $('#hostGame [name="username"]').val();
+				userName = $('#username [name="username"]').val();
 			if (gameName && userName) {
 				Controller.fire('join', { game: gameName, username: userName });
 			}
@@ -232,9 +232,7 @@ var app = (function () {
 				Game.acceptTrade();
 			}
 		},
-		victory: function () {
-			
-		},
+		victory: function () { },
 		request: function (req, fn) {
 			fn(dataRequest[req.data]());
 		},
@@ -251,7 +249,6 @@ var app = (function () {
 				Board.swapTiles(tiles[0], tiles[1]);
 			} else if (res.type == 'build') {
 				Board.placePiece(res.data);
-				Game.msg([Game.getPlayer(res.player).name, 'placed a', res.type].join(' '));
 			} else if (res.type == 'message') {
 				Game.msg(res.data.text);
 			}
