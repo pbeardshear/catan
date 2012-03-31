@@ -56,7 +56,7 @@ var Engine = (function () {
 	};
 	
 	// Color used for designating a highlighted tile
-	var highlightColor = '#FFC900';
+	var highlightColor = '#000';
 	
 	// Image files
 	var tileImages = {
@@ -177,7 +177,7 @@ var Engine = (function () {
 			var strokeCtx = highlight ? pieceCanvasMap.tileHighlight : pieceCanvasMap.tile;
 			strokeCtx.save();
 			strokeCtx.strokeStyle = highlight ? highlightColor : '#FFF';
-			strokeCtx.lineWidth = highlight ? 3 : 1;
+			strokeCtx.lineWidth = highlight ? 4 : 1;
 			
 			strokeCtx.beginPath();
 			strokeCtx.moveTo(center.x + alt, center.y + (len/2));

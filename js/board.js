@@ -67,14 +67,18 @@ var Board = (function () {
 	Tile.prototype.draw = function () {
 		Engine.draw(this, 'tile');
 	};
-	Tile.prototype.swap = function (tile) {
+	Tile.prototype.swap = function (tile, swapType) {
 		var type = this.type,
 			quality = this.quality;
-			
-		this.type = tile.type;
-		this.quality = tile.quality;
-		tile.type = type;
-		tile.quality = quality;
+		
+		if (swapType == 'both' || swapType == 'type') {
+			this.type = tile.type;
+			tile.type = type;
+		}
+		if (swapType == 'both' || swapType == 'value') {
+			this.quality = tile.quality;
+			tile.quality = quality;
+		}
 		
 		this.draw();
 		tile.draw();
@@ -599,20 +603,27 @@ var Board = (function () {
 			return piece;
 		},
 		swapTiles: function (event, i) {
+			// This method is an event handler, so "this" will be bound to the event target
+			var self = Board;
 			if (i && typeof event == 'number' && typeof i == 'number') {
 				var j = event;
 				tiles[i].swap(tiles[j]);
 			} else {
 				var target = event.target,
-					coords = target.coords.split(',');
+					coords = target.coords.split(','),
+					swapType = $('[name="swapControl"]:checked').val();
 				if (swapTile != null) {
-					// Second tile in the swap
-					var tile = Engine.getTile(coords[0], coords[1]);
-					swapTile.swap(tile);
-					Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
+					// Make sure they didn't change the swap type in between tile swaps
+					if (swapType == self.swapType) {
+						// Second tile in the swap
+						var tile = Engine.getTile(coords[0], coords[1]);
+						swapTile.swap(tile, swapType);
+						Controller.update({ dest: 'client', type: 'swap', self: false, data: [swapTile.id, tile.id] });
+					}					
 					swapTile = null;
 					Engine.clearHighlight();
 				} else {
+					self.swapType = swapType;
 					swapTile = Engine.getTile(coords[0], coords[1]);
 					Engine.highlightTile(swapTile);
 				}
