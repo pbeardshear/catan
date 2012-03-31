@@ -4,7 +4,6 @@
 		<meta charset="utf-8" />
 		<title>Catan</title>
 		<link rel="stylesheet" href="main.css" type="text/css" media="screen" />
-		<!-- -->
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 		<script type="text/javascript" src="js/lib/jquery-ui-min.js"></script>
 		<script type="text/javascript" src="js/lib/ember-0.9.5.min.js"></script>
@@ -17,12 +16,8 @@
 		<script type="text/javascript" src="js/board.js"></script>
 		<script type="text/javascript" src="js/engine.js"></script>
 		<script type="text/javascript" src="js/new/views.js"></script>
-		<!-- -->
 		
 		<style type="text/css">
-		  /*
-		  #mapContainer canvas { border:1px solid #F00; }
-		  */
 		  #hostPage { display:block; }
 			#setupPage { display: none; }
 			#gamePage { display: none; }
@@ -151,13 +146,14 @@
 				</script>
 				<!-- Map Container goes here -->
 			</div>
-			<!-- Side Pane -->			
+			<!-- Side Pane -->
 			<div id="sidePane" class="pane">
 			  <div id="wrapperPlayerInfo">
   				<script type="text/x-handlebars">
   					<table id="playerInfo" class="playerList">
   						{{#each App.Players}}
   							<tr {{bindAttr class="color isTurn:active"}}>
+  							  <td class="swatch">&nbsp;</td>
   								<td class="name">{{name}}</td>
   								<td class="achievement">{{achievements}}</td>
   								<td class="resource"><em>R:</em> {{resourceCount}}</td>
