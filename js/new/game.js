@@ -138,24 +138,27 @@ var Game = (function () {
 			var self = this.get('self');
 			var views = this.get('views');
 			if (data instanceof Player) {
-				if (data.id == self.id) {
-					// This is the current player, so we need to do some additional setup
-					data.set('isSelf', true);
-					this.set('self', data);
-					App.Players.set('self', data);
+				var newPlayer = data;	// Alias for readability
+				if (newPlayer.id == self.id) {
+					this.set('self', newPlayer);
+					App.Players.set('self', newPlayer);
 				}
-				this.get('players').push(data);
+				this.get('players').push(newPlayer);
 				// TODO: Deprecate this
-				this.get('playerState').push(data.getState());
-				App.Players.addPlayer(data);
+				this.get('playerState').push(newPlayer.getState());
+				App.Players.addPlayer(newPlayer);
 				// views.playerPreview.create([data.getState()]);
 			} else if (base.isArray(data)) {
 				base.each(data, function (o) {
 					var player = Player.create(o);
 					// var player = new Player(o);
-					_this.addPlayers(player);
+					_this.addPlayers(o);
 				});
 			} else {
+				// This is the current player, so we need to do some additional setup
+				if (data.id == self.id) {
+					data.isSelf = true;
+				}
 				// this.addPlayers(new Player(data));
 				this.addPlayers(Player.create(data));
 			}
