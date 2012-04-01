@@ -187,9 +187,8 @@ try {
 				if (self.currentRotation == self.currentTurn) {
 					self.currentTurn += 1;
 					self.currentRotation = self.currentTurn + 1;
-					var victory = self.victoryCheck();
-					if (victory && victory.player) {
-						self.broadcast('victory', { player: victory.player });
+					if (self.victoryCheck()) {
+						self.broadcast('victory', { player: self.playerList[self.currentTurn].id });
 					} else {
 						self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
 					}
@@ -198,9 +197,8 @@ try {
 				}
 			});
 		} else {
-			var victory = self.victoryCheck();
-			if (victory && victory.player) {
-				self.broadcast('victory', { player: victory.player });
+			if (self.victoryCheck()) {
+				self.broadcast('victory', { player: self.playerList[self.currentTurn].id });
 			} else {
 				self.currentTurn = (self.currentTurn + 1) % self.numPlayers;
 				self.broadcast('startTurn', { roll: self.util.roll(), turn: self.currentTurn }, true);
@@ -269,6 +267,19 @@ try {
 			if (exclude != p.id) players.push({ name: p.name, color: p.color, id: p.id });
 		}
 		return players;
+	};
+	
+	Game.prototype.updatePlayer = function (data) {
+		switch (data.type) {
+			case 'victoryPoints':
+				var player = Game.getPlayer({ by: 'clientID', id: data.player });
+				player.victoryPoints += 1;
+				if (self.victoryCheck()) {
+					// Winner!
+					self.broadcast('victory', { player: self.playerList[self.currentTurn].id });
+				}
+				break;
+		}
 	};
 
 	Game.prototype.generateColor = function () {

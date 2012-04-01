@@ -186,6 +186,8 @@ Player = Ember.Object.extend({
 		if (this.isSelf && (piece.type == 'settlement' || piece.type == 'city')) {
 			console.log('incrementing victory points');
 			this.incrementProperty('victoryPoints', 1);
+			// Update the current victory point count on the server
+			Controller.update({ dest: 'server', type: 'victoryPoints', data: { inc: 1 } });
 		}
 	},
 	

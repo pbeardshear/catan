@@ -88,6 +88,7 @@ try {
 					client.game.broadcast('update', { type: options.type, data: options.data }, options.self, client);
 				} else if (options.dest == 'server') {
 					// TODO: Update server state
+					client.game.updatePlayer({ type: options.type, data: options.data, player: client.id });
 				}
 			},
 			
