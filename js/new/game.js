@@ -30,9 +30,12 @@ var Game = (function () {
 			Game.msg('Select a new location for the robber.');
 			// Move robber
 			// Then, steal from a player adjacent
-			Board.moveRobber(function (players) {
+			Board.startMoveRobber(function (players) {
 				App.RobberTargets.setTargets(players);
-				$('#stealPopup').show();
+				// Only show if there is at least one player to steal from
+				if (players.length) {
+					$('#stealPopup').show();
+				}
 			});
 		},
 		plenty: function () {

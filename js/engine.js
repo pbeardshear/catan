@@ -26,7 +26,7 @@ var Engine = (function () {
 		// DEBUG
 		numbers = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
 		resources = [
-			{ type: 'wheat', count: 4 },
+			{ type: 'grain', count: 4 },
 			{ type: 'brick', count: 3 },
 			{ type: 'ore', count: 3 },
 			{ type: 'wood', count: 4 },

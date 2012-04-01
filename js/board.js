@@ -289,7 +289,7 @@ var Board = (function () {
 			portTypes.push('any');
 		}
 		// Break down the resource ports
-		var resources = ['brick', 'wood', 'wheat', 'ore', 'wool'];
+		var resources = ['brick', 'wood', 'grain', 'ore', 'wool'];
 		for (var i = 0; i < resourcePortCount; i++) {
 			portTypes.push(resources[i % 5]);
 		}
@@ -458,9 +458,8 @@ var Board = (function () {
 						valid: valid
 					}));
 				}
-				// Add the docks to the ports
-				generatePortLocations(ports);
 				console.log(ports);
+				
 			} else if (typeof size == 'object') {
 				// Whole board was passed to us, we need to set up the state
 				var board = size;
@@ -476,6 +475,8 @@ var Board = (function () {
 					ports[i] = new Port(board.ports[i]);
 				}
 			}
+			// Add the docks to the ports
+			generatePortLocations(ports);
 			// Draw the tiles
 			Engine.generateMap(tiles, ports);
 			// Generate events for board interaction
@@ -525,7 +526,8 @@ var Board = (function () {
 				
 				base.each(cities, function (city) {
 					if (tile.adjacent(city.pos)) {
-						resources[tile.type] += 2;
+						// Cities don't replace settlements, so they only give 1 more resource
+						resources[tile.type] += 1;
 					}
 				});
 			});
@@ -641,21 +643,33 @@ var Board = (function () {
 			}
 		},
 		
+		startMoveRobber: function (callback) {
+			placeState('center', function (e) { 
+				this.moveRobber.call(Board, e, callback);
+			});
+		},
+		
 		// Set up the click state and register a click callback to swap the robber tile
-		moveRobber: function (callback) {
-			placeState('center', function (e) {
+		moveRobber: function (e, callback) {
+			if (typeof e == 'number') {
+				// Passed the tile id
+				var tile = tiles[e];
+			} else {
 				var coords = e.target.coords.split(','),
 					tile = Engine.getTile(coords[0], coords[1]);
-				if (tile.id != this.robberTile.id) {
-					tile.robber = true;
-					this.robberTile.robber = false;
-					this.robberTile = tile;
-					Engine.drawRobber();
-					callback && callback(listAdjacentPlayers(this.robberTile));
-				} else {
-					Game.msg('You must move the robber to a different tile!');
-				}
-			});
+				
+			}
+			if (tile.id != this.robberTile.id) {
+				tile.robber = true;
+				this.robberTile.robber = false;
+				this.robberTile = tile;
+				Engine.drawRobber();
+				// Update the location of the robber
+				Controller.update({ dest: 'client', type: 'moveRobber', data: { id: this.robberTile.id } });
+				callback && callback(listAdjacentPlayers(this.robberTile));
+			} else {
+				Game.msg('You must move the robber to a different tile!');
+			}			
 		}
 	};
 })();

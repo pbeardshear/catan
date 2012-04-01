@@ -251,6 +251,8 @@ var app = (function () {
 				Board.placePiece(res.data);
 			} else if (res.type == 'message') {
 				Game.msg(res.data.text);
+			} else if (res.type == 'moveRobber') {
+				Board.moveRobber(res.data.id);
 			}
 		},
 		
