@@ -91,7 +91,7 @@ try {
 
 	// Host a new game
 	Game.prototype.host = function (client, options) {
-		console.log('\n\n Hosting options', options, '\n\n');
+		// console.log('\n\n Hosting options', options, '\n\n');
 		// Initialize state for this game
 		try {
 			// Generate a unique game id
@@ -110,14 +110,14 @@ try {
 			return this.join(client, options.username, true);
 		}
 		catch (e) {
-			console.log('the error is', e);
+			// console.log('the error is', e);
 			return { success: false, reason: 'invalid entry' };
 		}
 	};
 	// Connect a client to this game
 	Game.prototype.join = function (client, username, hosting) {
 		if (this.available()) {
-			console.log('joining');
+			// console.log('joining');
 			var player = new Player(this.numPlayers, client, username, this.generateColor(), hosting);
 			this.players[client.id] = player;
 			this.playerList.push(player);
@@ -361,12 +361,12 @@ try {
 			// Iterate over each player, and request their resources in turn
 			var asyncIterator = function (i) {
 				if (i >= players.length) {
-					console.log('finished monopoly:', fn);
+					// console.log('finished monopoly:', fn);
 					fn(resources);
 					return;
 				}
 				if (players[i].self != client) {
-					console.log('emitting to player:', players[i].name);
+					// console.log('emitting to player:', players[i].name);
 					players[i].self.emit('monopoly', { resource: data.resource }, function (count) {
 						resources[data.resource] += count;
 						asyncIterator(i + 1);
@@ -463,18 +463,18 @@ try {
 	};
 
 	Server.prototype.get = function (type, id) {
-		console.log('this is the game id:', id);
+		// console.log('this is the game id:', id);
 		var _id = type == 'games' ? cryp.generateUniqueID(id) : id;
 		return this[type][_id];
 	};
 
 	Server.prototype.log = function () {
 		var args = arguments;
-		console.log('\n');
+		// console.log('\n');
 		for (var i = 0; i < args.length; i++) {
-			console.log(args[i], ' ');
+			// console.log(args[i], ' ');
 		}
-		console.log('\n');
+		// console.log('\n');
 	};
 
 	exports.Server = function (o) {

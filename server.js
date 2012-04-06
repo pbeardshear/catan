@@ -42,7 +42,6 @@ try {
 			join: function (data) {
 				server.log('join data:', data);
 				var game = server.get('games', data.game);
-				server.log('i got the game', game);
 				if (game) {
 					var join = game.join(client, data.username, false);
 					client.emit('join', join);
