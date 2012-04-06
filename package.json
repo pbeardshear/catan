@@ -1,13 +1,13 @@
 {
 	"name": "catan",
 	"version": "0.0.1",
+	"engines": {
+		"node": "0.6.4",
+		"npm": "1.1.x"
+	},
 	"dependencies": {
 		"connect": "",
 		"socket.io": "",
 		"mailer": ""
-	},
-	"engines": {
-		"node": "0.6.4",
-		"npm": "1.1.x"
 	}
 }
