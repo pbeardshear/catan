@@ -6,7 +6,7 @@ var fs = require('fs'),
 // Global require
 require('./lib/mail/mailer.js');
 // Initialize the email system that will track errors
-Mailer.init('lib/mail/config.txt', 'lib/mail/template.txt');
+Mailer.init('./lib/mail/config.txt', './lib/mail/template.txt');
 
 try {
 	var server = new model.Server(connect);
