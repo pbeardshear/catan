@@ -1,25 +1,24 @@
 var fs = require('fs'),
 	connect = require('connect'),
 	io = require('socket.io'),
-	po = require('./player_objects.js'),
-	go = require('./game.js'),
 	model = require('./model.js');
 
 // Global require
-require('./mail/mailer.js');
+require('./lib/mail/mailer.js');
 // Initialize the email system that will track errors
-Mailer.init('mail/config.txt', 'mail/template.txt');
+Mailer.init('lib/mail/config.txt', 'lib/mail/template.txt');
 
 try {
 	var server = new model.Server(connect);
 	var base = io.listen(server.master);
 	server.listen(process.env.PORT || 3000);
 	
+	// Tell socket.io to use long polling, since Heroku doesn't currently support WebSockets
 	base.configure(function () {
 		base.set("transports", ["xhr-polling"]);
 		base.set("polling duration", 10);
 	});
-
+	
 	base.sockets.on('connection', function (client) {
 		server.register('client', client);
 		

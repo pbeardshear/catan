@@ -1,8 +1,0 @@
-// Ghetto bug tracker for Catan
-
-Known bugs:
-	- None!
-
-Missing features:
-	- fix some view stuff (ports are getting clipped)
-	- development cards uses (stealing from another player, monopoly, year of plenty)

@@ -263,18 +263,22 @@ var Game = (function () {
 		},
 		// Displays the event notice, and updates its text
 		// Called on: user interaction
-		msg: function (text, location) {
+		// Optional arguments => [location:2], [duration:2], [cls:3]
+		msg: function (text, location, cls) {
 			if (location == 'chat') {
 				// Post update message to the chat log
-				var template = ['<p class="systemChat">', text, '</p>'].join('');
+				var template = ['<p class="systemChat ', cls || '', ' ">', text, '</p>'].join('');
 				var chatWindow = $('#chatLog .wrap');
 				chatWindow.append(template);
 				// Scroll the chat window to the bottom
 				chatWindow[0].scrollTop = chatWindow[0].scrollHeight;
 			} else {
+				var duration = location
 				// Default: Show the message in the event notice dropdown
 				App.gameMessage.set('text', text);
-				setTimeout(function () { App.gameMessage.set('text', null); }, 3000);
+				if (duration != -1) {
+					setTimeout(function () { App.gameMessage.set('text', null); }, duration || 3000);
+				}
 			}
 		},
 		// Called on: trade command, request property

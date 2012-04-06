@@ -153,8 +153,10 @@ var Board = (function () {
 	// ---------------------------------------------------------------------------------------------------------
 	
 	// Converts a given point object into a consistently formatted string
-	function pointString (point) {
-		return [parseInt(point.x), ',', parseInt(point.y)].join('');
+	function pointString (point, alt) {
+		// TODO: rework this so that we aren't at the mercy of floating point precision
+		return alt ? [Math.ceil(point.x), ',', Math.ceil(point.y)].join('') :
+				[Math.floor(point.x), ',', Math.floor(point.y)].join('');
 	}
 	
 	// Generate the resources for this board size
@@ -270,7 +272,7 @@ var Board = (function () {
 	
 	// Returns a port object if one is adjacent to the provided position, otherwise returns null
 	function findPort (pos) {
-		var id = portLocations[pointString(pos)];
+		var id = portLocations[pointString(pos)] || portLocations[pointString(pos, true)];
 		if (id) {
 			return ports.find(function (port) {
 				return id == port.id;
@@ -537,9 +539,9 @@ var Board = (function () {
 				return count > 0 ? (count + " " + name) : "";
 			});
 			if (earnings) {
-				Game.msg(['You earned', earnings, 'this turn.'].join(' '), 'chat');
+				Game.msg(['You earned', earnings, 'this turn.'].join(' '), 'chat', 'resourceChat');
 			} else {
-				Game.msg('You didn\'t earn any resources this turn.', 'chat');
+				Game.msg('You didn\'t earn any resources this turn.', 'chat', 'resourceChat');
 			}
 		},
 		validate: function (a, b, type) {

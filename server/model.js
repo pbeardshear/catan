@@ -1,11 +1,9 @@
-var po = require('./player_objects.js'),
-	go = require('./game.js'),	
-	cryp = require('./js/md5.js');
+var cryp = require('./lib/md5.js');
 
 // Global includes
-require('./mail/mailer.js');
+require('./lib/mail/mailer.js');
 // Initialize error tracker
-Mailer.init('mail/config.txt', 'mail/template.txt');
+Mailer.init('lib/mail/config.txt', 'lib/mail/template.txt');
 
 try {
 
@@ -404,7 +402,7 @@ try {
 	exports.Game = function (server) {
 		return new Game(server);
 	};
-
+	
 	// Server -------------------------------------------------------------------------------
 	// --------------------------------------------------------------------------------------
 	function Server (module) {
@@ -416,7 +414,7 @@ try {
 		// Initialize the server
 		this.master = module.createServer(
 			module.logger(),
-			module.static(__dirname)
+			module.static('../client')
 		);
 	}
 	// Wrapper functionality

@@ -115,6 +115,7 @@ button { cursor:pointer; }
 #chat #chatLog p { margin:0 0 12px; }
 #chat #chatLog .name { color:#999; font-weight:bold; padding:0 5px 0 0; }
 #chat #chatLog .systemChat { color:#FDD106; font-style:italic; }
+#chat #chatLog .resourceChat { color:#3C9DD0; font-style:italic; }
 #chat form { position:absolute; width:90%; height:47px; padding:13px 5% 0; bottom:0; border-top:1px solid #EEE; }
 #chat form p { margin:0; }
 #chat .text { float:left; width:78%; }

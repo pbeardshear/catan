@@ -232,7 +232,9 @@ var app = (function () {
 				Game.acceptTrade();
 			}
 		},
-		victory: function () { },
+		victory: function (data) {
+			Game.msg(Game.getPlayer(data.player) + ' has won the game!', -1);
+		},
 		request: function (req, fn) {
 			fn(dataRequest[req.data]());
 		},
