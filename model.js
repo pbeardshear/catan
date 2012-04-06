@@ -272,11 +272,11 @@ try {
 	Game.prototype.updatePlayer = function (data) {
 		switch (data.type) {
 			case 'victoryPoints':
-				var player = Game.getPlayer({ by: 'clientID', id: data.player });
+				var player = this.getPlayer({ by: 'clientID', id: data.player });
 				player.victoryPoints += 1;
-				if (self.victoryCheck()) {
+				if (this.victoryCheck()) {
 					// Winner!
-					self.broadcast('victory', { player: self.playerList[self.currentTurn].id });
+					this.broadcast('victory', { player: self.playerList[self.currentTurn].id });
 				}
 				break;
 		}
