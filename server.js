@@ -11,14 +11,14 @@ require('./mail/mailer.js');
 Mailer.init('mail/config.txt', 'mail/template.txt');
 
 try {
-	io.configure(function () {
-		io.set("transports", ["xhr-polling"]);
-		io.set("polling duration", 10);
-	});
-	
 	var server = new model.Server(connect);
 	var base = io.listen(server.master);
 	server.listen(process.env.PORT || 3000);
+	
+	base.configure(function () {
+		base.set("transports", ["xhr-polling"]);
+		base.set("polling duration", 10);
+	});
 
 	base.sockets.on('connection', function (client) {
 		server.register('client', client);
