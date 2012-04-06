@@ -3,7 +3,7 @@ var cryp = require('./lib/md5.js');
 // Global includes
 require('./lib/mail/mailer.js');
 // Initialize error tracker
-Mailer.init('./lib/mail/config.txt', './lib/mail/template.txt');
+Mailer.init('./server/lib/mail/config.txt', './server/lib/mail/template.txt');
 
 try {
 

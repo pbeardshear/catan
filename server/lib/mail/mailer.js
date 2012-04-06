@@ -30,12 +30,6 @@ Mailer = (function () {
 		// options [object, optional] -> additional arguments to use in place of default values when sending an email
 		init: function (configPath, templatePath, options) {
 			var self = this; 	// Maintain a reference to the outer scope
-			fs.readFile('config.txt.', 'utf-8', function (err, data) {
-				// TEST
-				if (err) {
-					console.error('\n\nSorry this didn\'t work!\n\n');
-				}
-			});
 			fs.readFile(configPath, 'utf-8', function (err, data) {
 				if (err) {
 					console.error('Config file READ ERROR:', err);
