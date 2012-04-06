@@ -414,7 +414,7 @@ try {
 		// Initialize the server
 		this.master = module.createServer(
 			module.logger(),
-			module.static('../client')
+			module.static('client')
 		);
 	}
 	// Wrapper functionality
