@@ -114,7 +114,7 @@ try {
 					case 'bug':
 						Mailer.send({
 							subject: 'Catan - User Bug Report',
-							template: 'mail/bug.txt',
+							template: 'server/lib/mail/bug.txt',
 							data: {
 								description: data.bugDescription,
 								steps: data.bugSteps || '',
@@ -126,7 +126,7 @@ try {
 					case 'feature':
 						Mailer.send({
 							subject: 'Catan - User Feature Request',
-							template: 'mail/feature.txt',
+							template: 'server/lib/mail/feature.txt',
 							data: {
 								name: data.featureName,
 								description: data.featureDescription
