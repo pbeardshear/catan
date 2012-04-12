@@ -52,7 +52,7 @@ button { cursor:pointer; }
 #joinGame .joinAction { width:30px; }
 
 /* Setup Page */
-#setupMapPane { width:75%; height:100%; padding:0 0 0 1px; background:#4CC4FC; right:0; overflow:hidden; }
+#setupMapPane { width:55%; height:100%; padding:0 0 0 1px; background:#4CC4FC; right:20%; overflow:hidden; }
 
 #setupSidePane { width:25%; height:100%; left:0; background:#555; }
 #setupSidePane h2 { color:#EEE; text-transform:uppercase; font-size:15px; margin:0 0 15px; padding:0; clear:both; }
@@ -67,6 +67,26 @@ button { cursor:pointer; }
 #playerList .name { color:#FFF; padding-left:10px; font-size:14px; }
 #playerList .color { width:30px; }
 #playerList .swatch { width:25px; height:25px; float:left; box-shadow:0 1px 4px #111; border:1px solid #222; }
+
+#setupChat { width: 20%; height: 100%; right:0; background: #555; }
+#setupChat #setupChatLog { position:absolute; height:100%; overflow:hidden; color:#FFF; padding:0 0 60px 5%; box-sizing:border-box; width:100%; }
+#setupChat #setupChatLog .wrap { height:100%; overflow:auto; padding:15px 15px 1px 0; box-sizing:border-box; width:100%; }
+#setupChat #setupChatLog .wrap::-webkit-scrollbar { width: 12px; }
+#setupChat #setupChatLog .wrap::-webkit-scrollbar-track { background:#777; }
+#setupChat #setupChatLog .wrap::-webkit-scrollbar-thumb { background:#333; }
+#setupChat #setupChatLog p { margin:0 0 12px; }
+#setupChat #setupChatLog .name { color:#999; font-weight:bold; padding:0 5px 0 0; }
+#setupChat #setupChatLog .systemChat { color:#FDD106; font-style:italic; }
+#setupChat #setupChatLog .resourceChat { color:#3C9DD0; font-style:italic; }
+#setupChat form { position:absolute; width:90%; height:47px; padding:13px 5% 0; bottom:28px; border-top:1px solid #EEE; }
+#setupChat form p { margin:0; }
+#setupChat .text { float:left; width:78%; }
+#setupChat #setupChatMessage { display:block; width:90%; height:34px; margin:0; padding:0 5%; background:#333; border:none; border-radius:4px; font-size:13px; color:#FFF; box-shadow:inset 0 0 5px rgba(0,0,0,0.5); -webkit-transition:all 300ms; }
+#setupChat #setupChatMessage:focus { background:#222; }
+#setupChat .send { float:right; width:20%; }
+#setupChat .send button  { background:#111; border:none; width:100%; height:24px; color:#999; display:block; height:34px; line-height:34px; padding:0; text-transform:uppercase; font-size:12px; border-radius:4px; }
+#setupChat .send button:hover { color:#FFF; background:#000; }
+
 
 /* Game Page */
 #mapPane { width:75%; height:70%; left:0; top:0; padding:0 1px 1px 0; background:#4CC4FC; }
@@ -124,6 +144,7 @@ button { cursor:pointer; }
 #chat .send { float:right; width:20%; }
 #chat .send button  { background:#111; border:none; width:100%; height:24px; color:#999; display:block; height:34px; line-height:34px; padding:0; text-transform:uppercase; font-size:12px; border-radius:4px; }
 #chat .send button:hover { color:#FFF; background:#000; }
+
 /*
 #trade { position:absolute; width:180px; left:0; bottom:0; margin:10px 20px; }
 #trade p { margin:0; }

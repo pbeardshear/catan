@@ -119,6 +119,17 @@ var Game = (function () {
 			// Set up the data object that is this player
 			this.set('self', data);
 			// Hold off on creating the player until we get the list of players in this game
+			
+			// Same code as in Game.Begin - hardcode binding to chat window submit
+			$('#setupChat .chat').bind('submit', function (e) {
+				e.preventDefault();
+				// Data required: { player: playerName, message: chatMessage }
+				var playerName = Game.get('self').get('name');
+				var chatMessage = $('#setupChatMessage').val();
+				Controller.emit('chat', { player: playerName, message: chatMessage });
+				// Clear the text field
+				$('#setupChatMessage').val('');
+			});
 		},
 		// Set up initial game state (i.e. board, game-specific options)
 		// Called on: successful host

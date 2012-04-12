@@ -16,12 +16,27 @@
 		<script type="text/javascript" src="app/board.js"></script>
 		<script type="text/javascript" src="app/engine.js"></script>
 		<script type="text/javascript" src="app/views.js"></script>
-		
 		<style type="text/css">
 			#hostPage { display:block; }
 			#setupPage { display: none; }
 			#gamePage { display: none; }
 		</style>
+		<!-- start Mixpanel -->
+		<script type="text/javascript">
+			(function(d,c){var a,b,g,e;a=d.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"===d.location.protocol?"https:":"http:")+'//api.mixpanel.com/site_media/js/api/mixpanel.2.js';b=d.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b);c._i=[];c.init=function(a,d,f){var b=c;"undefined"!==typeof f?b=c[f]=[]:f="mixpanel";g="disable track track_pageview track_links track_forms register register_once unregister identify name_tag set_config".split(" ");
+			for(e=0;e<g.length;e++)(function(a){b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,0)))}})(g[e]);c._i.push([a,d,f])};window.mixpanel=c})(document,[]);
+			mixpanel.init("80c6903b3a438984581082c7f2f9d0f6");
+			
+			// Bind to the global error handler, so that we can register any client-side errors that are thrown
+			window.onerror = function (msg, file, line) {
+				mixpanel.track('error', {
+					message: msg,
+					file: file,
+					line: line
+				});
+			};
+		</script>
+		<!-- end Mixpanel -->
 	</head>
 	<body>
 		<!-- Start Game Host Page -->
@@ -91,47 +106,58 @@
 		<div id="setupPage" class="page">
 			<!-- -->
 			<div id="setupMapPane" class="pane">
-  			<div id="mapContainer">
-  				<img src="images/bg_land_small.png" />  			  
-  				<canvas id="map" height="620" width="800"></canvas>
-  				<canvas id="highlight" height="620" width="800"></canvas>
-  				<canvas id="robber" height="620" width="800"></canvas>
-  				<canvas id="roads" height="620" width="800"></canvas>
-  				<canvas id="pieces" height="620" width="800"></canvas>
-  				<img src="images/blank.png" id="blank" />
-  			</div>
-  		</div>
+				<div id="mapContainer">
+					<img src="images/bg_land_small.png" />  			  
+					<canvas id="map" height="620" width="800"></canvas>
+					<canvas id="highlight" height="620" width="800"></canvas>
+					<canvas id="robber" height="620" width="800"></canvas>
+					<canvas id="roads" height="620" width="800"></canvas>
+					<canvas id="pieces" height="620" width="800"></canvas>
+					<img src="images/blank.png" id="blank" />
+				</div>
+			</div>
 			<!-- -->
 			<div id="setupSidePane" class="pane">
-  			<div id="configuration">
-  				<button class="button">Randomize Map</button>
-  				<button id="startGame" class="action startGame button">Start</button>
-  				<div>
-  					<h2>Swap Control</h2>
-  					<label>
-  					  <input type="radio" name="swapControl" value="type" /> Swap Type
-  					</label>
-  					<label>
-  					  <input type="radio" name="swapControl" value="value" /> Swap Value
-  					</label>
-  					<label>
-  					  <input type="radio" name="swapControl" value="both" checked="checked" /> Swap Both
-  					</label>
-  				</div>
-  			</div>
-  			<div id="playerList" class="playerList">
-  			  <h2>Players</h2>
-  				<script type="text/x-handlebars">
-  					<table>
-  						{{#each App.Players}}
-  							<tr {{bindAttr class="color"}}>
-  								<td class="color"><div class="swatch"></div></td>
-  								<td class="name">{{name}}</td>
-  							</tr>
-  						{{/each}}
-  					</table>
-  				</script>
-  			</div>
+				<div id="configuration">
+					<button class="button">Randomize Map</button>
+					<button id="startGame" class="action startGame button">Start</button>
+					<div>
+						<h2>Swap Control</h2>
+						<label>
+						  <input type="radio" name="swapControl" value="type" /> Swap Type
+						</label>
+						<label>
+						  <input type="radio" name="swapControl" value="value" /> Swap Value
+						</label>
+						<label>
+						  <input type="radio" name="swapControl" value="both" checked="checked" /> Swap Both
+						</label>
+					</div>
+				</div>
+				<div id="playerList" class="playerList">
+				  <h2>Players</h2>
+					<script type="text/x-handlebars">
+						<table>
+							{{#each App.Players}}
+								<tr {{bindAttr class="color"}}>
+									<td class="color"><div class="swatch"></div></td>
+									<td class="name">{{name}}</td>
+								</tr>
+							{{/each}}
+						</table>
+					</script>
+				</div>
+			</div>
+			<!-- Setup page chat panel -->
+			<div id="setupChat" class="pane">
+				<div id="setupChatLog">
+					<div class="wrap">
+					</div>
+				</div>
+				<form class="chat">
+					<p class="text"><input type="text" name="message" id="setupChatMessage" autocomplete="off" tabindex="1" /></p>
+					<p class="send"><button type="submit">Send</button></p>
+				</form>
 			</div>
 		</div>
 		<!-- Start Game Page -->
@@ -408,6 +434,7 @@
 		<!-- End Game Page -->
 		<!-- Footer allowing users to submit requested features -->
 		<div id="featureBar" class="footer">
+			<a href="https://mixpanel.com/f/partner"><img src="https://mixpanel.com/site_media/images/partner/badge_light.png" alt="Mobile and Web Analytics" height="20" /></a>
 			<span><a href="#" id="reportBug">Report Bug</a></span>
 			<span><a href="#" id="requestFeature">Request a Feature</a></span>
 		</div>

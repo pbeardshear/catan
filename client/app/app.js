@@ -212,7 +212,7 @@ var app = (function () {
 		chat: function (data) {
 			// TODO: Remove hardcode
 			var template = ['<p><em class="name">', data.player, ':</em> ', data.message, '</p>'];
-			var chatWindow = $('#chatLog .wrap');
+			var chatWindow = $('.wrap');
 			template = template.join('');
 			chatWindow.append(template);
 			// Scroll the chat window to the bottom
