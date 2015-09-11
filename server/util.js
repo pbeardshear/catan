@@ -33,3 +33,20 @@ exports.expand = function (count, value) {
 
 	return results;
 }
+
+
+// Generate a new guid (globally unique identifier)
+function guidReplace(part) {
+	return (part^Math.random() * 16 >> part/4).toString(16);
+}
+
+exports.guid = function () {
+	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, guidReplace);
+}
+
+
+// Returns a list of randomly generated colors, of length {count}
+exports.colors = function (count) {
+	// TODO:
+	return [];
+}

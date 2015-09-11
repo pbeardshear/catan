@@ -33,6 +33,8 @@ function Game() {
 	// Development cards currently in deck
 	this.deck = [];
 
+	this.colors = util.colors(12);
+
 
 	// !OBSOLETE
 	// Mapping of player token => color
@@ -58,11 +60,23 @@ Game.prototype.start = function (params) {
 
 Game.prototype.addPlayer = function (player) {
 	// Add player state to game
+	if (player.id in this.players) {
+		// Player is rejoining the game, reconstitute them based on current game state
+		player.load(this.players[player.id]);
+	}
+	else {
+		// New player is joining the game
+		player.color = this.colors.shift();
+		this.players[player.id] = player;
+	}
+
+	return player;
 }
 
 Game.prototype.removePlayer = function (player) {
 	// Remove player state from game
 	// Owned structures become abandoned
+	// TODO: decide how to handle this
 }
 
 
