@@ -4,6 +4,7 @@
 	"dependencies": {
 		"connect": "",
 		"socket.io": "",
-		"mailer": ""
+		"mailer": "",
+		"underscore": ""
 	}
 }

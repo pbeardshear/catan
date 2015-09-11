@@ -21,6 +21,18 @@ process.on('uncaughtException', function (err) {
 	// });
 });
 
+// Lobby - list of games
+// Game - token, board state, list of players
+//  - token used for URL to find game
+//  - board state: list of players, colors, pieces, tiles, numbers
+// Player - token, name, email?
+//  - email used to notify player when it is their turn
+//  - token is game specific?
+//  - no email for now (use chrome desktop notifications, assume player will complete game)
+
+
+
+
 var app = connect();
 
 app.use(function (req, res) {
