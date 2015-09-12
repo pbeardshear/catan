@@ -5,6 +5,7 @@
 		"connect": "",
 		"socket.io": "",
 		"mailer": "",
-		"underscore": ""
+		"underscore": "",
+		"randomColor": "0.4.0"
 	}
 }

@@ -2,6 +2,9 @@
  * Utility methods
  */
 
+var randomColor = require('randomcolor');
+
+
 // Implementation of Durstenfeld shuffle
 // Shuffle is done in-place
 //
@@ -47,6 +50,5 @@ exports.guid = function () {
 
 // Returns a list of randomly generated colors, of length {count}
 exports.colors = function (count) {
-	// TODO:
-	return [];
+	return randomColor({ count: count });
 }
