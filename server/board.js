@@ -96,6 +96,21 @@ function Board(tileCount) {
 	//   4 ---- 3
 }
 
+// Returns a list of the [x,y] coordinates of the tiles of the given type
+Board.prototype.locations = function (type) {
+	var results = [];
+
+	this.layout.forEach(function (row, i) {
+		return row.forEach(function (tile, j) {
+			if (tile[1] === type) {
+				results.push([i, j])
+			}
+		});
+	});
+
+	return results;
+}
+
 
 // Enum of tile (resource) types
 Board.Tiles = {

@@ -17,6 +17,21 @@ function Player(id) {
 	this.cards = [];
 	this.resources = [];
 	this.structures = {};
+
+	Object.defineProperty(this, 'victoryPoints', {
+		get: function () {
+			// Formula: # of settlements + # of cities * 2 + # of victory point cards
+			var victoryCards = _.filter(this.cards, function (card) { 
+				return card === 'Victory';
+			});
+
+			var settlementCount = _.size(this.structures.settlement);
+			var cityCount = _.size(this.structures.city);
+
+			// TODO: include additional victory point methods, like longest road and largest army
+			return victoryCards + settlementCount + (cityCount * 2);
+		}
+	})
 }
 
 
