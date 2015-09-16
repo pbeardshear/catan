@@ -2,10 +2,10 @@
 	"name": "catan",
 	"version": "0.0.1",
 	"dependencies": {
-		"connect": "",
 		"socket.io": "",
-		"mailer": "",
-		"underscore": "",
-		"randomColor": "0.4.0"
+		"serve-static": "1.10.*",
+		"finalhandler": "0.4.*",
+		"underscore": "1.8.3",
+		"randomcolor": "0.4.0"
 	}
 }

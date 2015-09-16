@@ -1,24 +1,14 @@
-var fs = require('fs'),
-	connect = require('connect'),
-	http = require('http'),
-	io = require('socket.io');
-	// model = require('./model.js');
+var http = require('http');
+var io = require('socket.io');
+var serverStatic = require('serve-static');
+var finalHandler = require('finalhandler');
 
-// Global require
-// require('./lib/mail/mailer.js');
-// Initialize the email system that will track errors
-// Mailer.init('./server/lib/mail/config.txt', './server/lib/mail/template.txt');
 
 // Hook into the top level exception handler
 // This should prevent the server from crashing on an error, and will catch asynchronous errors in callbacks
 process.on('uncaughtException', function (err) {
 	console.log('Uncaught Exception:', err);
-	// Mailer.send({
-	// 	subject: err.toString(),
-	// 	data: {
-	// 		stack: Mailer.formatErrorStack(err.stack)
-	// 	}
-	// });
+	console.log(err.stack);
 });
 
 // Lobby - list of games
@@ -31,17 +21,30 @@ process.on('uncaughtException', function (err) {
 //  - no email for now (use chrome desktop notifications, assume player will complete game)
 
 
+var serve = serverStatic('client')
 
 
-var app = connect();
-
-app.use(function (req, res) {
-	res.end('Under construction...');
+var server = http.createServer(function (req, res) {
+	var done = finalHandler(req, res);
+	serve(req, res, done);
 });
 
-app.listen(process.env.PORT || 3000, function () {
-	console.log('Server started.');
+server.listen(process.env.PORT || 3000, function () {
+	console.log('Server started');
 });
+
+
+
+
+// socket = io(app);
+
+// socket.on('connection', function () {
+
+// })
+
+// app.listen(process.env.PORT || 3000, function () {
+// 	console.log('Server started.');
+// });
 
 // var server = new model.Server(connect);
 // var base = io.listen(server.master);
